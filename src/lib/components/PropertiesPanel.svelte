@@ -65,8 +65,6 @@
       }
       current = current[keyParts[i]];
     }
-
-    
     
     // Set the final value
     const finalKey = keyParts[keyParts.length - 1];
@@ -99,7 +97,7 @@
     // Navigate through nested properties
     let current = source;
     for (const key of keyParts) {
-      if (current && typeof current === 'object' && key in current) {
+      if (current && typeof current === "object" && key in current) {
         current = current[key];
       } else {
         return "";
@@ -157,12 +155,13 @@
               <Select 
                 label={control.label} 
                 value={getCurrentValue(control.property)}
+                description={control.description}
                 onchange={(event: Event) => {
                   const target = event.target as HTMLInputElement;
                   updateProperty(control.property, target.value);
                 }}
               >
-                {#each control.options as {value, text }}
+                {#each control.options as { value, text }}
                   <option value={value}>{text}</option>
                 {/each}
               </Select>
@@ -206,7 +205,7 @@
                             updateProperty(tabControl.property, target.value);
                           }}
                         >
-                          {#each tabControl.options as {value, text }}
+                          {#each tabControl.options as { value, text }}
                             <option value={value} selected={value === tabControl.defaultValue}>{text}</option>
                           {/each}
                         </Select>
@@ -215,6 +214,8 @@
                   </TabPanel>
                 {/each}
               </Tabs>
+            {:else if control.type === "group"}
+              
             {/if}
           {/each}
         </PropertiesPanelSection>

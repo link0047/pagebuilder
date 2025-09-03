@@ -16,7 +16,7 @@
     required?: boolean | null,
     value?: string,
     error?: boolean,
-    description?: Snippet,
+    description?: string,
     errorMessage?: string,
     ref?: HTMLInputElement,
     [key: string]: unknown;
@@ -123,14 +123,16 @@
       <div class="uikit-textfield__notched-outline-trailing"></div>
     </div>
 	{/if}
-	<div id={messageId} class="uikit-textfield__message" aria-live="assertive" role="alert">
+	<div id={messageId} class="uikit-textfield__message">
     {#if description}
       <div class="uikit-textfield__message--description">
-        {@render description()}
+        {description}
       </div>
     {/if}
     {#if error && errorMessage}
-      <div class="uikit-textfield__message--error">{errorMessage}</div>
+      <div class="uikit-textfield__message--error" aria-live="assertive" role="alert">
+        {errorMessage}
+      </div>
     {/if}
   </div>
 </div>

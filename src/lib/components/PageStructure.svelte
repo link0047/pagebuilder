@@ -32,8 +32,8 @@
     path?: number[];
 	}
 
-  const knownComponents = ["Hero", "HeroWithText", "HeroWithVideo", "StoryBlock", "CollectionBlock", "Card", "CardWithVideo", "CardWithPromo", "CardWithText","ProductCard", "StoryCard"];
-  const componentsWithChildren = new Set(["StoryBlock", "CollectionBlock"]);
+  const knownComponents = ["Hero", "StoryBlock", "CollectionBlock", "Card", "ProductCard", "StoryCard",  "FeaturedCategories", "FeaturedCategory"];
+  const componentsWithChildren = new Set(["StoryBlock", "CollectionBlock", "FeaturedCategories"]);
 
 	let {
 		pageTree = $bindable(),
@@ -85,6 +85,26 @@
       appState.addComponent(defaultCard, path);
     }
   }
+
+  function addFeaturedCategory() {
+    if (appState && canHaveChildren) {
+      const defaultCategory = {
+        type: "component" as const,
+        name: "FeaturedCategory",
+        props: {
+          image: "",
+          text: "",
+          href: ""
+        },
+        data: {},
+        meta: {
+          label: "Featured Category"
+        }
+      };
+
+      appState.addComponent(defaultCategory, path);
+    }
+  }
 </script>
 
 {#if pageTree?.type === "root" && pageTree.children.length > 0}
@@ -114,9 +134,15 @@
       </div>
     {/if}
     {#if canHaveChildren}
-      <Button onclick={() => addCard()}>
-        Add Story Card
-      </Button>
+      {#if pageTree.name === "StoryBlock"}
+        <Button onclick={() => addCard()}>
+          Add Story Card
+        </Button>
+      {:else if pageTree.name === "FeaturedCategories"}
+        <Button size="sm" onclick={() => addFeaturedCategory()}>
+          Add Featured Category
+        </Button>
+      {/if}
     {/if}
   </div>
 {/if}

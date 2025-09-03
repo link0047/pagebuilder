@@ -10,6 +10,7 @@
 		children?: Snippet;
 		label?: string;
 		labelPosition?: LabelPosition;
+		description?: string;
 		size?: Size;
 		error?: boolean;
 		errorMessage?: string;
@@ -28,6 +29,7 @@
 		children,
 		label,
 		labelPosition = "above",
+		description,
 		error,
 		errorMessage,
 		variant,
@@ -35,7 +37,7 @@
 		value = $bindable(),
 		ref = $bindable(),
 		...restProps
-	} = $props();
+	}: Props = $props();
 </script>
 
 <div
@@ -63,9 +65,16 @@
 	>
 		{@render children?.()}
 	</select>
-	<div id={messageId} class="uikit-select__message" aria-live="assertive" role="alert">
+	<div id={messageId} class="uikit-select__message">
+		{#if description}
+      <div class="uikit-select__message--description">
+        {description}
+      </div>
+    {/if}
     {#if error && errorMessage}
-      <div class="uikit-select__message--error">{errorMessage}</div>
+      <div class="uikit-select__message--error" aria-live="assertive" role="alert">
+				{errorMessage}
+			</div>
     {/if}
   </div>
 </div>
@@ -117,6 +126,11 @@
 		.uikit-select__message {
 			font-size: .875rem;
 			line-height: 1;
+		}
+
+		.uikit-select__message--description {
+			color: #6d6d6d;
+			font-size: .75rem;
 		}
 	}
 	

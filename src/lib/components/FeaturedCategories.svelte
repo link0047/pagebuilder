@@ -37,7 +37,7 @@
 			id={headingId}
 			class="uikit-featured-categories__heading"
 		>
-			Featured Categories
+			{title}
 		</svelte:element>
 	</header>
 	<nav
@@ -51,7 +51,7 @@
 <style>
 	:root {
 		--uikit-featured-categories-gap: 0.5rem;
-		--uikit-featured-categories-container-gap: 1rem;
+		--uikit-featured-categories-container-gap: .5rem;
 		--uikit-featured-categories-max-columns: 6;
 	}
 	
@@ -86,6 +86,10 @@
 	}
 
 	@container (min-width: 768px) {
+		.uikit-featured-categories {
+			--uikit-featured-categories-container-gap: 1rem;
+		}
+
 		.uikit-featured-categories__container {
 			grid-template-columns: repeat(var(--uikit-featured-categories-max-columns), 1fr);
 		}
@@ -93,6 +97,10 @@
 	
 	@supports not (container-type: inline-size) {
 		@media(min-width: 768px) {
+			.uikit-featured-categories {
+				--uikit-featured-categories-container-gap: 1rem;
+			}
+			
 			.uikit-featured-categories__container {
 				grid-template-columns: repeat(var(--uikit-featured-categories-max-columns), 1fr);
 			}

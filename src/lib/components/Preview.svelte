@@ -1,6 +1,8 @@
 <script lang="ts">
   import Hero from "./Hero.svelte";
 	import Card from "./Card.svelte";
+  import FeaturedCategories from "./FeaturedCategories.svelte";
+  import FeaturedCategory from "./FeaturedCategory.svelte";
   import StoryBlock from "./StoryBlock.svelte";
   import CollectionBlock from "./CollectionBlock.svelte";
   import ProductCard from "./ProductCard.svelte";
@@ -82,5 +84,15 @@
         {@html pageTree.data.content}
       {/if}
     </ProductCard>
+  {:else if pageTree.name === "FeaturedCategories"}
+    <FeaturedCategories {...pageTree.props}>
+      {#if pageTree.children}
+        {#each pageTree.children as child}
+          <Self pageTree={child} />
+        {/each}
+      {/if}
+    </FeaturedCategories>
+  {:else if pageTree.name === "FeaturedCategory"}
+    <FeaturedCategory {...pageTree.props} />
   {/if}
 {/if}

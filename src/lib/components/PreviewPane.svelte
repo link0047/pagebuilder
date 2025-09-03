@@ -55,5 +55,6 @@
 		display: flex;
 		flex-flow: column nowrap;
 		gap: 2rem;
+		padding-inline: .5rem;
 	}
 </style>

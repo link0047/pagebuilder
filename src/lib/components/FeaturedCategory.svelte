@@ -9,6 +9,7 @@
 		text: string;
 		href: string;
 		ariaLabel?: string;
+		[key: string]: unknown;
 	};
 	
 	let {
@@ -18,7 +19,8 @@
 		alt = "",
 		text,
 		href,
-		ariaLabel
+		ariaLabel,
+		...restProps
 	}: Props = $props();
 </script>
 
@@ -26,6 +28,7 @@
 	class="uikit-featured-category"
 	{href}
 	aria-label={ariaLabel}
+	{...restProps}
 >
 	<picture class="uikit-featured-category__media">
 		<source srcset={image} media="(min-width: 561px)" />
@@ -51,10 +54,10 @@
 		flex-flow: column nowrap;
 		text-align: center;
 		color: #212121;
-		background-color: #f5f5f5;
 		min-height: 2.5rem;
 		align-items: center;
 		justify-content: center;
+		background-color: #f5f5f5;
 		border-radius: .25rem;
 		text-decoration: underline;
 		text-decoration-color: transparent;
@@ -74,13 +77,22 @@
 		color: #000;
 	}
 
-	@media(min-width: 800px) {
+	@container (min-width: 768px) {
+		.uikit-featured-category,
+		.uikit-featured-category:visited  {
+			background-color: transparent;
+		}
+
 		.uikit-featured-category__media {
 			display: block;
 		}
 
 		.uikit-featured-category {
 			background-color: #fff;
+		}
+
+		.uikit-featured-category__text {
+			font-size: 1.375rem;
 		}
 	}
 

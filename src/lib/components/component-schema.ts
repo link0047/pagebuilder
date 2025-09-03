@@ -1,22 +1,16 @@
 type ControlSchema = {
-  type: "textfield" | "textarea" | "number" | "colorpicker" | "checkbox" | "select" | "segmentedbutton" | "objectgroup" | "tabs";
-  property: string;
+  type: "textfield" | "textarea" | "number" | "colorpicker" | "checkbox" | "select" | "segmentedbutton" | "group" | "tabs";
+  property?: string;
   label?: string;
   placeholder?: string;
+  description?: string;
   defaultValue?: any;
   options?: string[] | { value: string; text: string }[];
   min?: number;
   max?: number;
   step?: number;
-  fields?: {
-    key: string;
-    label: string;
-    type: "textfield" | "checkbox";
-    placeholder?: string;
-    defaultValue?: unknown;
-  }[];
+  controls?: ControlSchema[];
   tabs?: {
-    key: string;
     label: string;
     icon?: string;
     controls: Omit<ControlSchema, "tabs">[];
@@ -33,7 +27,7 @@ type ComponentSchema = {
 };
 
 // Define component names as a union type
-export type ComponentName = "Hero" | "HeroWithText" | "ProductCard" | "StoryBlock" | "StoryCard" | "FeaturedCategories" | "FeaturedCategory";
+export type ComponentName = "Hero" | "ProductCard" | "StoryBlock" | "StoryCard" | "FeaturedCategories" | "FeaturedCategory";
 
 export const componentSchemas: Record<ComponentName, ComponentSchema> = {
   Hero: {
@@ -45,20 +39,211 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             type: "textfield",
             label: "Desktop Image URL",
             property: "props.images.desktop",
-            placeholder: "https://example.com/desktop.jpg"
+            placeholder: "https://example.com/desktop.jpg",
+            description: "Required - This image will be used on tablet/desktop devices"
           },
           {
             type: "textfield",
             label: "Mobile Image URL",
             property: "props.images.mobile",
-            placeholder: "https://example.com/mobile.jpg"
+            placeholder: "https://example.com/mobile.jpg",
+            description: "Required - This image will be used on mobile devices"
           },
           {
             type: "textfield",
             label: "Alt",
             property: "props.alt",
-            placeholder: "Hero alt"
+            placeholder: "Describe the image for accessibility"
           },
+        ]
+      },
+      {
+        title: "Content",
+        controls: [
+          {
+            type: "textfield",
+            label: "Headline",
+            property: "props.headline",
+            placeholder: "Enter headline"
+          },
+          {
+            type: "textfield",
+            label: "Subheading",
+            property: "props.subheading",
+            placeholder: "Enter subheading"
+          },
+          {
+            type: "textarea",
+            label: "Details",
+            property: "props.supportingText",
+            placeholder: "Enter details"
+          },
+          {
+            type: "textfield",
+            label: "Link (Optional)",
+            property: "props.href",
+            placeholder: "https://example.com"
+          }
+        ]
+      },
+      {
+        title: "Content Positioning",
+        controls: [
+          {
+            type: "tabs",
+            tabs: [
+              {
+                label: "Mobile",
+                controls: [
+                  {
+                    type: "segmentedbutton",
+                    label: "Title Alignment",
+                    property: "props.contentConfig.mobile.textAlign",
+                    options: ["left", "center", "right"],
+                    defaultValue: "center"
+                  },
+                  {
+                    type: "select",
+                    label: "Vertical Alignment",
+                    property: "props.contentConfig.mobile.justify",
+                    defaultValue: "center",
+                    options: [
+                      { value: "start", text: "Top" },
+                      { value: "center", text: "Center" },
+                      { value: "end", text: "Bottom" },
+                    ]
+                  },
+                  {
+                    type: "select",
+                    label: "Horizontal Position",
+                    property: "props.contentConfig.mobile.align",
+                    defaultValue: "center",
+                    options: [
+                      { value: "start", text: "Left" },
+                      { value: "center", text: "Center" },
+                      { value: "end", text: "Right" },
+                    ]
+                  },
+                  {
+                    type: "textfield",
+                    label: "Padding",
+                    property: "props.contentConfig.mobile.padding",
+                    defaultValue: "1rem"
+                  }
+                ]
+              },
+              {
+                label: "Tablet",
+                controls: [
+                  {
+                    type: "segmentedbutton",
+                    label: "Title Alignment",
+                    property: "props.contentConfig.tablet.textAlign",
+                    options: ["left", "center", "right"],
+                    defaultValue: "center"
+                  },
+                  {
+                    type: "select",
+                    label: "Vertical Alignment",
+                    property: "props.contentConfig.tablet.justify",
+                    defaultValue: "center",
+                    options: [
+                      { value: "start", text: "Top" },
+                      { value: "center", text: "Center" },
+                      { value: "end", text: "Bottom" },
+                    ]
+                  },
+                  {
+                    type: "select",
+                    label: "Horizontal Position",
+                    property: "props.contentConfig.tablet.align",
+                    defaultValue: "center",
+                    options: [
+                      { value: "start", text: "Left" },
+                      { value: "center", text: "Center" },
+                      { value: "end", text: "Right" },
+                    ]
+                  },
+                  {
+                    type: "textfield",
+                    label: "Padding",
+                    property: "props.contentConfig.tablet.padding",
+                    defaultValue: "1rem"
+                  }
+                ]
+              },
+              {
+                label: "Desktop",
+                controls: [
+                  {
+                    type: "segmentedbutton",
+                    label: "Title Alignment",
+                    property: "props.contentConfig.desktop.textAlign",
+                    options: ["left", "center", "right"],
+                    defaultValue: "center"
+                  },
+                  {
+                    type: "select",
+                    label: "Vertical Alignment",
+                    property: "props.contentConfig.desktop.justify",
+                    defaultValue: "center",
+                    options: [
+                      { value: "start", text: "Top" },
+                      { value: "center", text: "Center" },
+                      { value: "end", text: "Bottom" },
+                    ]
+                  },
+                  {
+                    type: "select",
+                    label: "Horizontal Position",
+                    property: "props.contentConfig.desktop.align",
+                    defaultValue: "center",
+                    options: [
+                      { value: "start", text: "Left" },
+                      { value: "center", text: "Center" },
+                      { value: "end", text: "Right" },
+                    ]
+                  },
+                  {
+                    type: "textfield",
+                    label: "Padding",
+                    property: "props.contentConfig.desktop.padding",
+                    defaultValue: "1rem"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        title: "Layout",
+        controls: [
+          {
+            type: "segmentedbutton",
+            label: "Layout Type",
+            property: "props.layout",
+            options: ["overlay", "split-left", "split-right"],
+            defaultValue: "overlay"
+          },
+          {
+            type: "group",
+            label: "Dimensions",
+            controls: [
+              {
+                type: "textfield",
+                label: "Width",
+                property: "props.width",
+                defaultValue: 1200
+              },
+              {
+                type: "textfield",
+                label: "Height",
+                property: "props.height",
+                defaultValue: 460
+              }
+            ]
+          }
         ]
       },
       {
@@ -70,57 +255,6 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             property: "props.backgroundColor",
             defaultValue: "#fff"
           },
-        ]
-      }
-    ]
-  },
-
-  HeroWithText: {
-    sections: [
-      {
-        title: "Content",
-        controls: [
-          {
-            type: "textfield",
-            label: "Title",
-            property: "props.title",
-            placeholder: "Hero title"
-          },
-          {
-            type: "textfield",
-            label: "Subtitle", 
-            property: "props.subtitle",
-            placeholder: "Hero subtitle"
-          },
-          {
-            type: "textarea",
-            label: "Description",
-            property: "props.description",
-            placeholder: "Hero description..."
-          },
-          {
-            type: "textfield",
-            label: "CTA Text",
-            property: "props.ctaText",
-            placeholder: "Learn More"
-          },
-          {
-            type: "textfield",
-            label: "CTA Link",
-            property: "props.ctaLink",
-            placeholder: "https://example.com"
-          }
-        ]
-      },
-      {
-        title: "Background",
-        controls: [
-          {
-            type: "textfield",
-            label: "Background Image",
-            property: "props.backgroundImage",
-            placeholder: "https://example.com/bg.jpg"
-          }
         ]
       }
     ]
@@ -239,7 +373,6 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             property: "props.mediaType",
             tabs: [
               {
-                key: "image",
                 label: "Image",
                 icon: "",
                 controls: [
@@ -264,7 +397,6 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                 ]
               },
               {
-                key: "video",
                 label: "Video",
                 icon: "",
                 controls: [
@@ -288,7 +420,6 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             property: "props.layout",
             tabs: [
               {
-                key: "layout",
                 label: "Desktop",
                 icon: "",
                 controls: [
@@ -325,7 +456,6 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                 ]
               },
               {
-                key: "layout",
                 label: "Tablet",
                 icon: "",
                 controls: [
@@ -362,7 +492,6 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                 ]
               },
               {
-                key: "layout",
                 label: "Mobile",
                 icon: "",
                 controls: [
@@ -481,10 +610,79 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
   },
 
   FeaturedCategories: {
-    sections: []
+    sections: [
+      {
+        title: "Content",
+        controls: [
+          {
+            type: "textfield",
+            label: "Title",
+            property: "props.title",
+            placeholder: "Story title"
+          },
+          {
+            type: "segmentedbutton",
+            label: "Title Alignment",
+            property: "props.titleAlignment",
+            options: ["left", "center", "right"],
+            defaultValue: "center"
+          },
+          {
+            type: "select",
+            label: "Heading Level",
+            property: "props.headingLevel",
+            description: "Choose appropiate headin level for document structure",
+            defaultValue: "2",
+            options: [
+              { value: "1", text: "H1 - Section heading" },
+              { value: "2", text: "H2 - Section heading" },
+              { value: "3", text: "H3 - Section heading" },
+              { value: "4", text: "H4 - Section heading" },
+              { value: "5", text: "H5 - Section heading" },
+              { value: "6", text: "H6 - Section heading" },
+            ]
+          }
+        ]
+      }
+    ]
   },
 
   FeaturedCategory: {
-    sections: []
+    sections: [
+      {
+        title: "Content",
+        controls: [
+          {
+            type: "textfield",
+            label: "Category Text",
+            property: "props.text",
+            placeholder: "Category Name"
+          }, 
+          {
+            type: "textfield",
+            label: "Link URL",
+            property: "props.href",
+            placeholder: "https://example.com/category"
+          }
+        ]
+      }, 
+      {
+        title: "Image",
+        controls: [
+          {
+            type: "textfield",
+            label: "Image URL",
+            property: "props.image",
+            placeholder: "https://example.com/image.jpg"
+          },
+          {
+            type: "textfield",
+            label: "Alt Text",
+            property: "props.alt",
+            placeholder: "Describe the image..."
+          }
+        ]
+      }
+    ]
   }
 };

@@ -24,7 +24,7 @@
         content: "test"
       },
       props: {
-        textAlignment: "center",     // Include defaults
+        textAlignment: "center",
         mediaAspectRatio: "1:1",    
         objectFit: "cover",
         backgroundColor: "#fff",
@@ -63,6 +63,33 @@
       }]
     });
   }
+
+  function addFeaturedCategories() {
+    isPopoverOpen = false;
+
+    appState.addComponent({
+      type: "component",
+      name: "FeaturedCategories",
+      data: {},
+      props: {},
+      meta: {},
+      children: [{
+        type: "component",
+        name: "FeaturedCategory",
+        data: {},
+        props: {
+          image: "",
+          text: "",
+          href: ""
+        },
+        meta: {
+          label: "Featured Category",
+          locked: false,
+          hidden: false
+        },
+      }]
+    });
+  }
 </script>
 
 <AppSidebar title="Home Page">
@@ -81,8 +108,11 @@
             Hero
           </button>
         </li>
-        <li>Hero with text</li>
-        <li>Hero with text overlay</li>
+        <li>
+          <button type="button" onclick={addFeaturedCategories}>
+            Featured Categories
+          </button>
+        </li>
         <li>
           <button type="button" onclick={addStoryBlock}>
             Story Block
