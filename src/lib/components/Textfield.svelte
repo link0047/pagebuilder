@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { type Snippet } from "svelte";
   import { generateId }	from "$lib/utils/unique-id-generator.js";
 
   type InputType = "text" | "password" | "email" | "tel" | "url" | "search" | "number";

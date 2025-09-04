@@ -1,4 +1,4 @@
-type ControlSchema = {
+export type ControlSchema = {
   type: "textfield" | "textarea" | "number" | "colorpicker" | "checkbox" | "select" | "segmentedbutton" | "group" | "tabs";
   property?: string;
   label?: string;
@@ -19,6 +19,7 @@ type ControlSchema = {
 
 type SectionSchema = {
   title: string;
+  icon?: "desktop" | "tablet" | "mobile" | "image" | "video" | "styling" | "content" | "layout" | "text" | "content-positioning";
   controls: ControlSchema[];
 };
 
@@ -34,20 +35,36 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
     sections: [
       {
         title: "Media",
+        icon: "image",
         controls: [
           {
-            type: "textfield",
-            label: "Desktop Image URL",
-            property: "props.images.desktop",
-            placeholder: "https://example.com/desktop.jpg",
-            description: "Required - This image will be used on tablet/desktop devices"
-          },
-          {
-            type: "textfield",
-            label: "Mobile Image URL",
-            property: "props.images.mobile",
-            placeholder: "https://example.com/mobile.jpg",
-            description: "Required - This image will be used on mobile devices"
+            type: "tabs",
+            tabs: [
+              {
+                label: "Desktop",
+                controls: [
+                  {
+                    type: "textfield",
+                    label: "Desktop Image URL",
+                    property: "props.images.desktop",
+                    placeholder: "https://example.com/desktop.jpg",
+                    description: "Required - This image will be used on tablet/desktop devices"
+                  }
+                ]
+              },
+              {
+                label: "Mobile",
+                controls: [
+                  {
+                    type: "textfield",
+                    label: "Mobile Image URL",
+                    property: "props.images.mobile",
+                    placeholder: "https://example.com/mobile.jpg",
+                    description: "Required - This image will be used on mobile devices"
+                  },
+                ]
+              }
+            ]
           },
           {
             type: "textfield",
@@ -59,6 +76,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
       },
       {
         title: "Content",
+        icon: "content",
         controls: [
           {
             type: "textfield",
@@ -88,6 +106,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
       },
       {
         title: "Content Positioning",
+        icon: "content-positioning",
         controls: [
           {
             type: "tabs",
@@ -218,6 +237,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
       },
       {
         title: "Layout",
+        icon: "layout",
         controls: [
           {
             type: "segmentedbutton",
@@ -248,6 +268,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
       },
       {
         title: "Styling",
+        icon: "styling",
         controls: [
           {
             type: "colorpicker",

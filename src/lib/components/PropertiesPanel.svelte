@@ -1,11 +1,12 @@
 <script lang="ts">
   import { getAppState } from "./app-state.svelte";
-  import { componentSchemas, type ComponentName } from "./component-schema";
+  import { componentSchemas, type ComponentName, type ControlSchema } from "./component-schema";
   import PropertiesPanelSection from "./PropertiesPanelSection.svelte";
   import Icon from "./Icon.svelte";
   import Button from "./Button.svelte";
   import SegmentedControl from "./SegmentedControl.svelte";
   import SegmentedButton from "./SegmentedButton.svelte";
+  import ControlGroup from "./ControlGroup.svelte";
   import Textfield from "./Textfield.svelte";
   import Textarea from "./Textarea.svelte";
   import Tab from "./Tab.svelte";
@@ -108,6 +109,83 @@
   }
 </script>
 
+{#snippet renderControls(control: ControlSchema)}
+  {#if control.type === "segmentedbutton"}
+    <SegmentedControl 
+      headingLabel={control.label} 
+      value={control.property ? getCurrentValue(control.property) : control.defaultValue}
+    >
+      {#each control.options || [] as option}
+        <SegmentedButton
+          value={typeof option === "string" ? option : option.value}
+          onclick={() => {
+            if (control.property) {
+              updateProperty(control.property, option);
+            }
+          }
+        }>
+          {typeof option === "string" ? option : option.text}
+        </SegmentedButton>
+      {/each}
+    </SegmentedControl>
+  {:else if control.type === "textfield"}
+    <Textfield 
+      label={control.label || ""}
+      placeholder={control.placeholder}
+      description={control.description}
+      value={control.property ? getCurrentValue(control.property) : control.defaultValue}
+      oninput={(event: Event) => {
+        const target = event.target as HTMLInputElement;
+        if (control.property) {
+          updateProperty(control.property, target.value);
+        }
+      }}
+    />
+  {:else if control.type === "textarea"}
+    <Textarea 
+      label={control.label}
+      value={control.property ? getCurrentValue(control.property) : control.defaultValue}
+      oninput={(event: Event) => {
+        const target = event.target as HTMLInputElement;
+        if (control.property) {
+          updateProperty(control.property, target.value);
+        }
+      }}
+    />
+  {:else if control.type === "select"}
+    <Select 
+      label={control.label} 
+      value={control.property ? getCurrentValue(control.property) : control.defaultValue}
+      description={control.description}
+      onchange={(event: Event) => {
+        const target = event.target as HTMLInputElement;
+        if (control.property) {
+          updateProperty(control.property, target.value);
+        }
+      }}
+    >
+      {#each control.options || [] as option}
+      {#if typeof option === "string"}
+        <option value={option}>{option}</option>
+      {:else}
+        <option value={option.value}>{option.text}</option>
+      {/if}
+    {/each}
+    </Select>
+  {:else if control.type === "colorpicker"}
+    <ColorPicker
+      label={control.label}
+      value={control.property ? getCurrentValue(control.property) : control.defaultValue}
+      onchange={(event: Event) => {
+        const target = event.target as HTMLInputElement;
+        if (control.property) {
+          updateProperty(control.property, target.value);
+        }
+      }}
+    />
+  {/if}
+{/snippet}
+
 <div class="uikit-properties-panel" aria-hidden={!isOpen} role="dialog" aria-modal="true" aria-labelledby="panel-title">
   <header class="uikit-properties-panel__header">
     <Button variant="ghost" shape="square" onclick={closePanel} aria-label="Close properties panel">
@@ -122,58 +200,10 @@
   <div class="uikit-properties-panel__content">
     {#if isOpen && selectedComponent && schema}
       {#each schema.sections as section}
-        <PropertiesPanelSection title={section.title}>
+        <PropertiesPanelSection title={section.title} icon={section.icon}>
           {#each section.controls as control}
-            {#if control.type === "segmentedbutton"}
-              <SegmentedControl headingLabel={control.label} value={(getCurrentValue(control.property) ?? "") || control?.defaultValue}>
-                {#each control.options || [] as option}
-                  <SegmentedButton value={option} onclick={() => updateProperty(control.property, option)}>
-                    {option}
-                  </SegmentedButton>
-                {/each}
-              </SegmentedControl>
-            {:else if control.type === "textfield"}
-              <Textfield 
-                label={control.label}
-                placeholder={control.placeholder}
-                value={getCurrentValue(control.property)}
-                oninput={(event: Event) => {
-                  const target = event.target as HTMLInputElement;
-                  updateProperty(control.property, target.value);
-                }}
-              />
-            {:else if control.type === "textarea"}
-              <Textarea 
-                label={control.label}
-                value={getCurrentValue(control.property)}
-                oninput={(event: Event) => {
-                  const target = event.target as HTMLInputElement;
-                  updateProperty(control.property, target.value);
-                }}
-              />
-            {:else if control.type === "select"}
-              <Select 
-                label={control.label} 
-                value={getCurrentValue(control.property)}
-                description={control.description}
-                onchange={(event: Event) => {
-                  const target = event.target as HTMLInputElement;
-                  updateProperty(control.property, target.value);
-                }}
-              >
-                {#each control.options as { value, text }}
-                  <option value={value}>{text}</option>
-                {/each}
-              </Select>
-            {:else if control.type === "colorpicker"}
-              <ColorPicker
-                label={control.label}
-                value={getCurrentValue(control.property) || control.defaultValue}
-                onchange={(event: Event) => {
-                  const target = event.target as HTMLInputElement;
-                  updateProperty(control.property, target.value);
-                }}
-              />
+            {#if ["segmentedbutton", "textfield", "textarea", "select", "colorpicker"].includes(control.type)}
+              {@render renderControls(control)}
             {:else if control.type === "tabs"}
               <Tabs>
                 <TabList>
@@ -186,36 +216,17 @@
                 {#each control.tabs || [] as tab}
                   <TabPanel>
                     {#each tab.controls as tabControl}
-                      {#if tabControl.type === "textfield"}
-                        <Textfield
-                          label={tabControl.label}
-                          placeholder={tabControl.placeholder}
-                          value={getCurrentValue(tabControl.property)}
-                          oninput={(event: Event) => {
-                            const target = event.target as HTMLInputElement;
-                            updateProperty(tabControl.property, target.value);
-                          }}
-                        />
-                      {:else if tabControl.type === "select"}
-                        <Select 
-                          label={tabControl.label} 
-                          value={getCurrentValue(tabControl.property) || tabControl.defaultValue}
-                          onchange={(event: Event) => {
-                            const target = event.target as HTMLInputElement;
-                            updateProperty(tabControl.property, target.value);
-                          }}
-                        >
-                          {#each tabControl.options as { value, text }}
-                            <option value={value} selected={value === tabControl.defaultValue}>{text}</option>
-                          {/each}
-                        </Select>
-                      {/if}
+                      {@render renderControls(tabControl)}
                     {/each}
                   </TabPanel>
                 {/each}
               </Tabs>
             {:else if control.type === "group"}
-              
+              <ControlGroup label={control.label} col={2}>
+                {#each control.controls || [] as groupControl}
+                  {@render renderControls(groupControl)}
+                {/each}
+              </ControlGroup>
             {/if}
           {/each}
         </PropertiesPanelSection>
