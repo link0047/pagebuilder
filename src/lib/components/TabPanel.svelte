@@ -27,3 +27,18 @@
 >
 	{@render children?.()}
 </div>
+
+<style>
+	.uikit-tabs__panel {
+		border: 1px solid #989898;
+		border-bottom-left-radius: .5rem;
+		border-bottom-right-radius: .5rem;
+		display: block;
+		box-sizing: border-box;
+		padding: .5rem;
+	}
+
+	.uikit-tabs__panel[hidden] {
+		display: none;
+	}
+</style>

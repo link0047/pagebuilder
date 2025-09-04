@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { type Snippet } from "svelte";
 
-	type Direction = "stacked" | "horizontal";
+	type Direction = "vertical" | "horizontal";
 	type Props = {
 		children?: Snippet,
 		direction?: Direction,
@@ -10,18 +10,16 @@
 	
 	let {
 		children,
-		direction = "stacked",
+		direction = "vertical",
 		gap
 	}: Props = $props();
-
-	let validGap = $derived(gap?.length ? `--uikit-group-gap: ${gap}` : undefined);
 </script>
 
 <div
 	class="uikit-group"
 	role="group"
 	data-direction={direction}
-	style={validGap}>
+	style:--uikit-group-gap={gap}>
 	{@render children?.()}
 </div>
 

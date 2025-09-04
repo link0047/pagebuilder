@@ -21,6 +21,6 @@
 	.uikit-tabs {
 		display: flex;
 		flex-flow: column nowrap;
-		gap: .5rem;
+		gap: 0;
 	}
 </style>

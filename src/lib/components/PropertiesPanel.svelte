@@ -15,6 +15,7 @@
   import TabPanel from "./TabPanel.svelte";
   import ColorPicker from "./ColorPicker.svelte";
   import Select from "./Select.svelte";
+  import Group from "./Group.svelte";
 
   type Props = {
     title?: string,
@@ -113,7 +114,7 @@
   {#if control.type === "segmentedbutton"}
     <SegmentedControl 
       headingLabel={control.label} 
-      value={control.property ? getCurrentValue(control.property) : control.defaultValue}
+      value={getCurrentValue((control.property as string)) || control.defaultValue}
     >
       {#each control.options || [] as option}
         <SegmentedButton
@@ -133,7 +134,7 @@
       label={control.label || ""}
       placeholder={control.placeholder}
       description={control.description}
-      value={control.property ? getCurrentValue(control.property) : control.defaultValue}
+      value={getCurrentValue((control.property as string)) || control.defaultValue}
       oninput={(event: Event) => {
         const target = event.target as HTMLInputElement;
         if (control.property) {
@@ -144,7 +145,7 @@
   {:else if control.type === "textarea"}
     <Textarea 
       label={control.label}
-      value={control.property ? getCurrentValue(control.property) : control.defaultValue}
+      value={getCurrentValue((control.property as string)) || control.defaultValue}
       oninput={(event: Event) => {
         const target = event.target as HTMLInputElement;
         if (control.property) {
@@ -155,7 +156,7 @@
   {:else if control.type === "select"}
     <Select 
       label={control.label} 
-      value={control.property ? getCurrentValue(control.property) : control.defaultValue}
+      value={getCurrentValue((control.property as string)) || control.defaultValue}
       description={control.description}
       onchange={(event: Event) => {
         const target = event.target as HTMLInputElement;
@@ -175,7 +176,7 @@
   {:else if control.type === "colorpicker"}
     <ColorPicker
       label={control.label}
-      value={control.property ? getCurrentValue(control.property) : control.defaultValue}
+      value={getCurrentValue((control.property as string)) || control.defaultValue}
       onchange={(event: Event) => {
         const target = event.target as HTMLInputElement;
         if (control.property) {
@@ -215,9 +216,11 @@
                 </TabList>
                 {#each control.tabs || [] as tab}
                   <TabPanel>
-                    {#each tab.controls as tabControl}
-                      {@render renderControls(tabControl)}
-                    {/each}
+                    <Group gap="0.5rem">
+                      {#each tab.controls as tabControl}
+                        {@render renderControls(tabControl)}
+                      {/each}
+                    </Group>
                   </TabPanel>
                 {/each}
               </Tabs>

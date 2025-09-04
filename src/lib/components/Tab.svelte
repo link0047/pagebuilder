@@ -85,7 +85,10 @@
 	.uikit-tabs__tab[aria-selected="true"] {
 		color: #212121;
 		background-color: #f2f2f2;
-		border-color: #f2f2f2;
+		border-color: #989898;
+		border-bottom: none;
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
 		font-weight: 500;
 	}
 </style>
