@@ -16,6 +16,7 @@
   import ColorPicker from "./ColorPicker.svelte";
   import Select from "./Select.svelte";
   import Group from "./Group.svelte";
+  import Hint from "./Hint.svelte";
 
   type Props = {
     title?: string,
@@ -129,6 +130,10 @@
         </SegmentedButton>
       {/each}
     </SegmentedControl>
+  {:else if control.type === "hint"}
+    <Hint variant="info" icon={true}>
+      <span>{control.description}</span>
+    </Hint>
   {:else if control.type === "textfield"}
     <Textfield 
       label={control.label || ""}
@@ -203,7 +208,7 @@
       {#each schema.sections as section}
         <PropertiesPanelSection title={section.title} icon={section.icon}>
           {#each section.controls as control}
-            {#if ["segmentedbutton", "textfield", "textarea", "select", "colorpicker"].includes(control.type)}
+            {#if ["segmentedbutton", "textfield", "textarea", "select", "colorpicker", "hint"].includes(control.type)}
               {@render renderControls(control)}
             {:else if control.type === "tabs"}
               <Tabs>

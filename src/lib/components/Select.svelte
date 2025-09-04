@@ -65,18 +65,20 @@
 	>
 		{@render children?.()}
 	</select>
-	<div id={messageId} class="uikit-select__message">
-		{#if description}
-      <div class="uikit-select__message--description">
-        {description}
-      </div>
-    {/if}
-    {#if error && errorMessage}
-      <div class="uikit-select__message--error" aria-live="assertive" role="alert">
-				{errorMessage}
-			</div>
-    {/if}
-  </div>
+	{#if description || error}
+		<div id={messageId} class="uikit-select__message">
+			{#if description}
+				<div class="uikit-select__message--description">
+					{description}
+				</div>
+			{/if}
+			{#if error && errorMessage}
+				<div class="uikit-select__message--error" aria-live="assertive" role="alert">
+					{errorMessage}
+				</div>
+			{/if}
+		</div>
+	{/if}
 </div>
 
 <style>

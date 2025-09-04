@@ -122,6 +122,7 @@
       <div class="uikit-textfield__notched-outline-trailing"></div>
     </div>
 	{/if}
+  {#if description || error}
 	<div id={messageId} class="uikit-textfield__message">
     {#if description}
       <div class="uikit-textfield__message--description">
@@ -134,6 +135,7 @@
       </div>
     {/if}
   </div>
+  {/if}
 </div>
 
 <style>

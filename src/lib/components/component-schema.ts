@@ -1,5 +1,5 @@
 export type ControlSchema = {
-  type: "textfield" | "textarea" | "number" | "colorpicker" | "checkbox" | "select" | "segmentedbutton" | "group" | "tabs";
+  type: "textfield" | "textarea" | "number" | "colorpicker" | "checkbox" | "select" | "segmentedbutton" | "group" | "tabs" | "hint";
   property?: string;
   label?: string;
   placeholder?: string;
@@ -108,6 +108,10 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         title: "Content Positioning",
         icon: "content-positioning",
         controls: [
+          {
+            type: "hint",
+            description: "Content positioning is responsive and adapts to different screen sizes."
+          },
           {
             type: "tabs",
             tabs: [
