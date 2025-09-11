@@ -16,6 +16,31 @@
   const appState = setAppState();
 </script>
 
+{#snippet headerTrailing()}
+  <SegmentedControl size="sm" bind:value={appState.previewMode}>
+    <SegmentedButton value="desktop">
+      <Icon size="1rem">
+        <use href="#desktop" />
+      </Icon>
+    </SegmentedButton>
+    <SegmentedButton value="tablet">
+      <Icon size="1rem">
+        <use href="#tablet" />
+      </Icon>
+    </SegmentedButton>
+    <SegmentedButton value="mobile">
+      <Icon size="1rem">
+        <use href="#mobile" />
+      </Icon>
+    </SegmentedButton>
+  </SegmentedControl>
+  <Button onclick={() => {
+    console.log($state.snapshot(appState?.pageTree));
+  }}>
+    get state
+  </Button>
+{/snippet}
+
 <div class="app">
   <Iconset>
     <symbol id="desktop">
@@ -53,30 +78,7 @@
       <path d="M19 21.8H5c-1.5 0-2.8-1.2-2.8-2.8V5c0-1.5 1.2-2.8 2.8-2.8h14c1.5 0 2.8 1.2 2.8 2.8v14c0 1.5-1.2 2.8-2.8 2.8ZM5 3.8c-.7 0-1.2.6-1.2 1.2v14c0 .7.6 1.2 1.2 1.2h14c.7 0 1.2-.6 1.2-1.2V5c0-.7-.6-1.2-1.2-1.2H5ZM10 9h4c.6 0 1 .4 1 1v4c0 .6-.4 1-1 1h-4c-.6 0-1-.4-1-1v-4c0-.6.4-1 1-1Zm2.8-2v-.3c.3 0 .6 0 .8-.2.3-.3.3-.8 0-1.1l-1-1s-.2-.1-.2-.2h-.6s-.2 0-.2.2l-1 1c-.3.3-.3.8 0 1.1s.5.3.8.2V7c0 .4.3.8.8.8s.8-.3.8-.8Zm-.5 12.7s.2 0 .2-.2l1-1c.3-.3.3-.8 0-1.1s-.5-.3-.8-.2v-.3c0-.4-.3-.8-.8-.8s-.8.3-.8.8v.3c-.3 0-.6 0-.8.2s-.3.8 0 1.1l1 1s.2.1.2.2h.6Zm-5.8-6.2c.2-.2.3-.5.2-.8H7c.4 0 .8-.3.8-.8s-.3-.8-.8-.8h-.3c0-.3 0-.6-.2-.8s-.8-.3-1.1 0l-1 1s-.1.2-.2.2v.6s0 .2.2.2l1 1c.1.1.3.2.5.2s.4 0 .5-.2Zm12 0 1-1s.1-.2.2-.2v-.6s0-.2-.2-.2l-1-1c-.3-.3-.8-.3-1.1 0s-.3.5-.2.8h-.3c-.4 0-.8.3-.8.8s.3.8.8.8h.3c0 .3 0 .6.2.8s.3.2.5.2.4 0 .5-.2Z"/>
     </symbol>
   </Iconset>
-  <AppHeader>
-    <Button onclick={() => {
-      console.log($state.snapshot(appState?.pageTree));
-    }}>
-      get state
-    </Button>
-    <SegmentedControl size="sm" bind:value={appState.previewMode}>
-      <SegmentedButton value="desktop">
-        <Icon size="1rem">
-          <use href="#desktop" />
-        </Icon>
-      </SegmentedButton>
-      <SegmentedButton value="tablet">
-        <Icon size="1rem">
-          <use href="#tablet" />
-        </Icon>
-      </SegmentedButton>
-      <SegmentedButton value="mobile">
-        <Icon size="1rem">
-          <use href="#mobile" />
-        </Icon>
-      </SegmentedButton>
-    </SegmentedControl>
-  </AppHeader>
+  <AppHeader trailing={headerTrailing} />
   {@render children?.()}
 </div>
 
