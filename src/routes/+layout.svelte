@@ -7,14 +7,78 @@
   import { setAppState } from "$lib/components/app-state.svelte";
   import type { LayoutProps } from "./$types";
   import Iconset from "$lib/components/Iconset.svelte";
+  import { copyToClipboard } from "$lib/utils/clipboard";
+  import { attempt } from "$lib/utils/attempt";
 
-  let { 
-    data,
+  let {
     children
   }: LayoutProps = $props();
 
+  let isCopied = $state(false);
+  let isLoading = $state(false);
   const appState = setAppState();
+  const copyButtonText = $derived(() => {
+    if (isLoading) return "Copying...";
+    if (isCopied) return "Copied!";
+    return "Copy Code";
+  });
 
+  async function handleCopyHTML() {
+    isLoading = true;
+    
+    try {
+      const formData = new FormData();
+      formData.append("props", JSON.stringify({ pageTree: appState?.pageTree }));
+
+      const [fetchError, response] = await attempt(
+        fetch("/api/generate-html", {
+          method: "POST",
+          body: formData
+        })
+      );
+
+      if (fetchError) {
+        console.error("Fetch error:", fetchError);
+        return;
+      }
+
+      if (!response.ok) {
+        console.error(`HTTP error! status: ${response.status}`);
+        return;
+      }
+
+      const [parseError, res] = await attempt(response.json());
+      
+      if (parseError) {
+        console.error("JSON parse error:", parseError);
+        return;
+      }
+
+      if (!res.success || !res.html) {
+        console.error("Invalid response:", res);
+        return;
+      }
+
+      const [copyError, copySuccess] = await attempt(copyToClipboard(res.html));
+      
+      if (copyError || !copySuccess) {
+        console.error("Failed to copy to clipboard:", copyError);
+        return;
+      }
+
+      // Success!
+      isCopied = true;
+      console.log("HTML copied to clipboard");
+      
+      // Reset success state after 2 seconds
+      setTimeout(() => {
+        isCopied = false;
+      }, 2000);
+      
+    } finally {
+      isLoading = false;
+    }
+  }
 </script>
 
 {#snippet headerLeading()}
@@ -39,21 +103,10 @@
       </Icon>
     </SegmentedButton>
   </SegmentedControl>
-  <Button onclick={async () => {
-    const formData = new FormData();
-    formData.append("props", JSON.stringify({ pageTree: appState?.pageTree }));
-
-    const response = await fetch("/api/test", {
-      method: "POST",
-      body: formData
-    });
-
-    const res = await response.json();
-    if (res.success) {
-      console.log("Generated HTML:", res.html);
-    }
-  }}>
-    Copy HTML
+  <Button 
+    disabled={isLoading}
+    onclick={handleCopyHTML}>
+    {copyButtonText()}
   </Button>
 {/snippet}
 
