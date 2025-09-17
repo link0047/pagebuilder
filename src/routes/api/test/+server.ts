@@ -50,4 +50,8 @@ export const POST: RequestHandler = async ({ request }) => {
   const rawHTML = stripSvelteArtifacts(result.body);
 
   console.log(rawHTML);
+  return json({
+    success: true,
+    html: rawHTML
+  })
 }
