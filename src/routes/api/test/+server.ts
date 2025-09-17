@@ -49,6 +49,13 @@ export const POST: RequestHandler = async ({ request }) => {
   const result = render(PreviewComponent, { props });
   const rawHTML = stripSvelteArtifacts(result.body);
 
+  const cssPath = join(process.cwd(), "src/styles/generated/preview-styles.css");
+  const [cssReadError, originalCSS] = await attempt(readFile(cssPath, "utf-8"));
+  
+  if (cssReadError) {
+    throw error(500, "Could not read CSS file");
+  }
+
   console.log(rawHTML);
   return json({
     success: true,
