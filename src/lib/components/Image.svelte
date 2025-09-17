@@ -22,6 +22,7 @@
 		showWarnings?: boolean;
 		useFallback?: boolean;
 		fallbackSrc?: string;
+		[key: string]: unknown;
 	}
 	
 	const DEFAULT_WIDTH = 300;

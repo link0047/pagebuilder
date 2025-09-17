@@ -125,7 +125,7 @@
       <source srcset={images.tablet} media="(min-width: {breakpoints.tablet}px)">
     {/if}
     <Image 
-      src={images?.mobile} 
+      src={images?.mobile}
       {width} 
       {height} 
       {alt} 

@@ -86,10 +86,6 @@
 	}
 	
 	const parsed = $derived(parsePromoValue(value));
-	
-	$effect(() => {
-		console.log("promo", heading);		
-	})
 </script>
 
 <div class="promo-badge" aria-label={ariaLabel}>

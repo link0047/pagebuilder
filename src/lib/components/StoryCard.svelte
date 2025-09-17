@@ -45,6 +45,7 @@
     subhead,
     supportingText,
     images,
+		video,
     storycardActions,
     promo,
     href,

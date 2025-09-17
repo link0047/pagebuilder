@@ -24,10 +24,13 @@
         content: "test"
       },
       props: {
-        textAlignment: "center",
-        mediaAspectRatio: "1:1",    
-        objectFit: "cover",
-        backgroundColor: "#fff",
+        images: {
+          desktop: "https://placehold.co/1200x460",
+          tablet: "https://placehold.co/460x380",
+          mobile: "https://placehold.co/460x380",
+        },
+        width: 1200,
+        height: 460
       },
       meta: {}
     });
@@ -119,6 +122,7 @@
           </button>
         </li>
         <li>Collection Block</li>
+        <li>Recommendations Zone</li>
       </ul>
     </div>
   </Popover>
