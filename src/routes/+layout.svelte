@@ -43,7 +43,7 @@
     const formData = new FormData();
     formData.append("props", JSON.stringify({ pageTree: appState?.pageTree }));
 
-    const response = await fetch("/api/generate-html", {
+    const response = await fetch("/api/test", {
       method: "POST",
       body: formData
     });
