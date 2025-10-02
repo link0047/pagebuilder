@@ -111,6 +111,7 @@
     justify-content: center;
     gap: var(--uikit-button-gap);
     appearance: none;
+    width: var(--uikit-button-width);
     background-color: var(--uikit-button-bg-color);
     border: var(--uikit-button-border-width) var(--uikit-button-border-style) var(--uikit-button-border-color);
     border-radius: var(--uikit-button-border-radius);
