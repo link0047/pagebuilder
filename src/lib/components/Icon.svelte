@@ -5,6 +5,7 @@
 		viewBox?: string;
 		children?: Snippet;
 		size?: string | null;
+		"aria-label"?: string;
 		[key: string]: unknown;
 	};
 	
@@ -14,29 +15,28 @@
 		 size,
 		 ...restProps
 	 }: Props = $props();
+
+	 const hasAccessibleLabel = restProps["aria-label"] || restProps["aria-labelledby"];
 </script>
 
 <svg
 	xmlns="http://www.w3.org/2000/svg"
 	class="icon"
 	{viewBox}
+	{...restProps}
+	aria-hidden={hasAccessibleLabel ? undefined : "true"}
+	role={hasAccessibleLabel ? "img" : undefined}
 	style:--uikit-icon-width={size}
 	style:--uikit-icon-height={size}
-	{...restProps}
 >
 	{@render children?.()}
 </svg>
 
-<style>
-  :root {
-		--uikit-icon-width: 1.5rem;
-		--uikit-icon-height: 1.5rem;
-		--uikit-icon-fill: currentcolor;
-	}
-	
+<style>	
 	.icon {
-		width: var(--uikit-icon-width);
-		height: var(--uikit-icon-height);
-		fill: var(--uikit-icon-fill);
+		width: var(--uikit-icon-width, 1.5rem);
+		height: var(--uikit-icon-height, 1.5rem);
+		fill: var(--uikit-icon-fill, currentcolor);
+  	stroke: var(--uikit-icon-stroke, none);
 	}
 </style>
