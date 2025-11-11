@@ -5,7 +5,7 @@ import { render } from "svelte/server";
 import { minify } from "html-minifier";
 import { PurgeCSS } from "purgecss";
 import { attempt } from "$lib/utils/attempt";
-import previewStylesCSS from "../../../styles/generated/preview-styles.css?raw";
+import previewStylesCSS from "$styles/generated/preview-styles.css?raw";;
 
 /**
  * Comprehensive cleanup function for generated HTML
