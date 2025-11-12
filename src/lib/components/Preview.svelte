@@ -44,6 +44,18 @@
   const shouldRender = $derived(pageTree?.type !== "component" || !pageTree.meta.hidden);
 </script>
 
+{#if pageTree?.type === "root" && pageTree.children.length <= 0}
+  <div class="preview-empty">
+    <svg class="preview-empty__icon" width="64" height="64">
+      <use href="/favicon.svg" />
+    </svg>
+    <h2 class="preview-empty__title">Start Building</h2>
+    <div class="preview-empty__description">
+      Select a template or add sections to begin
+    </div>
+  </div>
+{/if}
+
 {#if pageTree?.type === "root" && pageTree.children.length > 0}
 	{#each pageTree.children as child}
 		<Self pageTree={child} />
@@ -96,3 +108,30 @@
     <FeaturedCategory {...pageTree.props} />
   {/if}
 {/if}
+
+<style>
+  .preview-empty {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    padding-block: 2rem;
+    color: #212121;
+    user-select: none;
+  }
+
+  .preview-empty__icon {
+    width: 4rem;
+    height: 4rem;
+    fill: currentColor;
+  }
+
+  .preview-empty__title {
+    font-size: 1.125rem;
+    font-weight: 500;
+  }
+
+  .preview-empty__description {
+    color: #555;
+    font-size: .875rem;
+  }
+</style>

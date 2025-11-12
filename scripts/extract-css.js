@@ -1,6 +1,6 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { transform } from "lightningcss";
 import { join } from "node:path";
+import { transform } from "lightningcss";
 
 const OUTPUT_DIR = "src/styles/generated";
 const OUTPUT_FILE = "preview-styles.css";
@@ -111,8 +111,8 @@ async function main() {
     process.exit(1);
   }
   
-  console.log("✅ CSS extraction completed!");
-  console.log(`📊 Total CSS: ${extractedCSS.length} characters`);
+  console.log("CSS extraction completed!");
+  console.log(`Total CSS: ${extractedCSS.length} characters`);
   
   if (result) {
     console.log("CSS has been minified and optimized with lightningcss");

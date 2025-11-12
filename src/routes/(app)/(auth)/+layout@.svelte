@@ -6,7 +6,4 @@
   }: LayoutProps = $props();
 </script>
 
-<div>
-  test
-  {@render children?.()}
-</div>
+{@render children?.()}

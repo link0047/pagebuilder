@@ -8,6 +8,7 @@
 	import Popover from "$lib/components/Popover.svelte";
   import PageStructure from "$lib/components/PageStructure.svelte";
   import { getAppState } from "$lib/components/app-state.svelte";
+  import { getBuilds } from "$lib/api/builds.remote";
 
 	let addSectionButtonRef = $state<HTMLButtonElement>();
   let isPopoverOpen = $state(false);
@@ -96,6 +97,9 @@
 </script>
 
 <AppSidebar title="Home Page">
+  {#each await getBuilds() as build}
+    {build}
+  {/each}
   <PageStructure bind:pageTree={appState.pageTree} />
   <Button color="primary" variant="ghost" bind:ref={addSectionButtonRef}>
     <Icon>
