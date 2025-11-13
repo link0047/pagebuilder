@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { login } from "$lib/api/auth.remote";
+
+	let stringifiedData = $derived(JSON.stringify(login, null, 2));
 </script>
 
 <div class="auth">
 	<h1>Log in</h1>
 
 	<form {...login}>
-		{#if login.result?.error}
-			<p class="error">{login.result.error}</p>
-		{/if}
+		<div>{stringifiedData}</div>
 		
 		<label>
 			Email

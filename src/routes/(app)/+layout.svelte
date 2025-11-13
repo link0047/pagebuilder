@@ -9,6 +9,7 @@
   import Iconset from "$lib/components/Iconset.svelte";
   import { copyToClipboard } from "$lib/utils/clipboard";
   import { attempt } from "$lib/utils/attempt";
+  import { signout } from "$lib/api/auth.remote";
 
   let {
     children
@@ -22,6 +23,10 @@
     if (isCopied) return "Copied!";
     return "Copy Code";
   });
+
+  async function handleSignout() {
+    console.log(signout);
+  }
 
   async function handleCopyHTML() {
     isLoading = true;
@@ -108,6 +113,11 @@
     onclick={handleCopyHTML}>
     {copyButtonText()}
   </Button>
+  <form {...signout}>
+    <Button buttonType="submit">
+      sign out
+    </Button>
+  </form>
 {/snippet}
 
 <Iconset>
