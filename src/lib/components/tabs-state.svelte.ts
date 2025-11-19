@@ -1,11 +1,7 @@
 import { getContext, setContext } from "svelte";
+import type { TabsConfig, Tab } from "./tabs.types";
 
 const TABS_KEY = Symbol("TABS");
-
-type Tab = {
-	id: string;
-	element: HTMLElement | null;
-}
 
 class TabState {
 	static tabId = 0;
@@ -16,8 +12,15 @@ class TabState {
 	#panels = $state<string[]>([]);
 	#headingId = $state<string | null>(null);
 	#selectedTabId = $state<string | null>(null);
+	#config = $state<TabsConfig>({} as TabsConfig);
 	
-	constructor() {}
+	constructor(config: TabsConfig) {
+		this.#config = config;
+	}
+
+	get config() {
+		return this.#config;
+	}
 
 	get tabs(): Tab[] {
 		return this.#tabs;
@@ -152,8 +155,8 @@ class TabState {
 
 export type { TabState };
 
-export function setTabState(): TabState {
-	return setContext(TABS_KEY, new TabState());
+export function setTabState(config: TabsConfig) {
+	return setContext(TABS_KEY, new TabState(config));
 }
 
 export function getTabState(): TabState {

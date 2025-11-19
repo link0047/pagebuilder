@@ -1,16 +1,29 @@
 <script lang="ts">
 	import { type Snippet } from "svelte";
 	import { setTabState } from "./tabs-state.svelte";
+	import type { TabsVariant, TabsSize, TabsColor, TabsShape } from "./tabs.types";
 
 	type Props = {
-		children: Snippet
+		children: Snippet;
+		variant?: TabsVariant;
+		size?: TabsSize;
+		color?: TabsColor;
+		shape?: TabsShape;
+		fullWidth?: boolean;
+		value?: string;
 	};
 	
 	let {
-		children
-	}:Props = $props();
+		children,
+		variant = "outlined",
+		size = "md",
+		color = "default",
+		shape = "default",
+		fullWidth = false,
+		value = $bindable()
+	}: Props = $props();
 
-	setTabState();
+	setTabState({ variant, size, color, shape, fullWidth });
 </script>
 
 <div class="uikit-tabs">

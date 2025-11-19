@@ -30,10 +30,10 @@
 
 <style>
 	.uikit-tabs__panel {
-		border: 1px solid #989898;
+		border-top: none;
 		border-bottom-left-radius: .5rem;
 		border-bottom-right-radius: .5rem;
-		display: block;
+		border: none;
 		box-sizing: border-box;
 		padding: .5rem;
 	}

@@ -51,7 +51,7 @@
     </svg>
     <h2 class="preview-empty__title">Start Building</h2>
     <div class="preview-empty__description">
-      Select a template or add sections to begin
+      Select a build from "My Builds" or go to the "Editor" tab to create a new one
     </div>
   </div>
 {/if}

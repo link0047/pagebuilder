@@ -1,4 +1,3 @@
-import { build } from "$service-worker";
 import * as v from "valibot";
 
 const buildTypeEnum = v.picklist(["homepage", "category", "landing_page", "custom"]);

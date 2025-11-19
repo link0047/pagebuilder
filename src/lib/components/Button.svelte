@@ -12,7 +12,8 @@
 		size?: Size,
 		color?: Color,
 		shape?: Shape,
-		buttonType?: "button" | "submit" | "reset",
+		type?: "button" | "submit" | "reset",
+    fullWidth?: boolean,
     ref?: HTMLButtonElement,
     [key: string]: unknown;
 	}
@@ -23,7 +24,8 @@
 		color = "default",
 		size = "md",
 		shape = "default",
-		buttonType = "button",
+		type = "button",
+    fullWidth = false,
 		ref = $bindable(),
 		...restProps
 	}: Props = $props();
@@ -32,6 +34,7 @@
 <button 
 	bind:this={ref}
 	class="uikit-button"
+  class:uikit-button--full-width={fullWidth}
 	class:uikit-button--shape-square={shape === "square"}
 	class:uikit-button--shape-pill={shape === "pill"}
 	class:uikit-button--shape-circle={shape === "circle"}
@@ -48,7 +51,7 @@
 	class:uikit-button--warning={color === "warning"}
 	class:uikit-button--danger={color === "danger"}
 	class:uikit-button--info={color === "info"}
-	type={buttonType}
+	{type}
 	{...restProps}
 >
 	{@render children?.()}
@@ -271,6 +274,10 @@
 	.uikit-button--info:is(.uikit-button--ghost, .uikit-button--link) {
 		--uikit-button-hover-border-color: #e0f0ff;
 	}
+
+  .uikit-button--full-width {
+    width: 100%;
+  }
 }
 	
 @layer states {

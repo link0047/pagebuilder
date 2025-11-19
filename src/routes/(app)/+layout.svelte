@@ -114,7 +114,7 @@
     {copyButtonText()}
   </Button>
   <form {...signout}>
-    <Button buttonType="submit">
+    <Button type="submit">
       sign out
     </Button>
   </form>
