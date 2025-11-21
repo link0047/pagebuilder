@@ -27,17 +27,21 @@ export const getTemplates = query(async () => {
 export const createBuild = command(createBuildSchema, async ({ name, buildType, content, thumbnailUrl }) => {
   const user = requireAuth();
   const createdBy = user.id;
-
-  await sql`
-    INSERT INTO builds (
-      name, 
-      build_type, 
-      content, 
-      thumbnail_url, 
-      created_by, 
-      updated_by
-    )
-    VALUES (${name}, ${buildType}, ${content}, ${thumbnailUrl}, ${createdBy}, ${createBuild})
-    RETURNING id;
-  `;
+  console.log({createdBy})
+  try {
+    await sql`
+      INSERT INTO builds (
+        name, 
+        build_type, 
+        content, 
+        thumbnail_url, 
+        created_by, 
+        updated_by
+      )
+      VALUES (${name}, ${buildType}, ${content}, ${thumbnailUrl}, ${createdBy}, ${createdBy})
+      RETURNING id;
+    `;
+  } catch(error) {
+    console.log(error);
+  }
 });

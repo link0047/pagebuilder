@@ -113,6 +113,36 @@
       }]
     });
   }
+
+  function generateHomepageTimestamp() {
+    const now = new Date();
+    const dateOptions: Intl.DateTimeFormatOptions = {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    };
+    const timeOptions: Intl.DateTimeFormatOptions = {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true
+    };
+
+    const formattedDate = now.toLocaleDateString("en-US", dateOptions);
+    const formattedTime = now.toLocaleTimeString("en-US", timeOptions);
+
+    return `Homepage - ${formattedDate} ${formattedTime}`;
+  }
+
+  async function saveBuild() {
+    const content = $state.snapshot(appState.pageTree);
+    const name = generateHomepageTimestamp();
+    await createBuild({
+      name,
+      buildType: "homepage",
+      content,
+      thumbnailUrl: "https://placehold.co/400x400"
+    });
+  }
 </script>
 
 <AppSidebar>
@@ -182,6 +212,9 @@
             <path d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z" />
           </Icon>
           Add Section
+        </Button>
+        <Button onclick={saveBuild}>
+          Save
         </Button>
       </div>
       {#if appState.pageTree.children.length === 0}

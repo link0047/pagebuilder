@@ -13,7 +13,7 @@
     labelPosition?: LabelPosition,
     size?: Size,
     required?: boolean | null,
-    value?: string,
+    value?: string | number | undefined;
     error?: boolean,
     description?: string,
     errorMessage?: string,
@@ -125,12 +125,12 @@
   {#if description || error}
 	<div id={messageId} class="uikit-textfield__message">
     {#if description}
-      <div class="uikit-textfield__message--description">
+      <div class="uikit-textfield__message-description">
         {description}
       </div>
     {/if}
     {#if error && errorMessage}
-      <div class="uikit-textfield__message--error" aria-live="assertive" role="alert">
+      <div class="uikit-textfield__message-error" aria-live="assertive" role="alert">
         {errorMessage}
       </div>
     {/if}
@@ -316,6 +316,10 @@
 
     .uikit-textfield__message:empty {
       display: none;
+    }
+
+    .uikit-textfield__message-error {
+      color: #b00020;
     }
 
     .uikit-textfield[data-label-position="notched"] > .uikit-textfield__native-control {
