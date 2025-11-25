@@ -8,7 +8,7 @@
 	
 	 let { 
 		 children,
-		 maxWidth
+		 maxWidth = "1200px"
 	 }: Props = $props();
 </script>
 

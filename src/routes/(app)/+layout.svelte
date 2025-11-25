@@ -1,15 +1,20 @@
 <script lang="ts">
+  import { page } from "$app/state";
   import AppHeader from "$lib/components/AppHeader.svelte";
+  import NavigationRail from "$lib/components/NavigationRail.svelte";
+  import NavigationRailItem from "$lib/components/NavigationRailItem.svelte";
   import Button from "$lib/components/Button.svelte";
   import Icon from "$lib/components/Icon.svelte";
+  import Iconset from "$lib/components/Iconset.svelte";
   import SegmentedControl from "$lib/components/SegmentedControl.svelte";
   import SegmentedButton from "$lib/components/SegmentedButton.svelte";
+  import Avatar from "$lib/components/Avatar.svelte";
   import { setAppState } from "$lib/components/app-state.svelte";
   import type { LayoutProps } from "./$types";
-  import Iconset from "$lib/components/Iconset.svelte";
   import { copyToClipboard } from "$lib/utils/clipboard";
   import { attempt } from "$lib/utils/attempt";
-  import { signout } from "$lib/api/auth.remote";
+  import { getInitials } from "$lib/utils/getInitials";
+  import { signout, getUser } from "$lib/api/auth.remote";
 
   let {
     children
@@ -84,6 +89,18 @@
       isLoading = false;
     }
   }
+
+  const activeRoute = $derived.by(() => {
+    const path = page.url.pathname;
+    if (path.startsWith("/editor/builds")) return "builds";
+    if (path.startsWith("/editor/templates")) return "templates";
+    if (path.startsWith("/editor")) return "editor";
+    return "editor";
+  });
+
+  const { name } = await getUser();
+
+  const userInitials = getInitials(name);
 </script>
 
 {#snippet headerLeading()}
@@ -109,8 +126,12 @@
     </SegmentedButton>
   </SegmentedControl>
   <Button 
+    color="success"
     disabled={isLoading}
     onclick={handleCopyHTML}>
+    <Icon size={16}>
+      <use href="#content-copy" />
+    </Icon>
     {copyButtonText()}
   </Button>
   <form {...signout}>
@@ -155,19 +176,60 @@
   <symbol id="content-positioning">
     <path d="M19 21.8H5c-1.5 0-2.8-1.2-2.8-2.8V5c0-1.5 1.2-2.8 2.8-2.8h14c1.5 0 2.8 1.2 2.8 2.8v14c0 1.5-1.2 2.8-2.8 2.8ZM5 3.8c-.7 0-1.2.6-1.2 1.2v14c0 .7.6 1.2 1.2 1.2h14c.7 0 1.2-.6 1.2-1.2V5c0-.7-.6-1.2-1.2-1.2H5ZM10 9h4c.6 0 1 .4 1 1v4c0 .6-.4 1-1 1h-4c-.6 0-1-.4-1-1v-4c0-.6.4-1 1-1Zm2.8-2v-.3c.3 0 .6 0 .8-.2.3-.3.3-.8 0-1.1l-1-1s-.2-.1-.2-.2h-.6s-.2 0-.2.2l-1 1c-.3.3-.3.8 0 1.1s.5.3.8.2V7c0 .4.3.8.8.8s.8-.3.8-.8Zm-.5 12.7s.2 0 .2-.2l1-1c.3-.3.3-.8 0-1.1s-.5-.3-.8-.2v-.3c0-.4-.3-.8-.8-.8s-.8.3-.8.8v.3c-.3 0-.6 0-.8.2s-.3.8 0 1.1l1 1s.2.1.2.2h.6Zm-5.8-6.2c.2-.2.3-.5.2-.8H7c.4 0 .8-.3.8-.8s-.3-.8-.8-.8h-.3c0-.3 0-.6-.2-.8s-.8-.3-1.1 0l-1 1s-.1.2-.2.2v.6s0 .2.2.2l1 1c.1.1.3.2.5.2s.4 0 .5-.2Zm12 0 1-1s.1-.2.2-.2v-.6s0-.2-.2-.2l-1-1c-.3-.3-.8-.3-1.1 0s-.3.5-.2.8h-.3c-.4 0-.8.3-.8.8s.3.8.8.8h.3c0 .3 0 .6.2.8s.3.2.5.2.4 0 .5-.2Z"/>
   </symbol>
+  <symbol id="editor">
+    <path d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z" />
+  </symbol>
+  <symbol id="builds">
+    <path d="M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L10.11,5.22L16,8.61L17.96,7.5L12,4.15M6.04,7.5L12,10.85L13.96,9.75L8.08,6.35L6.04,7.5M5,15.91L11,19.29V12.58L5,9.21V15.91M19,15.91V9.21L13,12.58V19.29L19,15.91Z" />
+  </symbol>
+  <symbol id="templates">
+    <path d="M16 0H8C6.9 0 6 .9 6 2V18C6 19.1 6.9 20 8 20H20C21.1 20 22 19.1 22 18V6L16 0M20 18H8V2H15V7H20V18M4 4V22H20V24H4C2.9 24 2 23.1 2 22V4H4Z" />
+  </symbol>
+  <symbol id="content-copy">
+    <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+  </symbol>
 </Iconset>
 <div class="app">
   <AppHeader leading={headerLeading} trailing={headerTrailing} />
+  <NavigationRail>
+    <NavigationRailItem href={"/editor"} active={activeRoute === "editor"} data-sveltekit-preload-data="tap">
+      {#snippet icon()}
+				<Icon>
+          <use href="#editor" />
+        </Icon>
+			{/snippet}
+			Editor
+    </NavigationRailItem>
+    <NavigationRailItem href={"/editor/builds"} active={activeRoute === "builds"} data-sveltekit-preload-data="tap">
+			{#snippet icon()}
+				<Icon>
+					<use href="#builds" />
+				</Icon>
+			{/snippet}
+			Builds
+		</NavigationRailItem>
+		<NavigationRailItem href={"/editor/templates"} active={activeRoute === "templates"} data-sveltekit-preload-data="tap">
+			{#snippet icon()}
+				<Icon>
+					<use href="#templates" />
+				</Icon>
+			{/snippet}
+			Templates
+		</NavigationRailItem>
+    {#snippet end()}
+      <Avatar src="" text={userInitials} shape="circle" />
+    {/snippet}
+  </NavigationRail>
   {@render children?.()}
 </div>
 
 <style>
   .app {
     display: grid;
-    grid-template-areas: 
-      "header header"
-      "sidebar preview";
-    grid-template-columns: minmax(0, auto) 1fr;
+    grid-template-areas:
+			"header header header"
+			"rail sidebar preview";
+    grid-template-columns: minmax(0, auto) minmax(0, auto) 1fr;
     grid-template-rows: minmax(0, auto) 1fr;
     height: 100dvh;
     background-color: #f1f1f1;

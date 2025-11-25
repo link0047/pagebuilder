@@ -66,6 +66,8 @@
     align-items: center;
     justify-content: center;
     border-radius: .25rem;
+    background-color: #333335;
+    color: #fff;
   }
 
   .uikit-avatar__image {
