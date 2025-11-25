@@ -125,7 +125,6 @@
   }
 </script>
 
-
 <AppSidebarHeader title="Page Structure"></AppSidebarHeader>
 <ScrollableArea>
   <PageStructure bind:pageTree={appState.pageTree} />

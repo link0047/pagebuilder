@@ -29,10 +29,6 @@
     return "Copy Code";
   });
 
-  async function handleSignout() {
-    console.log(signout);
-  }
-
   async function handleCopyHTML() {
     isLoading = true;
     
