@@ -1,13 +1,15 @@
 <script lang="ts">
   import Button from "$lib/components/Button.svelte";
 	import Icon from "$lib/components/Icon.svelte";
-	import Popover from "$lib/components/Popover.svelte";
+  import Menu from "$lib/components/Menu.svelte";
+  import MenuItem from "$lib/components/MenuItem.svelte";
   import PageStructure from "$lib/components/PageStructure.svelte";
   import { getAppState } from "$lib/components/app-state.svelte";
   import { createBuild } from "$lib/api/builds.remote";
   import AppSidebarHeader from "$lib/components/AppSidebarHeader.svelte";
   import ScrollableArea from "$lib/components/ScrollableArea.svelte";
   import EmptyState from "$lib/components/EmptyState.svelte";
+
 
   const appState = getAppState();
 
@@ -145,7 +147,24 @@
     </EmptyState>
   {/if}
 </ScrollableArea>
-<Popover anchor={addSectionButtonRef} placement="right-start" bind:open={isPopoverOpen}>
+<Menu placement="right-end" anchor={addSectionButtonRef}>
+  <MenuItem onclick={addHero}>
+    Hero
+  </MenuItem>
+  <MenuItem onclick={addFeaturedCategories}>
+    Featured Categories
+  </MenuItem>
+  <MenuItem onclick={addStoryBlock}>
+    Story Block
+  </MenuItem>
+  <MenuItem disabled>
+    Collection Block
+  </MenuItem>
+  <MenuItem disabled>
+    Recommendations Zone
+  </MenuItem>
+</Menu>
+<!-- <Popover anchor={addSectionButtonRef} placement="right-start" bind:open={isPopoverOpen}>
   <div>
     <ul>
       <li>
@@ -167,4 +186,4 @@
       <li>Recommendations Zone</li>
     </ul>
   </div>
-</Popover>
+</Popover> -->

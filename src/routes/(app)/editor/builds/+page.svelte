@@ -22,34 +22,45 @@
 
 <AppSidebarHeader title="Builds"></AppSidebarHeader>
 <ScrollableArea>
-  <Button color="primary" fullWidth>
-    <Icon>
-      <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
-    </Icon>
-    New Build
-  </Button>
-  <Tabs variant="enclosed" size="sm" fullWidth value={activeBuildsTab}>
-    <TabList>
-      <Tab value={BUILDS_TABS.ALL}>All Builds</Tab>
-      <Tab value={BUILDS_TABS.MY_BUILDS}>My Builds</Tab>
-    </TabList>
-    <TabPanel>
-      {#await getBuilds()}
-        {"loading"}
-      {:then builds} 
-        {#if builds.length === 0}
-          <EmptyState title="No Builds Yet" description={`Click "+ New Build" above to create the first one.`} />
-        {:else}
-          {#each builds as build}
-            {build}
-          {/each}
-        {/if}
-      {/await}
-    </TabPanel>
-    <TabPanel>
-      <EmptyState title="No Builds Yet" description={`Click "+ New Build" above or go to the Editor tab to create your first page`} />
-    </TabPanel>
-  </Tabs>
+  <div class="builds-content">
+    <Button color="primary" fullWidth>
+      <Icon>
+        <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+      </Icon>
+      New Build
+    </Button>
+    <Tabs variant="enclosed" size="sm" fullWidth value={activeBuildsTab}>
+      <TabList>
+        <Tab value={BUILDS_TABS.ALL}>All Builds</Tab>
+        <Tab value={BUILDS_TABS.MY_BUILDS}>My Builds</Tab>
+      </TabList>
+      <TabPanel>
+        {#await getBuilds()}
+          {"loading"}
+        {:then builds} 
+          {#if builds.length === 0}
+            <EmptyState title="No Builds Yet" description={`Click "+ New Build" above to create the first one.`} />
+          {:else}
+            {#each builds as build}
+              <div>
+                {JSON.stringify(build)}
+              </div>
+            {/each}
+          {/if}
+        {/await}
+      </TabPanel>
+      <TabPanel>
+        <EmptyState title="No Builds Yet" description={`Click "+ New Build" above or go to the Editor tab to create your first page`} />
+      </TabPanel>
+    </Tabs>
+  </div>
 </ScrollableArea>
 
-<style></style>
+<style>
+  .builds-content {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: .5rem;
+  }
+</style>

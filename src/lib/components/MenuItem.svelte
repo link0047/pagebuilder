@@ -1,27 +1,30 @@
 <script lang="ts">
 	import { type Snippet } from "svelte";
+	import { getMenuState } from "./menu-state.svelte";
 
 	type MenuItemType = "menuitem" | "menuitemcheckbox" | "menuitemradio";
 	type Size = "xs" | "small" | "sm" | "medium" | "md" | "large" | "lg" | "xl";
-	type ElementType = "button" | "a" | "div";
+	type ElementType = "button" | "a";
 	
 	type Props = {
-		children?: Snippet,
-		onclick?: (event: MouseEvent) => void,
-		checked?: boolean,
-		type?: MenuItemType,
-		size?: Size,
-		as?: ElementType,
-		shortcut?: string,
-		leading?: Snippet,
+		children?: Snippet;
+		onclick?: (event: MouseEvent) => void;
+		checked?: boolean;
+		disabled?: boolean;
+		type?: MenuItemType;
+		size?: Size;
+		as?: ElementType;
+		shortcut?: string;
+		leading?: Snippet;
 		trailing?: Snippet
 	}
 
 	let {
-    as,
+    as = "button",
 		size = "md",
 		type = "menuitem",
 		checked = $bindable(false),
+		disabled = false,
 		children,
 		onclick,
 		shortcut,
@@ -29,6 +32,8 @@
 		trailing,
 		...restProps
 	}: Props = $props();
+
+	const menuState = getMenuState();
 
 	function handleClick(event: MouseEvent) {
 		if (type === "menuitemcheckbox") {
@@ -38,6 +43,7 @@
     }
 
 		onclick?.(event);
+		menuState.close();
 	}
 </script>
 
@@ -46,6 +52,7 @@
 	role={type} 
 	type="button"
 	aria-checked={type !== "menuitem" ? checked : undefined}
+	aria-disabled={disabled}
 	class="uikit-menuitem"
 	class:uikit-menuitem--radio={type === "menuitemradio"}
 	class:uikit-menuitem--checkbox={type === "menuitemcheckbox"}
@@ -53,7 +60,9 @@
 	class:uikit-menuitem--size-sm={size === "sm"}
 	class:uikit-menuitem--size-lg={size === "lg"}
 	class:uikit-menuitem--size-xl={size === "xl"}
+	tabindex="-1"
 	onclick={handleClick}
+	{...restProps}
 >
 	{#if leading}
 		<span class="uikit-menu-item__leading">
@@ -89,7 +98,22 @@
 	
 	@layer base {
 		.uikit-menuitem {
-			
+			width: 100%;
+			white-space: normal;
+			word-break: break-word;
+			display: flex;
+			height: 2rem;
+			align-items: center;
+			appearance: none;
+			border: none;
+			padding-inline: 1rem;
+			background-color: #fff;
+			user-select: none;
+			cursor: pointer;
+		}
+
+		.uikit-menuitem:hover {
+			background-color: #f2f2f2;
 		}
 	}
 
