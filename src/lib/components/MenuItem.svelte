@@ -2,16 +2,18 @@
 	import { type Snippet } from "svelte";
 	import { getMenuState } from "./menu-state.svelte";
 
-	type MenuItemType = "menuitem" | "menuitemcheckbox" | "menuitemradio";
+	type MenuKind = "menuitem" | "menuitemcheckbox" | "menuitemradio";
 	type Size = "xs" | "small" | "sm" | "medium" | "md" | "large" | "lg" | "xl";
 	type ElementType = "button" | "a";
-	
+	type ButtonType = "button" | "submit" | "reset"; 
+
 	type Props = {
 		children?: Snippet;
 		onclick?: (event: MouseEvent) => void;
 		checked?: boolean;
 		disabled?: boolean;
-		type?: MenuItemType;
+		type?: ButtonType;
+		kind?: MenuKind;
 		size?: Size;
 		as?: ElementType;
 		shortcut?: string;
@@ -22,7 +24,8 @@
 	let {
     as = "button",
 		size = "md",
-		type = "menuitem",
+		kind = "menuitem",
+		type = "button",
 		checked = $bindable(false),
 		disabled = false,
 		children,
@@ -36,9 +39,9 @@
 	const menuState = getMenuState();
 
 	function handleClick(event: MouseEvent) {
-		if (type === "menuitemcheckbox") {
+		if (kind === "menuitemcheckbox") {
       checked = !checked;
-    } else if (type === "menuitemradio") {
+    } else if (kind === "menuitemradio") {
       checked = true;
     }
 
@@ -50,12 +53,12 @@
 <svelte:element 
 	this={as}
 	role={type} 
-	type="button"
-	aria-checked={type !== "menuitem" ? checked : undefined}
+	type={as === "button" ? type : undefined}
+	aria-checked={kind !== "menuitem" ? checked : undefined}
 	aria-disabled={disabled}
 	class="uikit-menuitem"
-	class:uikit-menuitem--radio={type === "menuitemradio"}
-	class:uikit-menuitem--checkbox={type === "menuitemcheckbox"}
+	class:uikit-menuitem--radio={kind === "menuitemradio"}
+	class:uikit-menuitem--checkbox={kind === "menuitemcheckbox"}
 	class:uikit-menuitem--size-xs={size === "xs"}
 	class:uikit-menuitem--size-sm={size === "sm"}
 	class:uikit-menuitem--size-lg={size === "lg"}
@@ -110,6 +113,7 @@
 			background-color: #fff;
 			user-select: none;
 			cursor: pointer;
+			gap: 1ch;
 		}
 
 		.uikit-menuitem:hover {

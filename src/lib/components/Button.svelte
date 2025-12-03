@@ -2,7 +2,7 @@
 	import { type Snippet } from "svelte";
 	
 	type Variant = "filled" | "outlined" | "ghost" | "link";
-	type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default"
+	type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default";
 	type Size = "xs" | "small" | "sm" | "medium" | "md" | "large" | "lg" | "xl";
 	type Shape = "default" | "square" | "pill" | "circle";
 	
@@ -65,7 +65,7 @@
     /* Base dimensions */
     --uikit-button-height: 2.5rem;
     --uikit-button-width: fit-content;
-    --uikit-button-gap: 1ch;
+    --uikit-button-gap: .25ch;
     --uikit-button-padding-inline: .5rem;
     
     /* Typography */

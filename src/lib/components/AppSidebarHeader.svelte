@@ -56,5 +56,6 @@
 
   .app-sidebar-header__content {
     padding-inline: .5rem;
+    padding-block-end: 1rem;
   }
 </style>

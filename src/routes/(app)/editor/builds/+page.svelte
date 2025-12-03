@@ -20,15 +20,18 @@
   let activeBuildsTab = $state<BuildsTab>(BUILDS_TABS.ALL);
 </script>
 
-<AppSidebarHeader title="Builds"></AppSidebarHeader>
-<ScrollableArea>
-  <div class="builds-content">
-    <Button color="primary" fullWidth>
+<AppSidebarHeader title="Builds">
+  {#snippet action()}
+    <Button color="primary">
       <Icon>
         <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
       </Icon>
-      New Build
+      New
     </Button>
+  {/snippet}
+</AppSidebarHeader>
+<ScrollableArea>
+  <div class="builds-content">
     <Tabs variant="enclosed" size="sm" fullWidth value={activeBuildsTab}>
       <TabList>
         <Tab value={BUILDS_TABS.ALL}>All Builds</Tab>

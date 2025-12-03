@@ -158,8 +158,8 @@
 	  
 	  // ALWAYS get fresh rects
 	  anchorRect = anchor?.getBoundingClientRect();
-		menuWidth = ref.offsetWidth;
-		menuHeight = ref.offsetHeight;
+		menuWidth = ref?.offsetWidth;
+		menuHeight = ref?.offsetHeight;
 	  
 	  // Only recalculate placement when requested
 	  if (recalculatePlacement) {

@@ -9,19 +9,24 @@
   import SegmentedControl from "$lib/components/SegmentedControl.svelte";
   import SegmentedButton from "$lib/components/SegmentedButton.svelte";
   import Avatar from "$lib/components/Avatar.svelte";
+  import Menu from "$lib/components/Menu.svelte";
+  import MenuItem from "$lib/components/MenuItem.svelte";
   import { setAppState } from "$lib/components/app-state.svelte";
   import type { LayoutProps } from "./$types";
   import { copyToClipboard } from "$lib/utils/clipboard";
   import { attempt } from "$lib/utils/attempt";
   import { getInitials } from "$lib/utils/getInitials";
   import { signout, getUser } from "$lib/api/auth.remote";
+  import { createBuild } from "$lib/api/builds.remote";
 
   let {
     children
   }: LayoutProps = $props();
 
+  let avatarRef = $state<HTMLButtonElement>();
   let isCopied = $state(false);
   let isLoading = $state(false);
+
   const appState = setAppState();
   const copyButtonText = $derived(() => {
     if (isLoading) return "Copying...";
@@ -86,6 +91,36 @@
     }
   }
 
+  function generateHomepageTimestamp() {
+    const now = new Date();
+    const dateOptions: Intl.DateTimeFormatOptions = {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    };
+    const timeOptions: Intl.DateTimeFormatOptions = {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true
+    };
+
+    const formattedDate = now.toLocaleDateString("en-US", dateOptions);
+    const formattedTime = now.toLocaleTimeString("en-US", timeOptions);
+
+    return `Homepage - ${formattedDate} ${formattedTime}`;
+  }
+
+  async function saveBuild() {
+    const content = $state.snapshot(appState.pageTree);
+    const name = generateHomepageTimestamp();
+    await createBuild({
+      name,
+      buildType: "homepage",
+      content,
+      thumbnailUrl: "https://placehold.co/400x400"
+    });
+  }
+
   const activeRoute = $derived.by(() => {
     const path = page.url.pathname;
     if (path.startsWith("/editor/builds")) return "builds";
@@ -97,6 +132,7 @@
   const { name } = await getUser();
 
   const userInitials = getInitials(name);
+  $inspect({ avatarRef });
 </script>
 
 {#snippet headerLeading()}
@@ -130,11 +166,9 @@
     </Icon>
     {copyButtonText()}
   </Button>
-  <form {...signout}>
-    <Button type="submit">
-      sign out
-    </Button>
-  </form>
+  <Button onclick={saveBuild} disabled={appState.pageTree.children.length === 0}>
+    Save
+  </Button>
 {/snippet}
 
 <Iconset>
@@ -184,7 +218,11 @@
   <symbol id="content-copy">
     <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
   </symbol>
+  <symbol id="logout">
+    <path d="M17 7L15.59 8.41L18.17 11H8V13H18.17L15.59 15.58L17 17L22 12M4 5H12V3H4C2.9 3 2 3.9 2 5V19C2 20.1 2.9 21 4 21H12V19H4V5Z" />
+  </symbol>
 </Iconset>
+
 <div class="app">
   <AppHeader leading={headerLeading} trailing={headerTrailing} />
   <NavigationRail>
@@ -213,11 +251,24 @@
 			Templates
 		</NavigationRailItem>
     {#snippet end()}
-      <Avatar src="" text={userInitials} shape="circle" />
+      <Avatar bind:ref={avatarRef} text={userInitials} shape="circle" tag="button" />
     {/snippet}
   </NavigationRail>
   {@render children?.()}
 </div>
+
+<Menu anchor={avatarRef} placement="right-end">
+  <form {...signout}>
+    <MenuItem type="submit">
+      {#snippet leading()}
+        <Icon>
+          <use href="#logout" />
+        </Icon>
+      {/snippet}
+      Signout
+    </MenuItem>
+  </form>
+</Menu>
 
 <style>
   .app {

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import Self from "./PageStructure.svelte";
   import Button from "./Button.svelte";
+  import Tree from "./Tree.svelte";
+  import TreeItem from "./TreeItem.svelte";
   import { getAppState } from "./app-state.svelte";
 
   type ComponentMeta = {
@@ -105,44 +107,49 @@
       appState.addComponent(defaultCategory, path);
     }
   }
+
+  $inspect($state.snapshot(appState.pageTree));
 </script>
 
 {#if pageTree?.type === "root" && pageTree.children.length > 0}
-	{#each pageTree.children as child, index}
-		<Self pageTree={child} path={[...path, index]}/>
-	{/each}
+	<Tree>
+    {#each pageTree.children as child, index}
+      <Self pageTree={child} path={[...path, index]}/>
+    {/each}
+  </Tree>
 {/if}
 
 {#if pageTree?.type === "component" && isKnownComponent}
-  <div class="item">
-    {#if pageTree.meta}
-      <span>
-        <button type="button" onclick={editProperties} class="edit-btn">
-          <span>{pageTree.meta.label}</span>
-        </button>
-        <button type="button" onclick={deleteComponent} class="delete-btn">
-          delete
-        </button>
-      </span>
-    {/if}
+  <TreeItem hasChildren={canHaveChildren && !!pageTree.children && pageTree.children.length > 0}>
+    {#snippet text()}
+      {#if pageTree.meta}
+        <span>
+          <button type="button" onclick={editProperties} class="edit-btn">
+            <span>{pageTree.meta.label}</span>
+          </button>
+          <button type="button" onclick={deleteComponent} class="delete-btn">
+            delete
+          </button>
+        </span>  
+      {/if}   
+    {/snippet}
 
     {#if canHaveChildren && pageTree.children}
-      <div class="group">
-        {#each pageTree.children as child, index}
-          <Self pageTree={child} path={[...path, index]} />
-        {/each}
-      </div>
+      {#each pageTree.children as child, index}
+        <Self pageTree={child} path={[...path, index]} />
+      {/each}
     {/if}
-    {#if canHaveChildren}
-      {#if pageTree.name === "StoryBlock"}
-        <Button onclick={() => addCard()}>
-          Add Story Card
-        </Button>
-      {:else if pageTree.name === "FeaturedCategories"}
-        <Button size="sm" onclick={() => addFeaturedCategory()}>
-          Add Featured Category
-        </Button>
-      {/if}
+  </TreeItem>
+
+  {#if canHaveChildren}
+    {#if pageTree.name === "StoryBlock"}
+      <Button onclick={() => addCard()}>
+        Add Story Card
+      </Button>
+    {:else if pageTree.name === "FeaturedCategories"}
+      <Button size="sm" onclick={() => addFeaturedCategory()}>
+        Add Featured Category
+      </Button>
     {/if}
-  </div>
+  {/if}
 {/if}

@@ -4,9 +4,11 @@
 	type FetchPriority = "high" | "low" | "auto";
   type Shape = "circle" | "squircle" | "hexagon" | "triangle" | "heart";
   type Size = "xs" | "sm" | "md" | "lg" | "xl";
+  type Tag = "div" | "button";
 
   type Props = {
-    src: string;
+    tag?: Tag;
+    src?: string;
     loading?: LoadingStrategy;
     decoding?: DecodingStrategy;
     fetchpriority?: FetchPriority;
@@ -14,6 +16,8 @@
     text?: string;
     size?: Size;
     shape?: Shape;
+    ref?: HTMLElement;
+    [key: string]: unknown;
   };
 
   const SIZE_MAP = {
@@ -25,6 +29,7 @@
   };
 
   let {
+    tag = "div",
     src,
     loading = "lazy",
     decoding = "async",
@@ -33,12 +38,17 @@
     text,
     size = "md",
     shape,
+    ref = $bindable(),
+    ...restProps
   }: Props = $props();
 
   let imageSize = $derived(SIZE_MAP[size] || 48);
 </script>
 
-<div
+<svelte:element
+  bind:this={ref}
+  this={tag}
+  type={tag === "button" ? "button" : undefined}
   class="uikit-avatar"
   class:uikit-avatar--size-xs={size === "xs"}
   class:uikit-avatar--size-sm={size === "sm"}
@@ -49,18 +59,23 @@
   class:uikit-avatar--shape-hexagon={shape === "hexagon"}
   class:uikit-avatar--shape-triangle={shape === "triangle"}
   class:uikit-avatar--shape-heart={shape === "heart"}
+  {...restProps}
 >
   {#if src}
     <img class="uikit-avatar__image" width={imageSize} height={imageSize} {src} {loading} {decoding} {fetchpriority} {alt} />
   {:else if text}
     { text }
   {/if}
-</div>
+</svelte:element>
 
 <style>
   .uikit-avatar {
     display: flex;
     aspect-ratio: 1 / 1;
+    touch-action: manipulation;
+    user-select: none;
+    appearance: none;
+    border: none;
     overflow: hidden;
     width: 3rem;
     align-items: center;
@@ -68,6 +83,10 @@
     border-radius: .25rem;
     background-color: #333335;
     color: #fff;
+  }
+
+  .uikit-avatar[type="button"] {
+    cursor: pointer;
   }
 
   .uikit-avatar__image {
