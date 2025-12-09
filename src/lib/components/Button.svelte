@@ -58,7 +58,7 @@
 </button>
 
 <style>
-@layer variables, base, variants, sizes, shapes, states, accessibility;
+@layer variables, base, variants, colors, sizes, shapes, states, accessibility;
 
 @layer variables {
   :root {
@@ -139,7 +139,7 @@
 @layer variants {
 	/* Variant styles */
 	.uikit-button--outlined {
-    background-color: transparent;
+    --uikit-button-bg-color: transparent;
     --uikit-button-color: #38393b;
 		--uikit-button-border-width: 2px;
 		--uikit-button-outline-offset: -2px;
@@ -148,22 +148,32 @@
   }
   
   .uikit-button--ghost {
-    background-color: transparent;
-    border-color: transparent;
+    --uikit-button-bg-color: transparent;
+    --uikit-button-border-color: transparent;
 	  --uikit-button-color: #38393b;
     --uikit-button-hover-bg-color: #eeeeef;
 		--uikit-button-hover-border-color: #eeeeef;
   }
   
   .uikit-button--link {
-    background-color: transparent;
-    border-color: transparent;
+    --uikit-button-bg-color: transparent;
+    --uikit-button-border-color: transparent;
     text-decoration: underline;
 		--uikit-button-color: #38393b;
 		--uikit-button-hover-bg-color: #eeeeef;
 		--uikit-button-hover-border-color: #eeeeef;
   }
 
+  .uikit-button--full-width {
+    width: 100%;
+  }
+
+  .uikit-button--full-width {
+    width: 100%;
+  }
+}
+
+@layer colors {
 	/* Color variants */
 	.uikit-button--primary {
 		--uikit-button-bg-color: #2a508f;
@@ -175,11 +185,13 @@
 	}
 
 	.uikit-button--primary:is(.uikit-button--outlined, .uikit-button--ghost, .uikit-button--link) {
+	  --uikit-button-bg-color: transparent;
 	  --uikit-button-color: #2a508f;
 		--uikit-button-hover-bg-color: #e9edf3;
 	}
 
 	.uikit-button--primary:is(.uikit-button--ghost, .uikit-button--link) {
+    --uikit-button-border-color: transparent;
 		--uikit-button-hover-border-color: #e9edf3;
 	}
 	
@@ -274,10 +286,6 @@
 	.uikit-button--info:is(.uikit-button--ghost, .uikit-button--link) {
 		--uikit-button-hover-border-color: #e0f0ff;
 	}
-
-  .uikit-button--full-width {
-    width: 100%;
-  }
 }
 	
 @layer states {

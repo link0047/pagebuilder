@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { login } from "$lib/api/auth.remote";
 	import { loginSchema } from "$lib/schema/auth";
+	import AuthCard from "$lib/components/AuthCard.svelte";
+	import Icon from "$lib/components/Icon.svelte";
 	import Textfield from "$lib/components/Textfield.svelte";
 	import Button from "$lib/components/Button.svelte";
   import Link from "$lib/components/Link.svelte";
   import debounce from "$lib/utils/debounced";
-  import { message } from "valibot";
 
 	const loginForm = login.preflight(loginSchema);
 	
@@ -45,16 +46,14 @@
 	const passwordError = $derived(getFieldError(loginForm.fields.password, "password"));
 </script>
 
-<div class="auth-card">
-	<header class="auth-card__header">
-		<svg class="auth-card__icon" width="96" height="96">
-			<use href="/favicon.svg"></use>
-		</svg>
-		<h1 class="auth-card__title">Sign In to Build</h1>
-		<p class="auth-card__subtitle">Let's create something amazing</p>
-	</header>
+<AuthCard title="Sign In to Build" subtitle="Let's create something amazing">
+	{#snippet icon()}
+		<Icon size="96">
+			<use href="/favicon.svg" />
+		</Icon>
+	{/snippet}
 	<form 
-		class="auth-card__form" 
+		class="form-layout" 
 		{...loginForm.enhance(async ({ submit }) => {
 			hasSubmitted = true;
 			validateInput.cancel();
@@ -80,73 +79,15 @@
 			Sign In
 		</Button>
 	</form>
-	<p class="auth-card__footer">
-		Don't have an account?
-		<Link href="/signup">Sign up</Link>
-	</p>
-</div>
+	{#snippet footer()}
+		<span>Don't have an account? <Link href="/signup">Sign up</Link></span>
+	{/snippet}
+</AuthCard>
 
 <style>
-	.auth-card {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
+	.form-layout {
 		display: flex;
-		flex-flow: column nowrap;
+		flex-direction: column;
 		gap: 1rem;
-		width: 100%;
-  	max-width: min(100vw - 2rem, 26.25rem);
-		background-color: #fff;
-		border-radius: .75rem;
-		padding-inline: 1rem;
-		padding-block: 1rem;
-		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-	}
-
-	.auth-card__header {
-		display: flex;
-		flex-flow: column nowrap;
-		gap: .5rem;
-		text-align: center;
-		align-items: center;
-		margin-block-end: 1rem;
-	}
-
-	.auth-card__form {
-		display: flex;
-		flex-flow: column nowrap;
-		gap: 1rem;
-		margin-block-end: .5rem;
-	}
-
-	.auth-card__title,
-	.auth-card__subtitle {
-		margin: 0;
-		line-height: 1;
-		user-select: none;
-	}
-
-	.auth-card__title {
-		font-size: 1.5rem;
-		font-weight: 700;
-  	color: #1a1a1a;
-	}
-
-	.auth-card__subtitle {
-		font-size: .875rem;
-		color: #666;
-	}
-
-	.auth-card__footer {
-		text-align: center;
-	}
-
-	@media (min-width: 768px) {
-		.auth-card {
-			top: 35%;
-			padding-inline: 2.5rem;
-			padding-block: 2.5rem;
-		}
 	}
 </style>

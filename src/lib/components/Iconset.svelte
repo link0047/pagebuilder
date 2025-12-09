@@ -6,12 +6,9 @@
 	}
 
 	let { children }: Props = $props();
-
-	// This component should only be used once in your app
-	// It creates a global SVG sprite for icon definitions
 </script>
 
-<svg class="icon-set" aria-hidden="true">
+<svg class="icon-set" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
 	<defs>
 		{@render children()}
 	</defs>
@@ -19,6 +16,12 @@
 
 <style>
 	.icon-set {
-		display: none;
+		position: absolute;
+		width: 0;
+		height: 0;
+		overflow: hidden;
+		pointer-events: none;
+		margin: 0;
+		padding: 0;
 	}
 </style>

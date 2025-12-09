@@ -123,13 +123,13 @@
   <TreeItem hasChildren={canHaveChildren && !!pageTree.children && pageTree.children.length > 0}>
     {#snippet text()}
       {#if pageTree.meta}
-        <span>
-          <button type="button" onclick={editProperties} class="edit-btn">
+        <span class="">
+          <Button onclick={editProperties} variant="ghost">
             <span>{pageTree.meta.label}</span>
-          </button>
-          <button type="button" onclick={deleteComponent} class="delete-btn">
+          </Button>
+          <Button onclick={deleteComponent} variant="ghost">
             delete
-          </button>
+          </Button>
         </span>  
       {/if}   
     {/snippet}
@@ -153,3 +153,7 @@
     {/if}
   {/if}
 {/if}
+
+<style>
+
+</style>
