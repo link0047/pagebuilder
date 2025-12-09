@@ -2,10 +2,10 @@
 	type Orientation = "horizontal" | "vertical";
 	
 	type Props = {
-		gap: number;
-		color: string;
-		width: string;
-		orientation: Orientation;
+		gap?: number;
+		color?: string;
+		width?: string;
+		orientation?: Orientation;
 	}
 
 	// Constants for defaults

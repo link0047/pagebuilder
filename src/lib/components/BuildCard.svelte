@@ -3,6 +3,7 @@
 	import Card from "./Card.svelte";
 	import Badge from "./Badge.svelte";
 	import Icon from "./Icon.svelte";
+	import Separator from "./Separator.svelte";
 	import { getRelativeTime } from "$lib/utils/relativeTime";
 
   type BuildData = {
@@ -21,6 +22,8 @@
     build,
     actions
   }: Props = $props();
+
+	$inspect(build);
 </script>
 
 <Card>
@@ -41,6 +44,7 @@
 			<span class="build-content__timestamp">{getRelativeTime(build.updated_at)}</span>
 		</div>
     {#if actions}
+			<Separator />
       <div class="build-content__actions">
         {@render actions()}
       </div>
@@ -67,8 +71,31 @@
 		font-weight: 400;
     display: flex;
     align-items: center;
+		justify-content: flex-start;
+		gap: .5ch;
     color: #666;
+		min-width: 0;
 	}
+
+	.build-content__author {
+		display: inline-flex;
+    align-items: center;
+		justify-content: flex-start;
+		gap: .25ch;
+		min-width: 0;
+		flex: 0 1 auto;
+	}
+
+	.build-content__author-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .build-content__separator,
+  .build-content__timestamp {
+    flex-shrink: 0;
+  }
 
 	.build-content__actions {
 		display: flex;

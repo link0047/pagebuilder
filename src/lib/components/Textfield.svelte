@@ -170,6 +170,7 @@
       --uikit-textfield-input-outline-offset: -2px;
 
       --uikit-textfield-message-color: #212121;
+      --uikit-textfield-description-color: #5d5d5d;
       --uikit-textfield-message-font-size: .75rem;
     }
   }
@@ -213,6 +214,10 @@
       font-size: var(--uikit-textfield-message-font-size);
       color: var(--uikit-textfield-message-color);
       line-height: 1.6;
+    }
+
+    .uikit-textfield__message-description {
+      color: var(--uikit-textfield-description-color);
     }
 
     .uikit-textfield__notched-outline {

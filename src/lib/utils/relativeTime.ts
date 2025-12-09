@@ -49,12 +49,12 @@ export function getRelativeTime(
   
   // Seconds
   if (diffSecs < 60) {
-    return `${diffSecs} ${plural(diffSecs, "second")} ago`;
+    return `${diffSecs} ${plural(diffSecs, "sec")} ago`;
   }
   
   // Minutes
   if (diffMins < 60) {
-    return `${diffMins} ${plural(diffMins, "minute")} ago`;
+    return `${diffMins} ${plural(diffMins, "min")} ago`;
   }
   
   // Hours (but check if it"s actually yesterday first)

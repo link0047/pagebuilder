@@ -8,12 +8,20 @@
   import TabList from "$lib/components/TabList.svelte";
   import Tab from "$lib/components/Tab.svelte";
   import TabPanel from "$lib/components/TabPanel.svelte";
+  import BuildCard from "$lib/components/BuildCard.svelte";
   import ScrollableArea from "$lib/components/ScrollableArea.svelte";
 
   const BUILDS_TABS = {
     ALL: "all",
     MY_BUILDS: "my-builds"
   } as const;
+
+  type BuildData = {
+		name: string;
+		build_type: string;
+    author: string;
+		updated_at: string;
+	};
 
   type BuildsTab = typeof BUILDS_TABS[keyof typeof BUILDS_TABS];
 
@@ -45,9 +53,7 @@
             <EmptyState title="No Builds Yet" description={`Click "+ New Build" above to create the first one.`} />
           {:else}
             {#each builds as build}
-              <div>
-                {JSON.stringify(build)}
-              </div>
+              <BuildCard {build}></BuildCard>
             {/each}
           {/if}
         {/await}

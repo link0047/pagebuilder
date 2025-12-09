@@ -3,6 +3,15 @@ import { error, redirect } from "@sveltejs/kit";
 import { sql } from "$lib/server/database";
 import { createBuildSchema } from "$lib/schema/builds";
 
+type BuildResult = {
+  id: string; // or number
+  name: string;
+  build_type: string;
+  author: string; // <--- The field your frontend is missing
+  updated_at: string;
+  // include other fields if necessary
+};
+
 function requireAuth() {
   const { locals } = getRequestEvent();
   if (!locals.user) {
@@ -14,7 +23,21 @@ function requireAuth() {
 
 export const getBuilds = query(async () => {
   requireAuth();
-  const builds = await sql`SELECT * FROM builds ORDER BY created_at DESC`;
+
+  const builds = await sql`
+    SELECT 
+      b.id,
+      b.name,
+      b.build_type,
+      b.updated_at,
+      b.content, 
+      b.thumbnail_url,
+      u.name as author
+    FROM builds b
+    LEFT JOIN "user" u ON b.created_by = u.id
+    ORDER BY b.created_at DESC
+  ` as BuildResult[];
+
   return builds;
 });
 
