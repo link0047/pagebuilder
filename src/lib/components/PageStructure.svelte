@@ -4,6 +4,7 @@
   import Tree from "./Tree.svelte";
   import TreeItem from "./TreeItem.svelte";
   import { getAppState } from "./app-state.svelte";
+  import Icon from "./Icon.svelte";
 
   type ComponentMeta = {
     locked: boolean;
@@ -107,8 +108,6 @@
       appState.addComponent(defaultCategory, path);
     }
   }
-
-  $inspect($state.snapshot(appState.pageTree));
 </script>
 
 {#if pageTree?.type === "root" && pageTree.children.length > 0}
@@ -120,17 +119,19 @@
 {/if}
 
 {#if pageTree?.type === "component" && isKnownComponent}
-  <TreeItem hasChildren={canHaveChildren && !!pageTree.children && pageTree.children.length > 0}>
+  <TreeItem hasChildren={canHaveChildren && !!pageTree.children && pageTree.children.length > 0} expanded={canHaveChildren && !!pageTree.children && pageTree.children.length > 0}>
     {#snippet text()}
       {#if pageTree.meta}
-        <span class="">
-          <Button onclick={editProperties} variant="ghost">
-            <span>{pageTree.meta.label}</span>
-          </Button>
-          <Button onclick={deleteComponent} variant="ghost">
-            delete
-          </Button>
-        </span>  
+      <span class="uikit-page-structure-meta">
+        <button class="uikit-page-structure-meta__edit-properties" type="button" onclick={editProperties}>
+          <span>{pageTree.meta.label}</span>
+        </button>
+        <Button onclick={deleteComponent} variant="ghost" size="sm" shape="square">
+          <Icon size="16">
+            <use href="#delete" />
+          </Icon>
+        </Button>
+      </span>  
       {/if}   
     {/snippet}
 
@@ -155,5 +156,23 @@
 {/if}
 
 <style>
+  .uikit-page-structure-meta {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: row;
+    gap: .25rem;
+    padding-block: .25rem;
+    padding-inline-end: .5rem;
+  }
 
+  .uikit-page-structure-meta__edit-properties {
+    flex-grow: 1;
+    background-color: transparent;
+    border: none;
+    text-align: start;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+  }
 </style>

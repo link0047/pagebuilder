@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type Snippet, onMount, onDestroy, tick } from "svelte";
-	import { debounce } from "./debounce.js"; 
+	import debounce from "$lib/utils/debounced"; 
 	import Icon from "./Icon.svelte";
 
 	type Size = "sm" | "md" | "lg";
@@ -20,6 +20,7 @@
 		size?: Size;
 		open?: boolean;
 		expandIconPosition?: IconPosition;
+		[key: string]: unknown;
 	};
 
 	const ANIMATION_DURATION = 300;
@@ -169,7 +170,11 @@
 	});
 </script>
 
-<details class="uikit-collapse" bind:this={detailsRef} open={detailsOpen}>
+<details 
+	class="uikit-collapse" 
+	bind:this={detailsRef} 
+	{...restProps}
+>
 	<summary 
 		class="uikit-collapse__header"
 		class:uikit-collapse__header--icon-position-start={expandIconPosition === "start"}

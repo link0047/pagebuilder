@@ -2,12 +2,12 @@
 	import Image from "./Image.svelte";	
 
 	type Props = {
-		image: string;
+		image?: string;
 		width?: number;
 		height?: number;
 		alt?: string;
-		text: string;
-		href: string;
+		text?: string;
+		href?: string;
 		ariaLabel?: string;
 		[key: string]: unknown;
 	};

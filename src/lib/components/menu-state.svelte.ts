@@ -38,7 +38,6 @@ class MenuState {
 		}
 		
 		if (!(element instanceof HTMLElement)) {
-			console.warn(element);
 			console.warn("MenuState: anchor must be an HTMLElement");
 			return;
 		}

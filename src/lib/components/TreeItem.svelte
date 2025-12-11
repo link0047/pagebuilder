@@ -157,6 +157,10 @@
 		padding-inline-start: calc(.5rem + var(--uikit-treeitem-indentation-size) * var(--uikit-treeitem-depth));
 	}
 
+	.uikit-treeitem__text {
+		width: 100%;
+	}
+
 	.uikit-treeitem__group {
 		list-style: none;
 		margin: 0;

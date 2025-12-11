@@ -15,9 +15,9 @@
   }
 
   type ImageSources = {
-    mobile: string;
+    mobile?: string;
     tablet?: string;
-    desktop: string;
+    desktop?: string;
   }
 
   type Props = {
@@ -60,6 +60,7 @@
     ...restProps
   }: Props = $props();
 
+	// $inspect({ images })
   const promoPlacement = $derived(promo?.placement ?? "top-left");
 	const promoHeading = $derived(promo?.heading ?? "");
 </script>

@@ -45,43 +45,58 @@
 	  ...restProps
 	}: Props = $props();
 
-	if (src === undefined) {
-		const warning: WarningType = {
-			type: "missingSource",
-			message: "🚨 Image component requires a source (src) attribute. Provide a valid image URL or path."
-		};
-		
-		showWarnings && console.warn(warning.message);
-    onWarning?.(warning);
-	}
-	
-	if (alt === undefined) {
-	  const warning: WarningType = {
-	    type: "missingAlt",
-	    message: `🌐 Accessibility Issue: Missing alt text for image. Add descriptive alternative text.`
-	  };
-	  
-	  showWarnings && console.warn(warning.message);
-    onWarning?.(warning);
-	}
+	let currentSrc = $state(src);
+  let hasError = $state(false);
+
+  $effect(() => {
+    currentSrc = src;
+    hasError = false;
+  });
+
+	$effect(() => {
+    if (!currentSrc && !hasError) {
+      const warning: WarningType = {
+        type: "missingSource",
+        message: "Image component requires a source (src).",
+      };
+      if (showWarnings) console.warn(warning.message);
+      onWarning?.(warning);
+    }
+
+    if (!alt) {
+      const warning: WarningType = {
+        type: "missingAlt",
+        message: "Accessibility Issue: Missing alt text.",
+      };
+      if (showWarnings) console.warn(warning.message);
+      onWarning?.(warning);
+    }
+  });
 
 	function handleError() {
+		if (hasError) return;
+    
+    hasError = true;
+
 	  const warning: WarningType = {
 	    type: "loadError",
-	    message: `❌ Failed to load image from: ${src}. Fallback placeholder will be used.`,
+	    message: `Failed to load image from: ${src}. Fallback placeholder will be used.`,
 	    src
 	  };
 	  
 	  showWarnings && console.warn(warning.message);
 	  onWarning?.(warning);
-	  onError?.(src);
-	  src = useFallback ? fallbackSrc : src;
+	  onError?.(currentSrc);
+	  
+		if (useFallback) {
+			currentSrc = fallbackSrc;
+		} 
 	}
 </script>
 
 <img
   class="image"
-  {src}
+  src={currentSrc}
   {width}
   {height}
   {loading}

@@ -98,16 +98,10 @@
       day: "numeric",
       year: "numeric"
     };
-    const timeOptions: Intl.DateTimeFormatOptions = {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true
-    };
 
     const formattedDate = now.toLocaleDateString("en-US", dateOptions);
-    const formattedTime = now.toLocaleTimeString("en-US", timeOptions);
 
-    return `Homepage - ${formattedDate} ${formattedTime}`;
+    return `Homepage - ${formattedDate}`;
   }
 
   async function saveBuild() {
@@ -229,6 +223,15 @@
 	<symbol id="delete">
 		<path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
 	</symbol>
+  <symbol id="dots-vertical">
+    <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z" />
+  </symbol>
+  <symbol id="close">
+    <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+  </symbol>
+  <symbol id="file-document-outline">
+    <path d="M6,2A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6M6,4H13V9H18V20H6V4M8,12V14H16V12H8M8,16V18H13V16H8Z" />
+  </symbol>
 </Iconset>
 
 <div class="app">

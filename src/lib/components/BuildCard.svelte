@@ -101,5 +101,7 @@
 		display: flex;
 		flex-direction: row;
 		gap: .5rem;
+		align-items: center;
+		justify-content: space-between;
 	}
 </style>

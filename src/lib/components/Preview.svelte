@@ -133,5 +133,7 @@
   .preview-empty__description {
     color: #555;
     font-size: .875rem;
+    text-align: center;
+    text-wrap: balance;
   }
 </style>
