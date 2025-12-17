@@ -44,6 +44,8 @@
 		return -1;
 	});
 
+	// $inspect({ expanded, isExpanded, ref, hasChildren });
+
 	function handleClick(event: MouseEvent): void {
 		if (!ref) return;
 
@@ -76,13 +78,30 @@
 
 		if (expanded && hasChildren) {
 			treeState.expandTreeItem(ref);
-    }
+		}
 
 		return () => {
 			if (ref instanceof HTMLElement) {
 				treeState.unregisterItem(ref);
 			}
 		};
+	});
+
+	
+	$effect(() => {
+		if (ref) {
+			console.log(isExpanded);
+			// Update the tree state when hasChildren changes
+			treeState.updateItem(ref, "hasChildren", hasChildren);
+			
+			// Then handle expansion
+			if (expanded && hasChildren) {
+				console.log("expanding");
+				treeState.expandTreeItem(ref);
+			} else if (!expanded) {
+				treeState.collapseTreeItem(ref);
+			}
+		}
 	});
 </script>
 

@@ -283,6 +283,7 @@ class TreeState {
 	}
 	
 	expandTreeItem(element: HTMLElement) {
+		console.log(element);
 		this.#expandedItems.add(element);
 	}
 	

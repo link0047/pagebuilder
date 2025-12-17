@@ -168,7 +168,7 @@
                 <BuildCard {build}>
                   {#snippet actions()}
                     {#if appState.currentBuildId === build.id}
-                      <Badge>
+                      <Badge color="info">
                         <Icon size="16">
                           <use href="#pencil-outline" />
                         </Icon>
@@ -193,7 +193,10 @@
                       </Icon>
                     </Button>
                     <Menu anchor={buildMoreButtonRefs[build.id]}>
-                      <MenuItem onclick={() => handleDuplicatingBuild(build)}>
+                      <MenuItem
+                        onclick={() => handleDuplicatingBuild(build)}
+                        disabled={appState.currentBuildId === build.id}
+                      >
                         {#snippet leading()}
                           <Icon size="16">
                             <use href="#duplicate" />
