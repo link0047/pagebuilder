@@ -161,18 +161,18 @@ export const updateBuild = command(updateBuildSchema, async ({ id, name, buildTy
     if (existing[0].created_by !== user.id) {
       error(403, "Unauthorized");
     }
-    
+
     const result = await sql`
       UPDATE builds
       SET 
-        name = ${name},
-        build_type = ${buildType},
-        content = ${content},
-        thumbnail_url = ${thumbnailUrl},
+        name = COALESCE(${name}, name),
+        build_type = COALESCE(${buildType}, build_type),
+        content = COALESCE(${content}, content),
+        thumbnail_url = COALESCE(${thumbnailUrl}, thumbnail_url),
         updated_by = ${user.id},
         updated_at = NOW()
       WHERE id = ${id}
-      RETURNING id;
+      RETURNING *;
     `;
     
     return result[0];
@@ -200,14 +200,14 @@ export const updateTemplate = command(updateTemplateSchema, async ({ id, name, b
     const result = await sql`
       UPDATE templates
       SET 
-        name = ${name},
-        build_type = ${buildType},
-        content = ${content},
-        thumbnail_url = ${thumbnailUrl},
+        name = COALESCE(${name}, name),
+        build_type = COALESCE(${buildType}, build_type),
+        content = COALESCE(${content}, content),
+        thumbnail_url = COALESCE(${thumbnailUrl}, thumbnail_url),
         updated_by = ${user.id},
         updated_at = NOW()
       WHERE id = ${id}
-      RETURNING id;
+      RETURNING *;
     `;
     
     return result[0];
@@ -282,6 +282,8 @@ export const duplicateBuild = command(duplicateBuildSchema, async ({ id }) => {
     }
     
     const build = original[0];
+
+    console.log({ build });
     
     const result = await sql`
       INSERT INTO builds (

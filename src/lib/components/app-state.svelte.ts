@@ -40,6 +40,7 @@ class AppState {
 		children: []
 	});
   #previewMode = $state<PreviewMode>("desktop");
+  #currentBuildId = $state<string | null>(null);
 
   constructor() {}
   
@@ -76,7 +77,15 @@ class AppState {
     }
   }
 
-  loadBuild(buildData: RootNode): void {
+  get currentBuildId(): string | null {
+    return this.#currentBuildId;
+  }
+
+  set currentBuildId(id: string | null) {
+    this.#currentBuildId = id;
+  }
+
+  loadBuild(buildData: RootNode, buildId?: string): void {
     // Validate that we have a proper root node structure
     if (!buildData || buildData.type !== "root") {
       console.error("Invalid build data");
@@ -85,11 +94,24 @@ class AppState {
 
     // Replace the entire page tree with the loaded build
     this.#pageTree = buildData;
+    this.#currentBuildId = buildId || null; 
     
     // Reset selection state when loading a new build
     this.selectedComponentPath = null;
     this.selectedComponent = null;
     this.isPropertiesPanelOpen = false;
+  }
+
+  clearBuild(): void {
+    this.#pageTree = {
+      name: "root",
+      type: "root",
+      children: []
+    };
+    this.selectedComponentPath = null;
+    this.selectedComponent = null;
+    this.isPropertiesPanelOpen = false;
+    this.#currentBuildId = null; // Clear the build ID
   }
 
   addComponent(

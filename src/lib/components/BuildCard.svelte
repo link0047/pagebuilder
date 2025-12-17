@@ -22,8 +22,6 @@
     build,
     actions
   }: Props = $props();
-
-	$inspect(build);
 </script>
 
 <Card>

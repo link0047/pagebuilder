@@ -94,15 +94,17 @@ class MenuState {
 		}
 	}
 
-	#handleClickOutside = ({ target }: MouseEvent) => {
-	if (
-		this.isOpen &&
-		!this.#menuElement?.contains(target as Node) &&
-		!this.#anchor?.contains(target as Node)
-	) {
-		this.close();
+	#handleClickOutside = (event: MouseEvent) => {
+		if (!this.isOpen) return;
+		
+		const path = event.composedPath();
+		const clickedMenu = this.#menuElement && path.includes(this.#menuElement);
+		const clickedAnchor = this.#anchor && path.includes(this.#anchor);
+		
+		if (!clickedMenu && !clickedAnchor) {
+			this.close();
+		}
 	}
-}
 
 	toggle = () => {
 		this.isOpen = !this.isOpen;

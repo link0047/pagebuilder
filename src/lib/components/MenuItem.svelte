@@ -3,7 +3,7 @@
 	import { getMenuState } from "./menu-state.svelte";
 
 	type MenuKind = "menuitem" | "menuitemcheckbox" | "menuitemradio";
-	type Size = "xs" | "small" | "sm" | "medium" | "md" | "large" | "lg" | "xl";
+	type Size = "xs" | "sm" | "md" | "lg" | "xl";
 	type ElementType = "button" | "a";
 	type ButtonType = "button" | "submit" | "reset"; 
 
@@ -39,6 +39,12 @@
 	const menuState = getMenuState();
 
 	function handleClick(event: MouseEvent) {
+		if (disabled) {
+			event.preventDefault();
+			event.stopPropagation();
+			return;
+		}
+
 		if (kind === "menuitemcheckbox") {
       checked = !checked;
     } else if (kind === "menuitemradio") {
@@ -63,7 +69,8 @@
 	class:uikit-menuitem--size-sm={size === "sm"}
 	class:uikit-menuitem--size-lg={size === "lg"}
 	class:uikit-menuitem--size-xl={size === "xl"}
-	tabindex="-1"
+	tabindex={disabled ? undefined : -1}
+	disabled={as === "button" ? disabled : undefined}
 	onclick={handleClick}
 	{...restProps}
 >
@@ -95,7 +102,11 @@
 
 	@layer {
 		:root {
-			
+			--uikit-menuitem-disabled-opacity: 0.5;
+			--uikit-menuitem-disabled-cursor: not-allowed;
+			--uikit-menuitem-height: 2rem;
+			--uikit-menuitem-padding-inline: 1rem;
+			--uikit-menuitem-font-size: 1rem;
 		}
 	}
 	
@@ -105,11 +116,12 @@
 			white-space: normal;
 			word-break: break-word;
 			display: flex;
-			height: 2rem;
+			font-size: var(--uikit-menuitem-font-size);
+			height: var(--uikit-menuitem-height);
 			align-items: center;
 			appearance: none;
 			border: none;
-			padding-inline: 1rem;
+			padding-inline: var(--uikit-menuitem-padding-inline);
 			background-color: #fff;
 			user-select: none;
 			cursor: pointer;
@@ -121,9 +133,38 @@
 		}
 	}
 
-	@layer sizes {}
+	@layer sizes {
+		.uikit-menuitem--size-xs {
+			--uikit-menuitem-height: 1.5rem;
+			--uikit-menuitem-padding-inline: .5rem;
+			--uikit-menuitem-font-size: .75rem;
+		}
 
-	@layer states {}
+		.uikit-menuitem--size-sm {
+			--uikit-menuitem-height: 1.75rem;
+			--uikit-menuitem-padding-inline: .75rem;
+			--uikit-menuitem-font-size: .875rem;
+		}
+
+		.uikit-menuitem--size-lg {
+			--uikit-menuitem-height: 2.5rem;
+			--uikit-menuitem-padding-inline: 1.25rem;
+			--uikit-menuitem-font-size: 1.125rem;
+		}
+
+		.uikit-menuitem--size-xl {
+			--uikit-menuitem-height: 3rem;
+			--uikit-menuitem-padding-inline: 1.5rem;
+			--uikit-menuitem-font-size: 1.25rem;
+		}
+	}
+
+	@layer states {
+		.uikit-menuitem:disabled {
+			opacity: var(--uikit-menuitem-disabled-opacity);
+			cursor: var(--uikit-menuitem-disabled-cursor);
+		}
+	}
 
 	@layer accessibility {}
 </style>

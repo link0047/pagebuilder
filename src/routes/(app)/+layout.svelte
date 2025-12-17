@@ -17,7 +17,7 @@
   import { attempt } from "$lib/utils/attempt";
   import { getInitials } from "$lib/utils/getInitials";
   import { signout, getUser } from "$lib/api/auth.remote";
-  import { createBuild } from "$lib/api/builds.remote";
+  import { createBuild, updateBuild } from "$lib/api/builds.remote";
 
   let {
     children
@@ -107,12 +107,35 @@
   async function saveBuild() {
     const content = $state.snapshot(appState.pageTree);
     const name = generateHomepageTimestamp();
-    await createBuild({
-      name,
-      buildType: "homepage",
-      content,
-      thumbnailUrl: "https://placehold.co/400x400"
-    });
+
+    try {
+      console.log({ currentBuildId: appState.currentBuildId });
+
+      if (appState.currentBuildId) {
+        await updateBuild({
+          id: appState.currentBuildId,
+          content,
+          name
+        });
+
+        // update this later to provide user feedback (inline alert most likely)
+        console.log("build updated successfully");
+      } else {
+        const newBuild = await createBuild({
+          name,
+          buildType: "homepage",
+          content,
+          thumbnailUrl: "https://placehold.co/400x400"
+        });
+
+        // update this later to provide user feedback (inline alert most likely)
+        console.log("Build created successfully");
+        console.log({ newBuild });
+      }
+    } catch (error) {
+      // update this later to provide user feedback (inline alert most likely)
+      console.error("Failed to save build", error);
+    }
   }
 
   const activeRoute = $derived.by(() => {
@@ -121,6 +144,12 @@
     if (path.startsWith("/editor/templates")) return "templates";
     if (path.startsWith("/editor")) return "editor";
     return "editor";
+  });
+
+  $effect(() => {
+    if (activeRoute !== "editor") {
+      appState.closePropertiesPanel();
+    }
   });
 
   const { name } = await getUser();
@@ -234,6 +263,9 @@
   </symbol>
   <symbol id="plus-circle-outline">
     <path d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z" />
+  </symbol>
+  <symbol id="pencil-outline">
+    <path d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z" />
   </symbol>
 </Iconset>
 

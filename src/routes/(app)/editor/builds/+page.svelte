@@ -16,6 +16,7 @@
   import RecentCard from "$lib/components/RecentCard.svelte";
   import { getAppState } from "$lib/components/app-state.svelte";
   import { goto } from "$app/navigation";
+  import Badge from "$lib/components/Badge.svelte";
 
   const BUILDS_TABS = {
     ALL: "all",
@@ -36,36 +37,30 @@
 
   let isDialogOpen = $state(false);
   let newBuildButtonRef = $state<HTMLButtonElement>();
-  let buildMoreButtonRef = $state<HTMLButtonElement>();
+  let buildMoreButtonRefs = $state<Record<string, HTMLButtonElement>>({});
   let activeBuildsTab = $state<BuildsTab>(BUILDS_TABS.ALL);
 
   const appState = getAppState();
   const templates = ["Blank", "Spencer's Homepage", "Spirit Homepage"];
 
-  let buildsPromise = $state(getBuilds());
+  const buildsQuery = getBuilds();
   let recentBuilds = $derived.by(() => {
-    return buildsPromise.then(builds => builds.slice(0, 5));
+    return buildsQuery.current?.slice(0, 5) ?? [];
   });
 
   function editBuild(build: BuildData) {
     goto("/editor");
-    appState.loadBuild(build?.content);
+    appState.loadBuild(build?.content, build.id);
   }
 
   async function handleDeletingBuild(build: BuildData) {
     const { id } = build;
     
-    // Optimistically update UI
-    buildsPromise = buildsPromise.then(builds => 
-      builds.filter(b => b.id !== id)
-    );
-    
     try {
       await deleteBuild({ id });
+      await buildsQuery.refresh();
     } catch (error) {
-      // On error, refetch to restore correct state
-      buildsPromise = getBuilds();
-      console.error('Failed to delete build:', error);
+      console.error("Failed to delete build:", error);
     }
   }
 
@@ -73,16 +68,26 @@
     const { id } = build;
     
     try {
-      const duplicated = await duplicateBuild({ id });
-      
-      // Add the duplicated build to the list
-      buildsPromise = buildsPromise.then(builds => 
-        [duplicated, ...builds]
-      );
+      await duplicateBuild({ id });
+      await buildsQuery.refresh();
     } catch (error) {
-      console.error('Failed to duplicate build:', error);
+      console.error("Failed to duplicate build:", error);
     }
   }
+
+  // Clean up refs when builds change
+  $effect(() => {
+    const currentBuilds = buildsQuery.current ?? [];
+    const currentBuildIds = new Set(currentBuilds.map(b => b.id));
+    
+    // Remove refs for builds that no longer exist
+    Object.keys(buildMoreButtonRefs).forEach(id => {
+      if (!currentBuildIds.has(id)) {
+        console.log("deleting", id);
+        delete buildMoreButtonRefs[id];
+      }
+    });
+  });
 </script>
 
 <AppSidebarHeader title="Builds">
@@ -152,7 +157,7 @@
         <Tab value={BUILDS_TABS.MY_BUILDS}>My Builds</Tab>
       </TabList>
       <TabPanel>
-        {#await buildsPromise}
+        {#await buildsQuery}
           {"loading"}
         {:then builds} 
           {#if builds.length === 0}
@@ -162,18 +167,32 @@
               {#each builds as build (build.id)}
                 <BuildCard {build}>
                   {#snippet actions()}
-                    <Button color="secondary" variant="outlined" size="sm" onclick={() => editBuild(build)}>
-                      <Icon size="16">
-                        <use href={`#edit`} />
-                      </Icon>
-                      Edit
-                    </Button>
-                    <Button variant="ghost" size="sm" shape="circle" bind:ref={buildMoreButtonRef}>
+                    {#if appState.currentBuildId === build.id}
+                      <Badge>
+                        <Icon size="16">
+                          <use href="#pencil-outline" />
+                        </Icon>
+                        Editing
+                      </Badge>
+                    {:else}
+                      <Button color="secondary" variant="outlined" size="sm" onclick={() => editBuild(build)}>
+                        <Icon size="16">
+                          <use href={`#edit`} />
+                        </Icon>
+                        Edit
+                      </Button>
+                    {/if}
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      shape="circle" 
+                      bind:ref={buildMoreButtonRefs[build.id]}
+                    >
                       <Icon size="16">
                         <use href="#dots-vertical" />
                       </Icon>
                     </Button>
-                    <Menu anchor={buildMoreButtonRef}>
+                    <Menu anchor={buildMoreButtonRefs[build.id]}>
                       <MenuItem onclick={() => handleDuplicatingBuild(build)}>
                         {#snippet leading()}
                           <Icon size="16">
@@ -182,7 +201,10 @@
                         {/snippet}
                         Duplicate
                       </MenuItem>
-                      <MenuItem onclick={() => handleDeletingBuild(build)}>
+                      <MenuItem 
+                        onclick={() => handleDeletingBuild(build)}
+                        disabled={appState.currentBuildId === build.id}
+                      >
                         {#snippet leading()}
                           <Icon size="16">
                             <use href="#delete" />
@@ -196,6 +218,8 @@
               {/each}
             </div>
           {/if}
+        {:catch error}
+          <EmptyState title="Error" description="Failed to load builds" />
         {/await}
       </TabPanel>
       <TabPanel>
