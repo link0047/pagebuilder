@@ -33,3 +33,15 @@ export const updateTemplateSchema = v.object({
 	content: v.optional(v.record(v.string(), v.unknown())),
 	thumbnailUrl: v.optional(v.pipe(v.string(), v.url()))
 })
+
+export const deleteBuildSchema = v.object({
+  id: v.pipe(v.string(), v.uuid())
+});
+
+export const deleteTemplateSchema = v.object({
+  id: v.pipe(v.string(), v.uuid())
+});
+
+export const duplicateBuildSchema = v.object({
+  id: v.pipe(v.string(), v.uuid())
+});

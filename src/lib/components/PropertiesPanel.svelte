@@ -194,7 +194,7 @@
 
 <div class="uikit-properties-panel" aria-hidden={!isOpen} role="dialog" aria-modal="true" aria-labelledby="panel-title">
   <header class="uikit-properties-panel__header">
-    <Button variant="ghost" shape="square" onclick={closePanel} aria-label="Close properties panel">
+    <Button size="sm" variant="ghost" shape="rounded-square" onclick={closePanel} aria-label="Close properties panel">
       <Icon>
         <path d="M15.41 16.58 10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.42Z"/>
       </Icon>
@@ -267,8 +267,10 @@
     height: 3rem;
     border-bottom: .0625rem solid #ebebeb;
     display: grid;
+    gap: .5rem;
     grid-template-columns: auto 1fr;
     align-items: center;
+    padding-inline: .5rem;
   }
 
   .uikit-properties-panel__content {

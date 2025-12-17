@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, getContext, setContext, type Snippet } from "svelte";
 	import { getTreeState, LEVEL_KEY } from "./tree-state.svelte";
-	
+
   type Props = {
     children?: Snippet;
     text?: Snippet;
@@ -20,7 +20,7 @@
 		...restProps 
 	}: Props = $props();
 
-	let ref = $state<HTMLElement>();
+	let ref = $state<HTMLElement | undefined>();
 	let contentRef: HTMLDivElement;
 	
 	const treeState = getTreeState();
@@ -52,7 +52,9 @@
 		treeState.selectItem(ref);
 	}
 
-	function handleExpandClick() {
+	function handleExpandClick(event: MouseEvent) {
+		event.stopPropagation();
+
     if (!ref) return;
 
 		if (treeState.isExpanded(ref)) {
@@ -63,24 +65,29 @@
 	}
 
 	onMount(() => {
-		treeState.registerItem(ref!, {
+		if (!ref) {
+			return;
+		}
+
+		treeState.registerItem(ref, {
 			level: currentLevel,
 			hasChildren
 		});
 
-		if (expanded) {
-			treeState.expandTreeItem(ref!);
-		}
+		if (expanded && hasChildren) {
+			treeState.expandTreeItem(ref);
+    }
 
 		return () => {
-			treeState.unregisterItem(ref!);
-		}
+			if (ref instanceof HTMLElement) {
+				treeState.unregisterItem(ref);
+			}
+		};
 	});
 </script>
 
-<svelte:element
+<li
 	bind:this={ref}
-	this={tag}
 	class="uikit-treeitem"
 	class:uikit-treeitem--focused={isFocused}
 	role="treeitem"
@@ -122,7 +129,7 @@
 			{@render children?.()}
 		</ul>
 	{/if}
-</svelte:element>
+</li>
 
 <style>
 	.uikit-treeitem {

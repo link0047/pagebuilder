@@ -20,6 +20,7 @@
 		isPopoverOpen = false;
 
     appState.addComponent({
+      id: crypto.randomUUID(),
       type: "component",
 			name: "Hero",
       data: {
@@ -42,6 +43,7 @@
     isPopoverOpen = false;
 
     appState.addComponent({
+      id: crypto.randomUUID(),
       type: "component",
 			name: "StoryBlock",
       data: {},
@@ -50,6 +52,7 @@
       },
       meta: {},
       children: [{
+        id: crypto.randomUUID(),
         type: "component",
         name: "StoryCard",
         data: {},
@@ -73,12 +76,14 @@
     isPopoverOpen = false;
 
     appState.addComponent({
+      id: crypto.randomUUID(),
       type: "component",
       name: "FeaturedCategories",
       data: {},
       props: {},
       meta: {},
       children: [{
+        id: crypto.randomUUID(),
         type: "component",
         name: "FeaturedCategory",
         data: {},
@@ -111,7 +116,7 @@
         {/snippet}
       </EmptyState>
     {:else}
-      <PageStructure bind:pageTree={appState.pageTree} />
+      <PageStructure pageTree={appState.pageTree} />
     {/if}
     <Button color="primary" variant="ghost" bind:ref={addSectionButtonRef} fullWidth>
       <Icon>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getBuilds } from "$lib/api/builds.remote";
+  import { deleteBuild, duplicateBuild, getBuilds } from "$lib/api/builds.remote";
   import AppSidebarHeader from "$lib/components/AppSidebarHeader.svelte";
   import EmptyState from "$lib/components/EmptyState.svelte";
   import Button from "$lib/components/Button.svelte";
@@ -14,6 +14,8 @@
   import MenuItem from "$lib/components/MenuItem.svelte";
   import Dialog from "$lib/components/Dialog.svelte";
   import RecentCard from "$lib/components/RecentCard.svelte";
+  import { getAppState } from "$lib/components/app-state.svelte";
+  import { goto } from "$app/navigation";
 
   const BUILDS_TABS = {
     ALL: "all",
@@ -22,18 +24,65 @@
 
   type BuildsTab = typeof BUILDS_TABS[keyof typeof BUILDS_TABS];
 
+  type BuildData = {
+    id: string;
+    name: string;
+    build_type: string;
+    updated_at: string;
+    content: any; // or RootNode if you import it
+    thumbnail_url: string | null;
+    author: string;
+  };
+
   let isDialogOpen = $state(false);
   let newBuildButtonRef = $state<HTMLButtonElement>();
   let buildMoreButtonRef = $state<HTMLButtonElement>();
   let activeBuildsTab = $state<BuildsTab>(BUILDS_TABS.ALL);
 
+  const appState = getAppState();
   const templates = ["Blank", "Spencer's Homepage", "Spirit Homepage"];
 
-  let recentBuildsPromise = $state(getBuilds());
+  let buildsPromise = $state(getBuilds());
   let recentBuilds = $derived.by(() => {
-    // This will be resolved when the dialog content renders
-    return recentBuildsPromise.then(builds => builds.slice(0, 5));
+    return buildsPromise.then(builds => builds.slice(0, 5));
   });
+
+  function editBuild(build: BuildData) {
+    goto("/editor");
+    appState.loadBuild(build?.content);
+  }
+
+  async function handleDeletingBuild(build: BuildData) {
+    const { id } = build;
+    
+    // Optimistically update UI
+    buildsPromise = buildsPromise.then(builds => 
+      builds.filter(b => b.id !== id)
+    );
+    
+    try {
+      await deleteBuild({ id });
+    } catch (error) {
+      // On error, refetch to restore correct state
+      buildsPromise = getBuilds();
+      console.error('Failed to delete build:', error);
+    }
+  }
+
+  async function handleDuplicatingBuild(build: BuildData) {
+    const { id } = build;
+    
+    try {
+      const duplicated = await duplicateBuild({ id });
+      
+      // Add the duplicated build to the list
+      buildsPromise = buildsPromise.then(builds => 
+        [duplicated, ...builds]
+      );
+    } catch (error) {
+      console.error('Failed to duplicate build:', error);
+    }
+  }
 </script>
 
 <AppSidebarHeader title="Builds">
@@ -103,17 +152,17 @@
         <Tab value={BUILDS_TABS.MY_BUILDS}>My Builds</Tab>
       </TabList>
       <TabPanel>
-        {#await getBuilds()}
+        {#await buildsPromise}
           {"loading"}
         {:then builds} 
           {#if builds.length === 0}
             <EmptyState title="No Builds Yet" description={`Click "+ New Build" above to create the first one.`} />
           {:else}
             <div class="builds-container">
-              {#each builds as build}
+              {#each builds as build (build.id)}
                 <BuildCard {build}>
                   {#snippet actions()}
-                    <Button color="secondary" variant="outlined" size="sm">
+                    <Button color="secondary" variant="outlined" size="sm" onclick={() => editBuild(build)}>
                       <Icon size="16">
                         <use href={`#edit`} />
                       </Icon>
@@ -125,7 +174,7 @@
                       </Icon>
                     </Button>
                     <Menu anchor={buildMoreButtonRef}>
-                      <MenuItem>
+                      <MenuItem onclick={() => handleDuplicatingBuild(build)}>
                         {#snippet leading()}
                           <Icon size="16">
                             <use href="#duplicate" />
@@ -133,7 +182,7 @@
                         {/snippet}
                         Duplicate
                       </MenuItem>
-                      <MenuItem>
+                      <MenuItem onclick={() => handleDeletingBuild(build)}>
                         {#snippet leading()}
                           <Icon size="16">
                             <use href="#delete" />

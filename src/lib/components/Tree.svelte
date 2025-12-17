@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Snippet } from "svelte";
+	import { type Snippet, onMount } from "svelte";
   import { setTreeState } from "./tree-state.svelte";
 	
   type Props = {
@@ -13,6 +13,8 @@
 		multiselect = false,
 		...restProps
 	}: Props = $props();
+
+	const treeState = setTreeState();
 
 	function handleKeyup(event: KeyboardEvent) {
 		event.preventDefault();
@@ -70,8 +72,6 @@
 	function handleFocus() {
 		treeState.setFocus();
 	}
-	
-	const treeState = setTreeState();
 </script>
 
 <ul 

@@ -1,7 +1,15 @@
 import { getRequestEvent, query, command } from "$app/server";
 import { error, redirect } from "@sveltejs/kit";
 import { sql } from "$lib/server/database";
-import { createBuildSchema, createTemplateSchema, updateBuildSchema, updateTemplateSchema } from "$lib/schema/builds";
+import { 
+  createBuildSchema,
+  createTemplateSchema,
+  updateBuildSchema,
+  updateTemplateSchema,
+  deleteBuildSchema,
+  deleteTemplateSchema,
+  duplicateBuildSchema
+} from "$lib/schema/builds";
 
 type BuildResult = {
   id: string;
@@ -9,6 +17,8 @@ type BuildResult = {
   build_type: string;
   author: string;
   updated_at: string;
+  content: any; // or RootNode if you import it
+  thumbnail_url: string | null;
 };
 
 function requireAuth() {
@@ -204,5 +214,98 @@ export const updateTemplate = command(updateTemplateSchema, async ({ id, name, b
   } catch(err) {
     console.error("Error updating template:", err);
     error(500, "Failed to update template");
+  }
+});
+
+export const deleteBuild = command(deleteBuildSchema, async ({ id }) => {
+  const user = requireAuth();
+  
+  try {
+    const existing = await sql`SELECT created_by FROM builds WHERE id = ${id}`;
+    
+    if (existing.length === 0) {
+      error(404, "Build not found");
+    }
+    
+    if (existing[0].created_by !== user.id) {
+      error(403, "Unauthorized");
+    }
+    
+    await sql`DELETE FROM builds WHERE id = ${id}`;
+    
+    return { success: true };
+  } catch(err) {
+    console.error("Error deleting build:", err);
+    error(500, "Failed to delete build");
+  }
+});
+
+export const deleteTemplate = command(deleteTemplateSchema, async ({ id }) => {
+  const user = requireAuth();
+  
+  try {
+    const existing = await sql`SELECT created_by FROM templates WHERE id = ${id}`;
+    
+    if (existing.length === 0) {
+      error(404, "Template not found");
+    }
+    
+    if (existing[0].created_by !== user.id) {
+      error(403, "Unauthorized");
+    }
+    
+    await sql`DELETE FROM templates WHERE id = ${id}`;
+    
+    return { success: true };
+  } catch(err) {
+    console.error("Error deleting template:", err);
+    error(500, "Failed to delete template");
+  }
+});
+
+export const duplicateBuild = command(duplicateBuildSchema, async ({ id }) => {
+  const user = requireAuth();
+  
+  try {
+    const original = await sql`
+      SELECT 
+        name,
+        build_type,
+        content,
+        thumbnail_url
+      FROM builds 
+      WHERE id = ${id}
+    `;
+    
+    if (original.length === 0) {
+      error(404, "Build not found");
+    }
+    
+    const build = original[0];
+    
+    const result = await sql`
+      INSERT INTO builds (
+        name,
+        build_type,
+        content,
+        thumbnail_url,
+        created_by,
+        updated_by
+      )
+      VALUES (
+        ${`${build.name} (Copy)`},
+        ${build.build_type},
+        ${build.content},
+        ${build.thumbnail_url},
+        ${user.id},
+        ${user.id}
+      )
+      RETURNING id, name;
+    `;
+    
+    return result[0];
+  } catch(err) {
+    console.error("Error duplicating build:", err);
+    error(500, "Failed to duplicate build");
   }
 });

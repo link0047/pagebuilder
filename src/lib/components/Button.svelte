@@ -4,7 +4,7 @@
 	type Variant = "filled" | "outlined" | "ghost" | "link";
 	type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default";
 	type Size = "xs" | "small" | "sm" | "medium" | "md" | "large" | "lg" | "xl";
-	type Shape = "default" | "square" | "pill" | "circle";
+	type Shape = "default" | "square" | "rounded-square" | "pill" | "circle";
 	
 	type Props = {
 		children?: Snippet,
@@ -36,6 +36,7 @@
 	class="uikit-button"
   class:uikit-button--full-width={fullWidth}
 	class:uikit-button--shape-square={shape === "square"}
+  class:uikit-button--shape-rounded-square={shape === "rounded-square"}
 	class:uikit-button--shape-pill={shape === "pill"}
 	class:uikit-button--shape-circle={shape === "circle"}
 	class:uikit-button--size-xs={size === "xs"}
@@ -345,7 +346,8 @@
   }
 }
 	
-@layer shapes {  
+@layer shapes {
+  .uikit-button--shape-rounded-square,  
   .uikit-button--shape-square {
     --uikit-button-border-radius: 0;
 		aspect-ratio: 1/1;
@@ -353,6 +355,10 @@
     align-items: center;
     width: var(--uikit-button-height);
     padding: 0; 
+  }
+
+  .uikit-button--shape-rounded-square {
+    --uikit-button-border-radius: .5rem;
   }
   
   .uikit-button--shape-pill {

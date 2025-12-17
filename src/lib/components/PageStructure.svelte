@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Self from "./PageStructure.svelte";
+	import PageStructure from "./PageStructure.svelte";
   import Button from "./Button.svelte";
   import Tree from "./Tree.svelte";
   import TreeItem from "./TreeItem.svelte";
@@ -13,6 +13,7 @@
   };
 
   type ComponentNode = {
+    id?: string;
     type: "component";
     name: string;
     meta: ComponentMeta;
@@ -22,6 +23,7 @@
   };
 
   type RootNode = {
+    id?: string;
     name: string;
     type: "root";
     children: PageTreeNode[];
@@ -39,7 +41,7 @@
   const componentsWithChildren = new Set(["StoryBlock", "CollectionBlock", "FeaturedCategories"]);
 
 	let {
-		pageTree = $bindable(),
+		pageTree,
     path = []
 	}: Props = $props();
 
@@ -63,6 +65,7 @@
     if (appState && canHaveChildren) {
       // Default card component to add
       const defaultCard = {
+        id: crypto.randomUUID(),
         type: "component" as const,
         name: "StoryCard",
         props: {
@@ -92,6 +95,7 @@
   function addFeaturedCategory() {
     if (appState && canHaveChildren) {
       const defaultCategory = {
+        id: crypto.randomUUID(),
         type: "component" as const,
         name: "FeaturedCategory",
         props: {
@@ -111,22 +115,27 @@
 </script>
 
 {#if pageTree?.type === "root" && pageTree.children.length > 0}
+{#key pageTree.children.length}
 	<Tree>
-    {#each pageTree.children as child, index}
-      <Self pageTree={child} path={[...path, index]}/>
+    {#each pageTree.children as child, index (child.id)}
+      <PageStructure pageTree={child} path={[...path, index]} />
     {/each}
   </Tree>
+  {/key}
 {/if}
 
 {#if pageTree?.type === "component" && isKnownComponent}
-  <TreeItem hasChildren={canHaveChildren && !!pageTree.children && pageTree.children.length > 0} expanded={canHaveChildren && !!pageTree.children && pageTree.children.length > 0}>
+  <TreeItem 
+    hasChildren={canHaveChildren && !!pageTree.children && pageTree.children.length > 0}
+    expanded={true}
+  >
     {#snippet text()}
       {#if pageTree.meta}
       <span class="uikit-page-structure-meta">
         <button class="uikit-page-structure-meta__edit-properties" type="button" onclick={editProperties}>
           <span>{pageTree.meta.label}</span>
         </button>
-        <Button onclick={deleteComponent} variant="ghost" size="sm" shape="square">
+        <Button onclick={deleteComponent} variant="ghost" size="sm" shape="rounded-square">
           <Icon size="16">
             <use href="#delete" />
           </Icon>
@@ -136,23 +145,41 @@
     {/snippet}
 
     {#if canHaveChildren && pageTree.children}
-      {#each pageTree.children as child, index}
-        <Self pageTree={child} path={[...path, index]} />
+      {#each pageTree.children as child, index (child.id)}
+        <PageStructure pageTree={child} path={[...path, index]} />
       {/each}
     {/if}
-  </TreeItem>
 
-  {#if canHaveChildren}
-    {#if pageTree.name === "StoryBlock"}
-      <Button onclick={() => addCard()}>
-        Add Story Card
-      </Button>
-    {:else if pageTree.name === "FeaturedCategories"}
-      <Button size="sm" onclick={() => addFeaturedCategory()}>
-        Add Featured Category
-      </Button>
+    {#if canHaveChildren}
+      {#if pageTree.name === "StoryBlock"}
+        <TreeItem>
+          {#snippet text()}
+            <div class="uikit-page-structure-add-action">
+              <button class="uikit-page-structure-add-action__button" type="button" onclick={() => addCard()}>
+                <Icon>
+                  <use href="#plus-circle-outline" />
+                </Icon>
+                Add Story Card
+              </button>
+            </div>
+          {/snippet}
+        </TreeItem>
+      {:else if pageTree.name === "FeaturedCategories"}
+        <TreeItem>
+          {#snippet text()}
+            <div class="uikit-page-structure-add-action">
+              <button class="uikit-page-structure-add-action__button" type="button" onclick={() => addFeaturedCategory()}>
+                <Icon>
+                  <use href="#plus-circle-outline" />
+                </Icon>
+                Add Featured Category
+              </button>
+            </div>
+          {/snippet}
+        </TreeItem>
+      {/if}
     {/if}
-  {/if}
+  </TreeItem>
 {/if}
 
 <style>
@@ -166,6 +193,7 @@
     padding-inline-end: .5rem;
   }
 
+  .uikit-page-structure-add-action__button,
   .uikit-page-structure-meta__edit-properties {
     flex-grow: 1;
     background-color: transparent;
@@ -174,5 +202,16 @@
     padding: 0;
     margin: 0;
     cursor: pointer;
+  }
+
+  .uikit-page-structure-add-action__button {
+    display: inline-flex;
+    align-items: center;
+    gap: .5ch;
+    letter-spacing: .04em;
+    font-weight: 500;
+    height: 2.5rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    color: #2a508f;
   }
 </style>
