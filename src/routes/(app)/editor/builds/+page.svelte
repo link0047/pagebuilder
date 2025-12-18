@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { deleteBuild, duplicateBuild, getBuilds } from "$lib/api/builds.remote";
+  import { deleteBuild, duplicateBuild, getBuilds, getUserBuilds, type BuildResult } from "$lib/api/builds.remote";
   import AppSidebarHeader from "$lib/components/AppSidebarHeader.svelte";
   import EmptyState from "$lib/components/EmptyState.svelte";
   import Button from "$lib/components/Button.svelte";
@@ -17,6 +17,7 @@
   import { getAppState } from "$lib/components/app-state.svelte";
   import { goto } from "$app/navigation";
   import Badge from "$lib/components/Badge.svelte";
+  import { type RemoteQuery } from "@sveltejs/kit";
 
   const BUILDS_TABS = {
     ALL: "all",
@@ -37,15 +38,21 @@
 
   let isDialogOpen = $state(false);
   let newBuildButtonRef = $state<HTMLButtonElement>();
-  let buildMoreButtonRefs = $state<Record<string, HTMLButtonElement>>({});
+  let allBuildMoreButtonRefs = $state<Record<string, HTMLButtonElement>>({});
+  let myBuildMoreButtonRefs = $state<Record<string, HTMLButtonElement>>({});
   let activeBuildsTab = $state<BuildsTab>(BUILDS_TABS.ALL);
 
   const appState = getAppState();
   const templates = ["Blank", "Spencer's Homepage", "Spirit Homepage"];
-
   const buildsQuery = getBuilds();
+  const userBuildsQuery = getUserBuilds();
+  
   let recentBuilds = $derived.by(() => {
     return buildsQuery.current?.slice(0, 5) ?? [];
+  });
+
+  let currentBuildsQuery = $derived.by(() => {
+    return activeBuildsTab === BUILDS_TABS.MY_BUILDS ? userBuildsQuery : buildsQuery;
   });
 
   function editBuild(build: BuildData) {
@@ -58,7 +65,9 @@
     
     try {
       await deleteBuild({ id });
+      // Refresh both queries to keep them in sync
       await buildsQuery.refresh();
+      await userBuildsQuery.refresh();
     } catch (error) {
       console.error("Failed to delete build:", error);
     }
@@ -69,7 +78,9 @@
     
     try {
       await duplicateBuild({ id });
+      // Refresh both queries to keep them in sync
       await buildsQuery.refresh();
+      await userBuildsQuery.refresh();
     } catch (error) {
       console.error("Failed to duplicate build:", error);
     }
@@ -77,18 +88,101 @@
 
   // Clean up refs when builds change
   $effect(() => {
-    const currentBuilds = buildsQuery.current ?? [];
-    const currentBuildIds = new Set(currentBuilds.map(b => b.id));
+    const allBuilds = buildsQuery.current ?? [];
+    const allBuildIds = new Set(allBuilds.map(b => b.id));
     
-    // Remove refs for builds that no longer exist
-    Object.keys(buildMoreButtonRefs).forEach(id => {
-      if (!currentBuildIds.has(id)) {
-        console.log("deleting", id);
-        delete buildMoreButtonRefs[id];
+    // Remove refs for builds that no longer exist in all builds
+    Object.keys(allBuildMoreButtonRefs).forEach(id => {
+      if (!allBuildIds.has(id)) {
+        delete allBuildMoreButtonRefs[id];
+      }
+    });
+  });
+
+  // Clean up refs when user builds change
+  $effect(() => {
+    const myBuilds = userBuildsQuery.current ?? [];
+    const myBuildIds = new Set(myBuilds.map(b => b.id));
+    
+    // Remove refs for builds that no longer exist in my builds
+    Object.keys(myBuildMoreButtonRefs).forEach(id => {
+      if (!myBuildIds.has(id)) {
+        delete myBuildMoreButtonRefs[id];
       }
     });
   });
 </script>
+
+{#snippet BuildsList(query: RemoteQuery<BuildResult[]>, emptyDescription: string, moreButtonRefs: Record<string, HTMLButtonElement>)}
+  {#if query.loading}
+    {"loading"}
+  {:else if query.current}
+    {@const builds = query.current}
+    {#if builds.length === 0}
+      <EmptyState title="No Builds Yet" description={emptyDescription} />
+    {:else}
+      <div class="builds-container">
+        {#each builds as build (build.id)}
+          <BuildCard {build}>
+            {#snippet actions()}
+              {#if appState.currentBuildId === build.id}
+                <Badge color="info">
+                  <Icon size="16">
+                    <use href="#pencil-outline" />
+                  </Icon>
+                  Editing
+                </Badge>
+              {:else}
+                <Button color="secondary" variant="outlined" size="sm" onclick={() => editBuild(build)}>
+                  <Icon size="16">
+                    <use href="#edit" />
+                  </Icon>
+                  Edit
+                </Button>
+              {/if}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                shape="circle" 
+                bind:ref={moreButtonRefs[build.id]}
+              >
+                <Icon size="16">
+                  <use href="#dots-vertical" />
+                </Icon>
+              </Button>
+              <Menu anchor={moreButtonRefs[build.id]}>
+                <MenuItem
+                  onclick={() => handleDuplicatingBuild(build)}
+                  disabled={appState.currentBuildId === build.id}
+                >
+                  {#snippet leading()}
+                    <Icon size="16">
+                      <use href="#duplicate" />
+                    </Icon>
+                  {/snippet}
+                  Duplicate
+                </MenuItem>
+                <MenuItem 
+                  onclick={() => handleDeletingBuild(build)}
+                  disabled={appState.currentBuildId === build.id}
+                >
+                  {#snippet leading()}
+                    <Icon size="16">
+                      <use href="#delete" />
+                    </Icon>
+                  {/snippet}
+                  Delete
+                </MenuItem>
+              </Menu>
+            {/snippet}
+          </BuildCard>
+        {/each}
+      </div>
+    {/if}
+  {:else if query.error}
+    <EmptyState title="Error" description="Failed to load builds" />
+  {/if}
+{/snippet}
 
 <AppSidebarHeader title="Builds">
   {#snippet action()}
@@ -157,76 +251,10 @@
         <Tab value={BUILDS_TABS.MY_BUILDS}>My Builds</Tab>
       </TabList>
       <TabPanel>
-        {#await buildsQuery}
-          {"loading"}
-        {:then builds} 
-          {#if builds.length === 0}
-            <EmptyState title="No Builds Yet" description={`Click "+ New Build" above to create the first one.`} />
-          {:else}
-            <div class="builds-container">
-              {#each builds as build (build.id)}
-                <BuildCard {build}>
-                  {#snippet actions()}
-                    {#if appState.currentBuildId === build.id}
-                      <Badge color="info">
-                        <Icon size="16">
-                          <use href="#pencil-outline" />
-                        </Icon>
-                        Editing
-                      </Badge>
-                    {:else}
-                      <Button color="secondary" variant="outlined" size="sm" onclick={() => editBuild(build)}>
-                        <Icon size="16">
-                          <use href={`#edit`} />
-                        </Icon>
-                        Edit
-                      </Button>
-                    {/if}
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      shape="circle" 
-                      bind:ref={buildMoreButtonRefs[build.id]}
-                    >
-                      <Icon size="16">
-                        <use href="#dots-vertical" />
-                      </Icon>
-                    </Button>
-                    <Menu anchor={buildMoreButtonRefs[build.id]}>
-                      <MenuItem
-                        onclick={() => handleDuplicatingBuild(build)}
-                        disabled={appState.currentBuildId === build.id}
-                      >
-                        {#snippet leading()}
-                          <Icon size="16">
-                            <use href="#duplicate" />
-                          </Icon>
-                        {/snippet}
-                        Duplicate
-                      </MenuItem>
-                      <MenuItem 
-                        onclick={() => handleDeletingBuild(build)}
-                        disabled={appState.currentBuildId === build.id}
-                      >
-                        {#snippet leading()}
-                          <Icon size="16">
-                            <use href="#delete" />
-                          </Icon>
-                        {/snippet}
-                        Delete
-                      </MenuItem>
-                    </Menu>
-                  {/snippet}
-                </BuildCard>
-              {/each}
-            </div>
-          {/if}
-        {:catch error}
-          <EmptyState title="Error" description="Failed to load builds" />
-        {/await}
+        {@render BuildsList(buildsQuery, `Click "+ New" above to create the first one.`, allBuildMoreButtonRefs)}
       </TabPanel>
       <TabPanel>
-        <EmptyState title="No Builds Yet" description={`Click "+ New Build" above or go to the Editor tab to create your first page`} />
+        {@render BuildsList(userBuildsQuery, `Click "+ New" above to create your first build`, myBuildMoreButtonRefs)}
       </TabPanel>
     </Tabs>
   </div>

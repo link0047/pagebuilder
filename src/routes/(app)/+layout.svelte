@@ -193,6 +193,24 @@
   </Button>
 {/snippet}
 
+{#snippet navigationRailEnd()}
+  <Avatar bind:ref={avatarRef} text={userInitials} shape="circle" tag="button" />
+  {#if avatarRef}
+    <Menu anchor={avatarRef} placement="right-end">
+      <form {...signout}>
+        <MenuItem type="submit">
+          {#snippet leading()}
+            <Icon>
+              <use href="#logout" />
+            </Icon>
+          {/snippet}
+          Signout
+        </MenuItem>
+      </form>
+    </Menu>
+  {/if}
+{/snippet}
+
 <Iconset>
   <symbol id="desktop">
     <path d="M20,17.9H4c-1.7,0-3-1.3-3-3V4.9c0-1.7,1.3-3,3-3h16c1.7,0,3,1.3,3,3v10c0,1.7-1.3,3-3,3ZM4,3.9c-.6,0-1,.4-1,1v10c0,.6.4,1,1,1h16c.6,0,1-.4,1-1V4.9c0-.6-.4-1-1-1H4ZM17,20.9c0-.6-.4-1-1-1h-8c-.6,0-1,.4-1,1s.4,1,1,1h8c.6,0,1-.4,1-1ZM11,17.9v3.2c0,.4.4.8,1,.8s1-.4,1-.8v-3.2"/>
@@ -297,24 +315,11 @@
 			Templates
 		</NavigationRailItem>
     {#snippet end()}
-      <Avatar bind:ref={avatarRef} text={userInitials} shape="circle" tag="button" />
+      {@render navigationRailEnd()}
     {/snippet}
   </NavigationRail>
   {@render children?.()}
 </div>
-
-<Menu anchor={avatarRef} placement="right-end">
-  <form {...signout}>
-    <MenuItem type="submit">
-      {#snippet leading()}
-        <Icon>
-          <use href="#logout" />
-        </Icon>
-      {/snippet}
-      Signout
-    </MenuItem>
-  </form>
-</Menu>
 
 <style>
   .app {

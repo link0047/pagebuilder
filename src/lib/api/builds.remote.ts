@@ -11,7 +11,7 @@ import {
   duplicateBuildSchema
 } from "$lib/schema/builds";
 
-type BuildResult = {
+export type BuildResult = {
   id: string;
   name: string;
   build_type: string;

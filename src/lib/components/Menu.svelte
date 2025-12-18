@@ -160,7 +160,7 @@
 	  anchorRect = anchor?.getBoundingClientRect();
 		menuWidth = ref?.offsetWidth;
 		menuHeight = ref?.offsetHeight;
-	  
+
 	  // Only recalculate placement when requested
 	  if (recalculatePlacement) {
 	    lockedPlacement = getAdjustedPlacement(placement);
@@ -183,6 +183,7 @@
 	onMount(() => {
 		menuState.menu = ref;
 		menuState.anchor = anchor;
+
 		updatePosition(false);
 
 		return () => {

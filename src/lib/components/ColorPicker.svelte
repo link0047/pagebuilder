@@ -1,44 +1,133 @@
 <script lang="ts">
-	import { createColorPickerState } from "./color-picker-state.svelte";
-
-	type Props = {
-		value?: string,
-		label?: string,
+	import { createColorPickerState, ColorPickerState } from "./color-picker-state.svelte";
+	
+	export type ColorPickerProps = {
+		value?: string;
+		onchange?: (value: string) => void;
 		[key: string]: unknown;
 	}
+
+	type ValidationState = 
+		| "pristine"           // Never touched
+		| "focused"            // Focused but no changes yet
+		| "editing"            // Actively typing
+		| "validating";        // Blurred after changes, now validating on input
+
+	const MAX_HEX_LENGTH = 7;
+	const DEFAULT_HEX_VALUE = "#000000";
 	
 	let {
-		label = "Color",
-		value = $bindable("#000"),
+		value = $bindable(DEFAULT_HEX_VALUE),
+		onchange,
 		...restProps
-	}: Props = $props();
-	
-	let colorState = createColorPickerState(value);
+	}: ColorPickerProps = $props();
 
-	$effect(() => {
-		value = colorState.value;
-	});
+	let colorState = createColorPickerState(
+		() => value, 
+		(newValue) => value = newValue
+	);
 	
-	const uid = colorState.id;
-	const colorInputId = `${uid}-color`;
-	const textInputId = `${uid}-text`;
+	let isValid = $state(true);
+	let validationState = $state<ValidationState>("pristine");
+	
+	function handleColorInput(event: Event & { currentTarget: HTMLInputElement }) {
+		const newValue = event.currentTarget.value;
+		colorState.value = newValue;
+		isValid = true;
+		onchange?.(newValue);
+	}
+
+	function handleTextInput(event: Event & { currentTarget: HTMLInputElement }) {
+		const inputValue = event.currentTarget.value;
+
+		if (validationState === "focused") {
+			validationState = "editing";
+		}
+
+		switch (validationState) {
+			case "editing":
+				colorState.value = inputValue;
+
+				if (inputValue && colorState.isValidHex(inputValue)) {
+					onchange?.(colorState.value);
+				}
+				break;
+
+			case "validating":
+				if (inputValue === "") {
+					isValid = true;
+					colorState.value = inputValue;
+				} else {
+					isValid = colorState.isValidHex(inputValue);
+					colorState.value = inputValue;
+
+					if (isValid) {
+						onchange?.(colorState.value);
+					}
+				}
+				break;
+		}
+	}
+
+	function handleTextFocus() {
+		if (validationState === "pristine") {
+			validationState = "focused";
+		}
+	}
+
+	function handleTextBlur() {
+		if (validationState === "editing") {
+			validationState = "validating";
+
+			const inputValue = colorState.value;
+
+			if (inputValue === "") {
+				isValid = true;
+			} else {
+				isValid = colorState.isValidHex(inputValue);
+			}
+		}
+	}
 </script>
 
 <fieldset class="uikit-color-picker">
-	<legend class="uikit-color-picker__legend">{label}</legend>
-	<input 
-		id={colorInputId}
+	<legend class="uikit-color-picker__legend">Color</legend>
+	<div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
+		Selected color: {colorState.value}
+	</div>
+	<label for={colorState.colorId} class="visually-hidden">Color swatch</label>
+	<input
+		data-testid="color-picker-swatch"
+		id={colorState.colorId}
 		class="uikit-color-picker__input-color"
 		type="color"
-		bind:value={colorState.value}
+		value={colorState.normalizedHex}
+		oninput={handleColorInput}
 	/>
+	<label for={colorState.textId} class="visually-hidden">Hex value</label>
 	<input
-		id={textInputId}
+		data-testid="color-picker-text-input"
+		id={colorState.textId}
 		class="uikit-color-picker__input-text"
 		type="text"
-		bind:value={colorState.value} 
-		{...restProps} 
+		value={colorState.value}
+		onfocus={handleTextFocus}
+		oninput={handleTextInput}
+		onblur={handleTextBlur}
+		maxlength={MAX_HEX_LENGTH}
+		pattern={ColorPickerState.HEX_PATTERN.source}
+		aria-invalid={!isValid}
+		aria-describedby={isValid ? undefined : colorState.errorId}
+		spellcheck="false"
+		autocomplete="off"
+		placeholder={DEFAULT_HEX_VALUE}
+		{...restProps}
 	/>
+	{#if !isValid && validationState === "validating"}
+		<span id={colorState.errorId} class="uikit-color-picker__message-error" role="alert">
+			Please enter a valid hex color (e.g., #000 or #000000)
+		</span>
+	{/if}
 </fieldset>
 
 <style>
@@ -76,6 +165,8 @@
 			
 			--uikit-color-picker-focus-outline-color: #2451b2;
 			--uikit-color-picker-hover-outline-color: #000;
+
+			--uikit-color-picker-error-color: #d32f2f;
 		}
 	}
 	
@@ -89,7 +180,8 @@
 			display: grid;
 			grid-template-areas: 
 				"legend legend"
-				"color text";
+				"color text"
+				"error error";
 			grid-template-columns: auto 1fr;
 			row-gap: var(--uikit-color-picker-gap);
 			column-gap: var(--uikit-color-picker-gap);
@@ -157,6 +249,13 @@
 			padding-inline: var(--uikit-color-picker-input-text-padding-inline);
 			color: var(--uikit-color-picker-input-text-color);
 		}
+
+		.uikit-color-picker__message-error {
+			grid-area: error;
+			font-size: 0.875rem;
+			color: var(--uikit-color-picker-error-color);
+			line-height: 1;
+		}
 	}
 
 	@layer states {
@@ -181,5 +280,17 @@
 				border-width: 2px; 
 			}
 		}
+	}
+
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border-width: 0;
 	}
 </style>
