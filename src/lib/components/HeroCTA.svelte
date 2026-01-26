@@ -1,4 +1,20 @@
 <script lang="ts">
+	import { type Snippet } from "svelte";
+
+	type Variant = "solid" | "outlined" | "ghost" | "link";
+	type Size = "small" | "sm" | "medium" | "large" | "lg";
+	type Color = "default" | "primary" | "secondary";
+
+	type Props = {
+		href?: string;
+		variant?: Variant;
+		size?: Size;
+		color?: Color;
+		disabled?: boolean;
+		children?: Snippet;
+		[key: string]: unknown;
+	};
+
   let {
     href,
     variant = "solid",
@@ -7,7 +23,7 @@
     disabled = false,
     children,
     ...restProps
-  } = $props();
+  }: Props = $props();
 </script>
 
 <a 

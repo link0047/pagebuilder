@@ -11,10 +11,10 @@
     grow = 1
   }: Props = $props();
 
-  let growValue = typeof grow === "boolean" ? (grow ? 1 : 0) : grow;
+  let growValue = $derived(typeof grow === "boolean" ? (grow ? 1 : 0) : grow);
 </script>
 
-<div 
+<div
   class="uikit-scrollable-area"
   style:--uikit-scrollable-area-grow={growValue}
   >

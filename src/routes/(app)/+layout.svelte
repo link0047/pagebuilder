@@ -18,6 +18,9 @@
   import { getInitials } from "$lib/utils/getInitials";
   import { signout, getUser } from "$lib/api/auth.remote";
   import { createBuild, updateBuild } from "$lib/api/builds.remote";
+  import Badge from "$lib/components/Badge.svelte";
+  import ModeIndicator from "$lib/components/ModeIndicator.svelte";
+  import SplitButton from "$lib/components/SplitButton.svelte";
 
   let {
     children
@@ -36,7 +39,7 @@
 
   async function handleCopyHTML() {
     isLoading = true;
-    
+
     try {
       const formData = new FormData();
       formData.append("props", JSON.stringify({ pageTree: appState?.pageTree }));
@@ -59,7 +62,7 @@
       }
 
       const [parseError, res] = await attempt(response.json());
-      
+
       if (parseError) {
         console.error("JSON parse error:", parseError);
         return;
@@ -71,7 +74,7 @@
       }
 
       const [copyError, copySuccess] = await attempt(copyToClipboard(res.html));
-      
+
       if (copyError || !copySuccess) {
         console.error("Failed to copy to clipboard:", copyError);
         return;
@@ -80,12 +83,12 @@
       // Success!
       isCopied = true;
       console.log("HTML copied to clipboard");
-      
+
       // Reset success state after 2 seconds
       setTimeout(() => {
         isCopied = false;
       }, 2000);
-      
+
     } finally {
       isLoading = false;
     }
@@ -158,7 +161,17 @@
 </script>
 
 {#snippet headerLeading()}
+  <!-- <Button color="neutral">
+    <Icon size="16">
+      <use href="#exit" />
+    </Icon>
+    Exit
+  </Button> -->
   <span class="app-title">Page Builder</span>
+  <Badge color="primary" shape="pill">
+    <ModeIndicator mode="preview" />
+    Editing
+  </Badge>
 {/snippet}
 
 {#snippet headerTrailing()}
@@ -179,7 +192,7 @@
       </Icon>
     </SegmentedButton>
   </SegmentedControl>
-  <Button 
+  <Button
     color="success"
     disabled={isLoading}
     onclick={handleCopyHTML}>
@@ -188,9 +201,23 @@
     </Icon>
     {copyButtonText()}
   </Button>
-  <Button onclick={saveBuild} disabled={appState.pageTree.children.length === 0}>
+  <SplitButton onclick={saveBuild} disabled={appState.pageTree.children.length === 0}>
     Save
-  </Button>
+    {#snippet menuItems()}
+      <MenuItem>
+        <Icon>
+          <use href="#download" />
+        </Icon>
+        Download
+      </MenuItem>
+      <MenuItem>
+        <Icon>
+          <use href="#share" />
+        </Icon>
+        Share
+      </MenuItem>
+    {/snippet}
+  </SplitButton>
 {/snippet}
 
 {#snippet navigationRailEnd()}
@@ -284,6 +311,9 @@
   </symbol>
   <symbol id="pencil-outline">
     <path d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z" />
+  </symbol>
+  <symbol id="exit">
+    <path  d="M11.7,5h4.7c.5,0,1,0,1.3,0,.4,0,.7,0,1.1.3.5.3.9.7,1.2,1.2.2.3.2.7.3,1.1,0,.4,0,.8,0,1.3v5.9c0,.5,0,1,0,1.3,0,.4,0,.7-.3,1.1-.3.5-.7.9-1.2,1.2-.3.2-.7.2-1.1.3-.4,0-.8,0-1.3,0h-4.9c-.2,0-.3,0-.5,0-1.3-.1-2.3-1.2-2.5-2.5,0-.1,0-.3,0-.5h0c0-.5.3-.8.8-.8s.8.3.8.8,0,.3,0,.4c0,.6.5,1.1,1.1,1.1,0,0,.1,0,.4,0h4.8c.6,0,1,0,1.3,0,.3,0,.4,0,.5-.1.2-.1.4-.3.5-.5,0,0,0-.2.1-.5,0-.3,0-.7,0-1.3v-5.9c0-.6,0-1,0-1.3,0-.3,0-.4-.1-.5-.1-.2-.3-.4-.5-.5l.3-.7-.3.7c0,0-.2,0-.5-.1-.3,0-.7,0-1.3,0h-4.6c-.5,0-.6,0-.7,0-.5,0-.9.5-1,1,0,.1,0,.2,0,.7s-.3.8-.8.8-.8-.3-.8-.8h0c0-.5,0-.8,0-1,.2-1.1,1.1-1.9,2.2-2.2.3,0,.6,0,1,0h0ZM6.1,12.5l1,1c.3.3.3.8,0,1.1-.3.3-.8.3-1,0l-2.2-2.2c-.3-.3-.3-.8,0-1.1l2.2-2.2c.3-.3.8-.3,1.1,0,.3.3.3.8,0,1.1,0,0,0,0,0,0l-1,1h6.7c.4,0,.8.3.8.8s-.3.8-.8.8h-6.7Z"/>
   </symbol>
 </Iconset>
 

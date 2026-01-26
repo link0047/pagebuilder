@@ -32,7 +32,7 @@
 
 		event.stopPropagation();
 		event.preventDefault();
-		
+
 		switch(event.key) {
 			case "ArrowLeft":
 				tabState.selectPreviousTab();
@@ -81,7 +81,7 @@
 	@layer variables, base, variants, sizes, shapes, states, accessibility;
 
 	@layer variables {
-		
+
 	}
 
 	@layer base {
@@ -125,7 +125,7 @@
 		:is(.uikit-tabs__tab--filled,.uikit-tabs__tab--enclosed)[aria-selected="true"] {
 			box-shadow: 0px 1px 2px color-mix(in srgb, #18181b 10%, transparent),0px 0px 1px color-mix(in srgb, #18181b 20%, transparent);
 		}
-		
+
 		.uikit-tabs__tab--outlined[aria-selected="true"] {
 			border: 1px solid #c5c5cb;
 			border-bottom: none;
@@ -137,7 +137,7 @@
 			background-color: #f4f4f5;
 		}
 	}
-	
+
 	@layer sizes {
 		.uikit-tabs__tab--size-sm {
 			height: 2rem;
@@ -147,9 +147,9 @@
 			height: 3rem;
 		}
 	}
-	
+
 	@layer shapes {
-		
+
 	}
 
 	@layer states {
@@ -157,12 +157,12 @@
 			flex: 1;
 		}
 
-		.uikit-tabs__tab:disabled {
+		/*.uikit-tabs__tab:disabled {
 
-		}
+		}*/
 	}
 
 	@layer accessibility {
-		
+
 	}
 </style>

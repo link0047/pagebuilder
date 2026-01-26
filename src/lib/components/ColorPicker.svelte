@@ -3,6 +3,7 @@
 	
 	export type ColorPickerProps = {
 		value?: string;
+		label?: string;
 		onchange?: (value: string) => void;
 		[key: string]: unknown;
 	}
@@ -18,6 +19,7 @@
 	
 	let {
 		value = $bindable(DEFAULT_HEX_VALUE),
+		label = "Color",
 		onchange,
 		...restProps
 	}: ColorPickerProps = $props();
@@ -91,7 +93,7 @@
 </script>
 
 <fieldset class="uikit-color-picker">
-	<legend class="uikit-color-picker__legend">Color</legend>
+	<legend class="uikit-color-picker__legend">{label}</legend>
 	<div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
 		Selected color: {colorState.value}
 	</div>

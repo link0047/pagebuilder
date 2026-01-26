@@ -21,7 +21,7 @@
   };
 
   let dismissed = $state(false);
-  let autoDismissTimer: number | null = null;
+  let autoDismissTimer: NodeJS.Timeout | null = null;
 
   let {
     severity = "info",
@@ -52,14 +52,14 @@
 
   function handleDismiss() {
     dismissed = true;
-    
+
     if (autoDismissTimer) {
       clearTimeout(autoDismissTimer);
     }
 
     onDismiss?.();
   }
-  
+
   const icons = {
     info: "M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,6.5V9.5H13V6.5H11M11,11V17H13V11H11Z",
     success: "M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,16.5L18,9.5L16.59,8.09L11,13.67L7.91,10.59L6.5,12L11,16.5Z",
@@ -107,7 +107,7 @@
         {@render actions?.()}
       </div>
       {#if dismissible}
-        <Button 
+        <Button
           variant="ghost"
           shape="circle"
           onclick={handleDismiss}

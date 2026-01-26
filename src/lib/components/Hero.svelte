@@ -29,7 +29,7 @@
   };
 
   type Props = {
-    images: Images;
+    images?: Images;
     href?: string;
     alt?: string;
     width?: number;

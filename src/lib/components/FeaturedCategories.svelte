@@ -4,6 +4,7 @@
 	type Props = {
 		children?: Snippet;
 		title?: string;
+		titleAlignment?: "left" | "center" | "right";
 		headingId?: string;
 		headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
 		maxColumns?: number;
@@ -14,6 +15,7 @@
 	let {
 		children,
 		title = "Featured Categories",
+		titleAlignment = "center",
 		headingId = "featured-categories-heading",
 		headingLevel = 2,
 		maxColumns,
@@ -27,6 +29,7 @@
 <section 
 	class="uikit-featured-categories"
 	aria-labelledby={headingId}
+	style:--uikit-featured-categories-title-align={titleAlignment}
 	style:--uikit-featured-categories-gap={gap}
 	style:--uikit-featured-categories-container-gap={containerGap}
 	style:--uikit-featured-categories-max-columns={maxColumns}
@@ -50,6 +53,7 @@
 
 <style>
 	:root {
+		--uikit-featured-categories-title-align: center;
 		--uikit-featured-categories-gap: 0.5rem;
 		--uikit-featured-categories-container-gap: .5rem;
 		--uikit-featured-categories-max-columns: 6;
@@ -68,7 +72,7 @@
 		height: 2rem;
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		justify-content: var(--uikit-featured-categories-title-align);
 	}
 	
 	.uikit-featured-categories__heading {

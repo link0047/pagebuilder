@@ -8,6 +8,7 @@
   import ProductCard from "./ProductCard.svelte";
   import StoryCard from "./StoryCard.svelte";
 	import Self from "./Preview.svelte";
+  import HeroCTA from "./HeroCTA.svelte";
 
   type ComponentMeta = {
     locked: boolean;
@@ -64,7 +65,15 @@
 
 {#if pageTree?.type === "component" && shouldRender}
   {#if pageTree.name === "Hero"}
-    <Hero {...pageTree.props} />
+    <Hero {...pageTree.props}>
+      {#if pageTree.children}
+        {#each pageTree.children as child}
+          <Self pageTree={child} />
+        {/each}
+      {/if}
+    </Hero>
+  {:else if pageTree.name === "HeroCTA"}
+    <HeroCTA {...pageTree.props} />
   {:else if pageTree.name === "StoryBlock"}
     <StoryBlock {...pageTree.props}>
       {#if pageTree.children}

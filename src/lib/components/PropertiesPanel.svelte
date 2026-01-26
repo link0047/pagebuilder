@@ -182,10 +182,9 @@
     <ColorPicker
       label={control.label}
       value={getCurrentValue((control.property as string)) || control.defaultValue}
-      onchange={(event: Event) => {
-        const target = event.target as HTMLInputElement;
+      onchange={(value) => {
         if (control.property) {
-          updateProperty(control.property, target.value);
+          updateProperty(control.property, value);
         }
       }}
     />

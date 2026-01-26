@@ -2,7 +2,7 @@
 	import { type Snippet, onMount } from "svelte";
 	import Portal from "$lib/components/Portal.svelte";
 	import { setMenuState } from "./menu-state.svelte";
-	
+
 	type Placement = "top" | "bottom" | "left" | "right" | "top-start" | "top-end" | "bottom-start" | "bottom-end" | "left-start" | "left-end" | "right-start" | "right-end";
 	type Props = {
 		children?: Snippet;
@@ -21,7 +21,7 @@
 	}: Props = $props();
 
 	const menuState = setMenuState(
-		() => open, 
+		() => open,
 		(value) => open = value
 	);
 	const id = menuState.id;
@@ -32,19 +32,19 @@
 
 	let ref: HTMLElement;
 	let anchorRect: DOMRect;
-	
+
 	let menuWidth = 0;
 	let menuHeight = 0;
-	
+
 	let justOpened = false;
 	let rafId: number | null = null;
-	let lockedPlacement: Placement = placement;
+	let lockedPlacement: Placement = $derived(placement);
 	let style = $state("");
-	
+
 	function getAdjustedPlacement(currentPlacement: Placement): Placement {
 		let main = currentPlacement.split("-")[0] as "top" | "bottom" | "left" | "right";
 		let align = currentPlacement.includes("-") ? currentPlacement.split("-")[1] as "start" | "end" : undefined;
-		
+
 		// 1. Vertical Flip
 		if (main === "top" || main === "bottom") {
 			const fitsTop = anchorRect.top - gap - menuHeight >= 0;
@@ -65,7 +65,7 @@
 				else if (centerX + halfWidth > viewport.width) align = "end";
 			}
 		}
-		
+
 		// 2. Horizontal Flip
 		if (main === "left" || main === "right") {
 			const fitsLeft = anchorRect.left - gap - menuWidth >= 0;
@@ -86,7 +86,7 @@
 				else if (centerY + halfHeight > viewport.height) align = "end";
 			}
 		}
-		
+
 		return (align ? `${main}-${align}` : main) as Placement;
 	}
 
@@ -95,7 +95,7 @@
 
 		let x = 0;
 		let y = 0;
-	
+
 		switch (targetPlacement) {
 			case "top":
 				x = anchorRect.left + (anchorRect.width - menuWidth) / 2;
@@ -146,7 +146,7 @@
 				y = anchorRect.bottom - menuHeight;
 				break;
 		}
-		
+
 		style = `transform:translate3d(${x}px,${y}px,0)`;
 	}
 
@@ -155,7 +155,7 @@
 
 	  viewport.width = window.innerWidth;
 	  viewport.height = window.innerHeight;
-	  
+
 	  // ALWAYS get fresh rects
 	  anchorRect = anchor?.getBoundingClientRect();
 		menuWidth = ref?.offsetWidth;
@@ -165,7 +165,7 @@
 	  if (recalculatePlacement) {
 	    lockedPlacement = getAdjustedPlacement(placement);
 	  }
-	  
+
 	  // Use locked placement with fresh dimensions
 	  setPlacementPosition(lockedPlacement);
 	}
@@ -173,13 +173,13 @@
 	function schedulePositionUpdate(recalculatePlacement = true) {
 	  // Skip if update already scheduled
 		if (rafId !== null) return;
-	  
+
 	  rafId = requestAnimationFrame(() => {
 	    updatePosition(recalculatePlacement);
 	    rafId = null;
 	  });
 	}
-	
+
 	onMount(() => {
 		menuState.menu = ref;
 		menuState.anchor = anchor;
@@ -239,7 +239,7 @@
 		background-color: #fff;
 		z-index: 999;
 		box-shadow: 0px 8px 10px 1px rgba(0,0,0,0.14),0px 3px 14px 2px rgba(0,0,0,0.12),0px 5px 5px -3px rgba(0,0,0,0.2);
-		will-change: transform;
+		will-change: transform, opacity;
 		overflow-wrap: break-word;
 	  word-break: keep-all;
 	}

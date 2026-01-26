@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type Snippet } from "svelte";
-	
+
 	type Variant = "filled" | "outlined";
 	type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default";
 	type Size = "sm" | "md" | "lg";
@@ -13,8 +13,8 @@
 		size?: Size;
 		shape?: Shape;
 	}
-	
-	let { 
+
+	let {
 		children,
 		variant = "filled",
 		color = "default",
@@ -23,7 +23,7 @@
 	}: Props = $props();
 </script>
 
-<span 
+<span
 	class="uikit-badge"
 	class:uikit-badge--outlined={variant === "outlined"}
 	class:uikit-badge--primary={color === "primary"}
@@ -37,7 +37,9 @@
 	class:uikit-badge--shape-square={shape === "square"}
 	class:uikit-badge--shape-pill={shape === "pill"}
 >
-	{@render children?.()}
+	<span class="uikit-badge__content">
+		{@render children?.()}
+	</span>
 </span>
 
 <style>
@@ -49,12 +51,12 @@
 			--uikit-badge-bg-color: #333335;
 			--uikit-badge-height: 1.5rem;
 			--uikit-badge-padding-inline: .5rem;
-			
+
 			--uikit-badge-border-width: 0;
 			--uikit-badge-border-style: solid;
 			--uikit-badge-border-color: #333335;
 			--uikit-badge-border-radius: .25rem;
-			
+
 			--uikit-badge-font-size: .75rem;
 			--uikit-badge-font-weight: 500;
 	    --uikit-badge-letter-spacing: .04em;
@@ -66,7 +68,6 @@
 		.uikit-badge {
 			display: inline-flex;
 			align-items: center;
-			justify-content: center;
 			border-radius: var(--uikit-badge-border-radius);
 			border: var(--uikit-badge-border-width) var(--uikit-badge-border-style) var(--uikit-badge-border-color);
 			padding-inline: var(--uikit-badge-padding-inline);
@@ -79,6 +80,14 @@
 			font-weight: var(--uikit-badge-font-weight);
 			letter-spacing: var(--uikit-badge-letter-spacing);
 			text-transform: uppercase;
+			gap: .5ch;
+			max-width: 100%;
+		}
+
+		.uikit-badge__content {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 		}
 	}
 
@@ -88,30 +97,30 @@
 			--uikit-badge-bg-color: #2a508f;
 			--uikit-badge-border-color: #1c2d4f;
 		}
-		
+
 		.uikit-badge--secondary {
 			--uikit-badge-bg-color: #e5e6e7;
 			--uikit-badge-border-color: #95999c;
 		}
-		
+
 		.uikit-badge--success {
 			--uikit-badge-color: #fff;
 			--uikit-badge-bg-color: #008a00;
 			--uikit-badge-border-color: #0b5c0d;
 		}
-		
+
 		.uikit-badge--warning {
 			--uikit-badge-color: #4c2100;
 			--uikit-badge-bg-color: #ffb224;
 			--uikit-badge-border-color: #dd6702;
 		}
-		
+
 		.uikit-badge--danger {
 			--uikit-badge-color: #fff;
 			--uikit-badge-bg-color: #cb2a2f;
 			--uikit-badge-border-color: #932125;
 		}
-		
+
 		.uikit-badge--info {
 			--uikit-badge-bg-color: #0062d1;
 			--uikit-badge-border-color: #0a3261;
@@ -128,7 +137,7 @@
 		.uikit-badge--size-sm {
 			--uikit-badge-height: 1rem;
 		}
-		
+
 		.uikit-badge--size-lg {
 			--uikit-badge-height: 2rem;
 		}

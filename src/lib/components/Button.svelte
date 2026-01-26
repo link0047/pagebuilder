@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { type Snippet } from "svelte";
-	
+
 	type Variant = "filled" | "outlined" | "ghost" | "link";
-	type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default";
+	type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default" | "neutral";
 	type Size = "xs" | "small" | "sm" | "medium" | "md" | "large" | "lg" | "xl";
 	type Shape = "default" | "square" | "rounded-square" | "pill" | "circle";
-	
+	type Attached = "none" | "left" | "right" | "both";
+
 	type Props = {
 		children?: Snippet,
 		variant?: Variant,
@@ -15,10 +16,12 @@
 		type?: "button" | "submit" | "reset",
     fullWidth?: boolean,
     ref?: HTMLButtonElement,
+    attached?: Attached;
+		truncate?: boolean;
     [key: string]: unknown;
 	}
-	
-	let { 
+
+	let {
 		children,
 		variant = "filled",
 		color = "default",
@@ -27,11 +30,13 @@
 		type = "button",
     fullWidth = false,
 		ref = $bindable(),
+		attached = "none",
+		truncate = true,
 		...restProps
 	}: Props = $props();
 </script>
 
-<button 
+<button
 	bind:this={ref}
 	class="uikit-button"
   class:uikit-button--full-width={fullWidth}
@@ -39,6 +44,8 @@
   class:uikit-button--shape-rounded-square={shape === "rounded-square"}
 	class:uikit-button--shape-pill={shape === "pill"}
 	class:uikit-button--shape-circle={shape === "circle"}
+	class:uikit-button--attached-left={attached === "left" || attached === "both"}
+  class:uikit-button--attached-right={attached === "right" || attached === "both"}
 	class:uikit-button--size-xs={size === "xs"}
 	class:uikit-button--size-sm={size === "sm"}
 	class:uikit-button--size-lg={size === "lg"}
@@ -51,11 +58,17 @@
 	class:uikit-button--success={color === "success"}
 	class:uikit-button--warning={color === "warning"}
 	class:uikit-button--danger={color === "danger"}
+  class:uikit-button--neutral={color === "neutral"}
 	class:uikit-button--info={color === "info"}
 	{type}
 	{...restProps}
 >
-	{@render children?.()}
+	<span
+		class="uikit-button__content"
+		class:uikit-button__content--truncate={truncate}
+	>
+		{@render children?.()}
+	</span>
 </button>
 
 <style>
@@ -68,39 +81,39 @@
     --uikit-button-width: fit-content;
     --uikit-button-gap: .25ch;
     --uikit-button-padding-inline: .5rem;
-    
+
     /* Typography */
     --uikit-button-font-size: .875rem;
     --uikit-button-font-weight: 500;
     --uikit-button-color: #fff;
     --uikit-button-letter-spacing: .04em;
     --uikit-button-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    
+
     /* Border styles */
     --uikit-button-border-width: 1px;
     --uikit-button-border-style: solid;
     --uikit-button-border-color: #333335;
     --uikit-button-border-radius: .5rem;
-    
+
     /* Default colors */
     --uikit-button-bg-color: #333335;
-    
+
     /* Hover state */
     --uikit-button-hover-bg-color: #555659;
     --uikit-button-hover-border-color: #555659;
-    
+
     /* Focus state */
     --uikit-button-outline-color: #007acc;
     --uikit-button-outline-style: solid;
     --uikit-button-outline-width: 2px;
     --uikit-button-outline-offset: 0;
-    
+
     /* Disabled state */
     --uikit-button-disabled-bg-color: #eeeeef;
     --uikit-button-disabled-font-color: #444547;
     --uikit-button-disabled-font-weight: 400;
     --uikit-button-disabled-border-color: #eeeeef;
-    
+
     /* Animation */
     --uikit-button-transition-duration: 0.2s;
     --uikit-button-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
@@ -134,7 +147,13 @@
     touch-action: manipulation;
     user-select: none;
     transition: background-color var(--uikit-button-transition-duration) var(--uikit-button-transition-timing),border-color var(--uikit-button-transition-duration) var(--uikit-button-transition-timing),transform var(--uikit-button-transition-duration) var(--uikit-button-transition-timing);
-  }
+	}
+
+	.uikit-button__content--truncate {
+		overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+	}
 }
 
 @layer variants {
@@ -147,7 +166,7 @@
     --uikit-button-border-color: #66676a;
 		--uikit-button-hover-bg-color: #eeeeef;
   }
-  
+
   .uikit-button--ghost {
     --uikit-button-bg-color: transparent;
     --uikit-button-border-color: transparent;
@@ -155,7 +174,7 @@
     --uikit-button-hover-bg-color: #eeeeef;
 		--uikit-button-hover-border-color: #eeeeef;
   }
-  
+
   .uikit-button--link {
     --uikit-button-bg-color: transparent;
     --uikit-button-border-color: transparent;
@@ -195,7 +214,7 @@
     --uikit-button-border-color: transparent;
 		--uikit-button-hover-border-color: #e9edf3;
 	}
-	
+
 	.uikit-button--secondary {
 		--uikit-button-bg-color: #e5e6e7;
 		--uikit-button-border-color: #e5e6e7;
@@ -213,7 +232,7 @@
 	.uikit-button--secondary:is(.uikit-button--ghost, .uikit-button--link) {
 		--uikit-button-hover-border-color: #f2f2f2;
 	}
-	
+
 	.uikit-button--success {
 		--uikit-button-bg-color: #008a00;
 		--uikit-button-border-color: #008a00;
@@ -232,7 +251,7 @@
 	.uikit-button--success:is(.uikit-button--ghost, .uikit-button--link) {
 		--uikit-button-hover-border-color: #f4f9f4;
 	}
-	
+
 	.uikit-button--warning {
 		--uikit-button-color: #4c2100;
 		--uikit-button-bg-color: #ffb224;
@@ -251,10 +270,10 @@
 	.uikit-button--warning:is(.uikit-button--ghost, .uikit-button--link) {
 		--uikit-button-hover-border-color: #fff4d6;
 	}
-	
+
 	.uikit-button--danger {
 		--uikit-button-bg-color: #cb2a2f;
-		--uikit-button-border-color: #cb2a2f; 
+		--uikit-button-border-color: #cb2a2f;
 		--uikit-button-hover-bg-color: #e5484d;
 		--uikit-button-hover-border-color: #e5484d;
     --uikit-button-outline-color: #f76469;
@@ -269,7 +288,7 @@
 	.uikit-button--danger:is(.uikit-button--ghost, .uikit-button--link) {
 		--uikit-button-hover-border-color: #fff0f0;
 	}
-	
+
 	.uikit-button--info {
 		--uikit-button-bg-color: #0062d1;
 		--uikit-button-border-color: #0062d1;
@@ -287,8 +306,17 @@
 	.uikit-button--info:is(.uikit-button--ghost, .uikit-button--link) {
 		--uikit-button-hover-border-color: #e0f0ff;
 	}
+
+  .uikit-button--neutral {
+    --uikit-button-bg-color: #fafafa;
+    --uikit-button-border-color: #e5e6e7;
+    --uikit-button-color: #38393b;
+    --uikit-button-hover-bg-color: #f0f0f0;
+    --uikit-button-hover-border-color: #d1d2d3;
+    --uikit-button-outline-color: #a8a8a8;
+  }
 }
-	
+
 @layer states {
   .uikit-button:disabled {
     cursor: not-allowed;
@@ -298,13 +326,13 @@
     border: var(--uikit-button-border-width) var(--uikit-button-border-style) var(--uikit-button-disabled-border-color);
     box-shadow: none;
   }
-  
+
   .uikit-button:not(:disabled):hover {
     background-color: var(--uikit-button-hover-bg-color);
     border-color: var(--uikit-button-hover-border-color);
     cursor: pointer;
   }
-  
+
   .uikit-button:active {
     transform: scale(var(--uikit-button-transform-scale));
   }
@@ -323,21 +351,21 @@
     --uikit-button-padding-inline: 0.5rem;
     --uikit-button-gap: 0.25rem;
   }
-  
+
   .uikit-button--size-sm {
     --uikit-button-height: 2rem;
     --uikit-button-font-size: 0.8125rem;
     --uikit-button-padding-inline: 0.75rem;
     --uikit-button-gap: 0.375rem;
   }
-  
+
   .uikit-button--size-lg {
     --uikit-button-height: 3rem;
     --uikit-button-font-size: 1rem;
     --uikit-button-padding-inline: 1.5rem;
     --uikit-button-gap: 0.625rem;
   }
-  
+
   .uikit-button--size-xl {
     --uikit-button-height: 3.5rem;
     --uikit-button-font-size: 1.125rem;
@@ -345,27 +373,27 @@
     --uikit-button-gap: 0.75rem;
   }
 }
-	
+
 @layer shapes {
-  .uikit-button--shape-rounded-square,  
+  .uikit-button--shape-rounded-square,
   .uikit-button--shape-square {
     --uikit-button-border-radius: 0;
 		aspect-ratio: 1/1;
 		justify-content: center;
     align-items: center;
     width: var(--uikit-button-height);
-    padding: 0; 
+    padding: 0;
   }
 
   .uikit-button--shape-rounded-square {
     --uikit-button-border-radius: .5rem;
   }
-  
+
   .uikit-button--shape-pill {
     --uikit-button-border-radius: 9999px;
     padding-inline: calc(var(--uikit-button-padding-inline) * 1.5);
   }
-  
+
   .uikit-button--shape-circle {
     --uikit-button-border-radius: 50%;
     aspect-ratio: 1/1;
@@ -373,6 +401,18 @@
     justify-content: center;
     align-items: center;
     width: var(--uikit-button-height);
+  }
+
+  .uikit-button--attached-left {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left-width: 0;
+  }
+
+  .uikit-button--attached-right {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right-width: 0;
   }
 }
 

@@ -105,7 +105,33 @@
         },
         data: {},
         meta: {
-          label: "Featured Category"
+          label: "Featured Category",
+          locked: false,
+          hidden: false
+        }
+      };
+
+      appState.addComponent(defaultCategory, path);
+    }
+  }
+
+  function addHeroCTA() {
+    if (appState && canHaveChildren) {
+      const defaultCategory = {
+        id: crypto.randomUUID(),
+        type: "component" as const,
+        name: "HeroCTA",
+        props: {
+          href: "",
+          variant: "solid",
+          size: "medium",
+          color: "default"
+        },
+        data: {},
+        meta: {
+          label: "Hero CTA",
+          locked: false,
+          hidden: false
         }
       };
 
@@ -114,13 +140,32 @@
   }
 </script>
 
+{#snippet addAction(label: string, onclick: () => void)}
+  <TreeItem>
+    {#snippet text()}
+      <div class="uikit-page-structure-add-action">
+        <button 
+          class="uikit-page-structure-add-action__button" 
+          type="button" 
+          {onclick}
+        >
+          <Icon>
+            <use href="#plus-circle-outline" />
+          </Icon>
+          {label}
+        </button>
+      </div>
+    {/snippet}
+  </TreeItem>
+{/snippet}
+
 {#if pageTree?.type === "root" && pageTree.children.length > 0}
-{#key pageTree.children.length}
-	<Tree>
-    {#each pageTree.children as child, index (child.id)}
-      <PageStructure pageTree={child} path={[...path, index]} />
-    {/each}
-  </Tree>
+  {#key pageTree.children.length}
+    <Tree>
+      {#each pageTree.children as child, index (child.id)}
+        <PageStructure pageTree={child} path={[...path, index]} />
+      {/each}
+    </Tree>
   {/key}
 {/if}
 
@@ -152,31 +197,11 @@
 
     {#if canHaveChildren}
       {#if pageTree.name === "StoryBlock"}
-        <TreeItem>
-          {#snippet text()}
-            <div class="uikit-page-structure-add-action">
-              <button class="uikit-page-structure-add-action__button" type="button" onclick={() => addCard()}>
-                <Icon>
-                  <use href="#plus-circle-outline" />
-                </Icon>
-                Add Story Card
-              </button>
-            </div>
-          {/snippet}
-        </TreeItem>
+        {@render addAction("Add Story Card", addCard)}
       {:else if pageTree.name === "FeaturedCategories"}
-        <TreeItem>
-          {#snippet text()}
-            <div class="uikit-page-structure-add-action">
-              <button class="uikit-page-structure-add-action__button" type="button" onclick={() => addFeaturedCategory()}>
-                <Icon>
-                  <use href="#plus-circle-outline" />
-                </Icon>
-                Add Featured Category
-              </button>
-            </div>
-          {/snippet}
-        </TreeItem>
+        {@render addAction("Add Featured Category", addFeaturedCategory)}
+      {:else if pageTree.name === "Hero"}
+        {@render addAction("Add CTA", addHeroCTA)}
       {/if}
     {/if}
   </TreeItem>
