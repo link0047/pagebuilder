@@ -145,6 +145,7 @@
 		border-radius: .25rem;
 		appearance: none;
 		display: flex;
+		color: #212121;
 		align-items: center;
 		justify-content: center;
 		width: var(--uikit-carousel-button-width);

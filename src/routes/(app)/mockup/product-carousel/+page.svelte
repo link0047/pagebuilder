@@ -107,8 +107,18 @@
 	}];
 </script>
 
-<CollectionBlock heading="Shop Top Tees">
-	{#each products as product}
-		<CollectionBlockItem {product} />
-	{/each}
-</CollectionBlock>
+<div class="page">
+	<CollectionBlock heading="Shop Top Tees">
+		{#each products as product}
+			<CollectionBlockItem {product} />
+		{/each}
+	</CollectionBlock>
+</div>
+
+<style>
+	.page {
+		padding-block-start: 1rem;
+		margin-inline: auto;
+		max-width: 75rem;
+	}
+</style>
