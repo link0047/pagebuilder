@@ -33,7 +33,7 @@
 		ctaBackgroundColor,
 		ctaTextColor,
 		breakpoints = {
-      "320": { slidesPerView: 2.5 },
+      "320": { slidesPerView: 1.5 },
       "768": { slidesPerView: 4 },
       "1024": { slidesPerView: 5 }
     },
