@@ -320,6 +320,7 @@
 		line-height: 1;
 		font-size: 1.5rem;
 		font-weight: 500;
+		font-variant-numeric: tabular-nums;
 	}
 
 	.fbt__cta {
