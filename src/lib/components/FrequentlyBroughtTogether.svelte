@@ -81,7 +81,12 @@
 								alt={product.name}
 							/>
 						</picture>
-						<span class="fbt__product-name">{product.name}</span>
+						<span class="fbt__product-name">
+							{#if index === 0}
+								<span class="fbt__current-item">This item:</span>
+							{/if}
+							{product.name}
+						</span>
 						<span class="fbt__product-price" aria-label={`$${product.price.toFixed(2)}`}>
 							<span class="fbt__product-price-symbol">$</span>
 							<span class="fbt__product-price-dollars">{Math.floor(product.price)}</span>
@@ -98,20 +103,28 @@
 		</div>
 		<div class="fbt__summary">
 			{#if !isMobile}
-				<div class="fbt__total">
-					<span class="fbt__total-label">Total price:</span>
-					<span class="fbt__total-price" aria-live="polite">
-						<span class="fbt__total-price-symbol">$</span>
-						<span class="fbt__total-price-whole">{totalPrice.toFixed(2)}</span>
-					</span>
+				<div class="fbt__status-area" aria-live="polite" aria-atomic="true">
+					{#if totalSelected > 0}
+						<div class="fbt__total">
+							<span class="fbt__total-label">Total price:</span>
+							<span class="fbt__total-price" aria-live="polite">
+								<span class="fbt__total-price-symbol">$</span>
+								<span class="fbt__total-price-whole">{totalPrice.toFixed(2)}</span>
+							</span>
+						</div>
+					{:else}
+						<span class="fbt__instruction">Please select items to build your perfect bundle</span>
+					{/if}
 				</div>
 				<Button shape="pill" disabled={!totalSelected}>
-					Add {totalSelected === products.length ? `all ${totalSelected}` : totalSelected} to Cart
+					{@const count = totalSelected === products.length ? `all ${totalSelected}` : totalSelected || ""}
+					Add {count} to Cart
 				</Button>
 			{:else}
+				{@const finalPrice = products.reduce((sum, p) => sum + p.price, 0).toFixed(2)}
 				<Button bind:ref={bottomSheetDisclosure} color="neutral" variant="outlined" shape="pill" fullWidth onclick={handleBottomSheet}>
 					<div class="fbt__cta">
-						<span class="fbt__cta-text">Buy all {products.length}: ${totalPrice.toFixed(2)}</span>
+						<span class="fbt__cta-text">Buy all {products.length}: ${finalPrice}</span>
 						<Icon>
 							<path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
 						</Icon>
@@ -142,7 +155,12 @@
 					/>
 				</picture>
 				<div class="fbt__sheet-info">
-					<span class="fbt__sheet-product-name">{product.name}</span>
+					<span class="fbt__sheet-product-name">
+						{#if index === 0}
+							<span class="fbt__current-item">This item:</span>
+						{/if}
+						{product.name}
+					</span>
 					<span class="fbt__sheet-product-price" aria-label={`$${product.price.toFixed(2)}`}>
 						<span class="fbt__product-price-symbol">$</span>
 						<span class="fbt__product-price-dollars">{Math.floor(product.price)}</span>
@@ -152,17 +170,25 @@
 			</div>
 		{/each}
 	</div>
+
 	{#snippet footer()}
 		<div class="fbt__sheet-summary">
-			<div class="fbt__sheet-total">
-				<span class="fbt__total-label">Total price:</span>
-				<span class="fbt__total-price" aria-live="polite">
-					<span class="fbt__total-price-symbol">$</span>
-					<span class="fbt__total-price-whole">{totalPrice.toFixed(2)}</span>
-				</span>
+			<div class="fbt__status-area" aria-live="polite" aria-atomic="true">
+				{#if totalSelected > 0}
+				<div class="fbt__sheet-total">
+					<span class="fbt__total-label">Total price:</span>
+					<span class="fbt__total-price" aria-live="polite">
+						<span class="fbt__total-price-symbol">$</span>
+						<span class="fbt__total-price-whole">{totalPrice.toFixed(2)}</span>
+					</span>
+				</div>
+				{:else}
+					<span class="fbt__instruction">Please select items to build your perfect bundle</span>
+				{/if}
 			</div>
 			<Button shape="pill" disabled={!totalSelected} fullWidth>
-				Add {totalSelected === products.length ? `all ${totalSelected}` : totalSelected} to Cart
+				{@const count = totalSelected === products.length ? `all ${totalSelected}` : totalSelected || ""}
+				Add {count} to Cart
 			</Button>
 		</div>
 	{/snippet}
@@ -203,6 +229,10 @@
 		align-items: center;
 		flex: 0 1 auto;
 		gap: 0.5rem;
+	}
+
+	.fbt__current-item {
+		font-weight: 700;
 	}
 
 	.fbt__product-checkbox {
@@ -263,6 +293,12 @@
 		flex-direction: column;
 		align-items: center;
 		gap: .5rem;
+	}
+
+	.fbt__instruction {
+		text-wrap: balance;
+  	display: inline-block;
+  	text-align: center;
 	}
 
 	.fbt__total {

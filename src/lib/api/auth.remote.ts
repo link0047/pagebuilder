@@ -62,20 +62,20 @@ export const resetPassword = form(resetPasswordSchema , async (data) => {
 });
 
 export const forgotPassword = form(forgotPasswordSchema, async (data) => {
-	try {
-		await auth.api.forgetPassword({
-			body: {
-				email: data.email
-			}
-		});
-		return {
-			success: "Check your email! We've sent you a link to reset your password. It may take a few minutes to arrive."
-		};
-	} catch (error) {
-		return {
-			success: "Check your email! We've sent you a link to reset your password. It may take a few minutes to arrive."
-		};
-	}
+	// try {
+	// 	await auth.api.forgetPassword({
+	// 		body: {
+	// 			email: data.email
+	// 		}
+	// 	});
+	// 	return {
+	// 		success: "Check your email! We've sent you a link to reset your password. It may take a few minutes to arrive."
+	// 	};
+	// } catch (error) {
+	// 	return {
+	// 		success: "Check your email! We've sent you a link to reset your password. It may take a few minutes to arrive."
+	// 	};
+	// }
 });
 
 export const getUser = query(async () => {

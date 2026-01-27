@@ -12,7 +12,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url }) => {
-
+      console.log(user, url);
     }
   },
   plugins: [sveltekitCookies(getRequestEvent)]
