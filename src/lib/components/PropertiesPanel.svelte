@@ -19,189 +19,149 @@
   import Hint from "./Hint.svelte";
 
   type Props = {
-    title?: string,
-  }
+    title?: string;
+  };
 
-  let {
-    title,
-  }: Props = $props();
+  let { title }: Props = $props();
 
   let appState = getAppState();
 
   const isOpen = $derived(appState.isPropertiesPanelOpen);
   const selectedComponent = $derived(appState.selectedComponent);
-  const schema = $derived(selectedComponent && isValidComponentName(selectedComponent.name) ? componentSchemas[selectedComponent.name] : null);
-
-  function closePanel() {
-    appState.closePropertiesPanel();
-  }
-
-  function updateProperty(property: string, value: unknown) {
-    if (!selectedComponent) return;
-    
-    const parts = property.split(".");
-    if (parts.length === 2) {
-      // Simple property like "props.title"
-      appState.updateComponentProperty(property, value);
-      return;
-    }
-    
-    // Nested property like "props.images.desktop" or "props.promo.value"
-    const [section, ...keyParts] = parts;
-    
-    let target: Record<string, any>;
-    if (section === "props") {
-      target = selectedComponent.props;
-    } else if (section === "data") {
-      target = selectedComponent.data;
-    } else if (section === "meta") {
-      target = selectedComponent.meta as Record<string, any>;
-    } else {
-      return;
-    }
-    
-    // Navigate to the nested property and create objects as needed
-    let current = target;
-    for (let i = 0; i < keyParts.length - 1; i++) {
-      if (!current[keyParts[i]] || typeof current[keyParts[i]] !== "object") {
-        current[keyParts[i]] = {};
-      }
-      current = current[keyParts[i]];
-    }
-    
-    // Set the final value
-    const finalKey = keyParts[keyParts.length - 1];
-    current[finalKey] = value;
-    
-    appState.updateComponentProperty(property, value);
-  }
+  const schema = $derived(
+    selectedComponent && isValidComponentName(selectedComponent.name)
+      ? componentSchemas[selectedComponent.name]
+      : null
+  );
 
   function isValidComponentName(name: string): name is ComponentName {
     return name in componentSchemas;
   }
 
-  function getCurrentValue(property: string): any {
-    if (!selectedComponent) return "";
-    
-    const parts = property.split('.');
-    const [section, ...keyParts] = parts;
+  // All reads and writes go through AppState — no local duplication
+  function getValue(property: string): any {
+    return appState.getPropertyValue(property);
+  }
 
-    let source: Record<string, any>;
-    if (section === "props") {
-      source = selectedComponent.props;
-    } else if (section === "data") {
-      source = selectedComponent.data;
-    } else if (section === "meta") {
-      source = selectedComponent.meta as Record<string, any>;
-    } else {
-      return "";
-    }
+  function setValue(property: string, value: unknown): void {
+    appState.updateProperty(property, value);
+  }
 
-    // Navigate through nested properties
-    let current = source;
-    for (const key of keyParts) {
-      if (current && typeof current === "object" && key in current) {
-        current = current[key];
-      } else {
-        return "";
-      }
-    }
+  function resolveOptionValue(option: string | { value: string; text: string }): string {
+    return typeof option === "string" ? option : option.value;
+  }
 
-    return current ?? "";
+  function resolveOptionLabel(option: string | { value: string; text: string }): string {
+    return typeof option === "string" ? option : option.text;
   }
 </script>
 
 {#snippet renderControls(control: ControlSchema)}
   {#if control.type === "segmentedbutton"}
-    <SegmentedControl 
-      headingLabel={control.label} 
-      value={getCurrentValue((control.property as string)) || control.defaultValue}
+    <SegmentedControl
+      headingLabel={control.label}
+      value={getValue(control.property as string) || control.defaultValue}
     >
       {#each control.options || [] as option}
         <SegmentedButton
-          value={typeof option === "string" ? option : option.value}
+          value={resolveOptionValue(option)}
           onclick={() => {
             if (control.property) {
-              updateProperty(control.property, option);
+              setValue(control.property, resolveOptionValue(option));
             }
-          }
-        }>
-          {typeof option === "string" ? option : option.text}
+          }}
+        >
+          {resolveOptionLabel(option)}
         </SegmentedButton>
       {/each}
     </SegmentedControl>
+
   {:else if control.type === "hint"}
     <Hint variant="info" icon={true}>
       <span>{control.description}</span>
     </Hint>
+
   {:else if control.type === "textfield"}
-    <Textfield 
+    <Textfield
       label={control.label || ""}
       placeholder={control.placeholder}
       description={control.description}
-      value={getCurrentValue((control.property as string)) || control.defaultValue}
+      value={getValue(control.property as string) || control.defaultValue}
       oninput={(event: Event) => {
-        const target = event.target as HTMLInputElement;
         if (control.property) {
-          updateProperty(control.property, target.value);
+          setValue(control.property, (event.target as HTMLInputElement).value);
         }
       }}
     />
+
   {:else if control.type === "textarea"}
-    <Textarea 
+    <Textarea
       label={control.label}
-      value={getCurrentValue((control.property as string)) || control.defaultValue}
+      value={getValue(control.property as string) || control.defaultValue}
       oninput={(event: Event) => {
-        const target = event.target as HTMLInputElement;
         if (control.property) {
-          updateProperty(control.property, target.value);
+          setValue(control.property, (event.target as HTMLInputElement).value);
         }
       }}
     />
+
   {:else if control.type === "select"}
-    <Select 
-      label={control.label} 
-      value={getCurrentValue((control.property as string)) || control.defaultValue}
+    <Select
+      label={control.label}
+      value={getValue(control.property as string) || control.defaultValue}
       description={control.description}
       onchange={(event: Event) => {
-        const target = event.target as HTMLInputElement;
         if (control.property) {
-          updateProperty(control.property, target.value);
+          setValue(control.property, (event.target as HTMLSelectElement).value);
         }
       }}
     >
       {#each control.options || [] as option}
-      {#if typeof option === "string"}
-        <option value={option}>{option}</option>
-      {:else}
-        <option value={option.value}>{option.text}</option>
-      {/if}
-    {/each}
+        <option value={resolveOptionValue(option)}>{resolveOptionLabel(option)}</option>
+      {/each}
     </Select>
+
   {:else if control.type === "colorpicker"}
     <ColorPicker
       label={control.label}
-      value={getCurrentValue((control.property as string)) || control.defaultValue}
+      value={getValue(control.property as string) || control.defaultValue}
       onchange={(value) => {
         if (control.property) {
-          updateProperty(control.property, value);
+          setValue(control.property, value);
         }
       }}
     />
   {/if}
 {/snippet}
 
-<div class="uikit-properties-panel" aria-hidden={!isOpen} role="dialog" aria-modal="true" aria-labelledby="panel-title">
+<!--
+  role="complementary" is appropriate for a persistent side panel.
+  role="dialog" + aria-modal should only be used for true modal dialogs
+  that trap focus and block the rest of the UI.
+-->
+<div
+  class="uikit-properties-panel"
+  role="complementary"
+  aria-label={title}
+  aria-hidden={!isOpen}
+>
   <header class="uikit-properties-panel__header">
-    <Button size="sm" variant="ghost" shape="rounded-square" onclick={closePanel} aria-label="Close properties panel">
+    <Button
+      size="sm"
+      variant="ghost"
+      shape="rounded-square"
+      onclick={() => appState.deselectComponent()}
+      aria-label="Close properties panel"
+    >
       <Icon>
-        <path d="M15.41 16.58 10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.42Z"/>
+        <path d="M15.41 16.58 10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.42Z" />
       </Icon>
     </Button>
-    <span class="uikit-properties-panel__title" id="panel-title">
+    <span class="uikit-properties-panel__title">
       {title}
     </span>
   </header>
+
   <div class="uikit-properties-panel__content">
     {#if isOpen && selectedComponent && schema}
       {#each schema.sections as section}
@@ -213,9 +173,7 @@
               <Tabs>
                 <TabList>
                   {#each control.tabs || [] as tab}
-                    <Tab>
-                      {tab.label}
-                    </Tab>
+                    <Tab>{tab.label}</Tab>
                   {/each}
                 </TabList>
                 {#each control.tabs || [] as tab}
@@ -228,6 +186,7 @@
                   </TabPanel>
                 {/each}
               </Tabs>
+
             {:else if control.type === "group"}
               <ControlGroup label={control.label} col={2}>
                 {#each control.controls || [] as groupControl}
@@ -254,7 +213,7 @@
     top: 0;
     left: 0;
     transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --uikit-button-border-radius: .5rem;
+    --uikit-button-border-radius: 0.5rem;
   }
 
   .uikit-properties-panel[aria-hidden="true"] {
@@ -264,16 +223,16 @@
 
   .uikit-properties-panel__header {
     height: 3rem;
-    border-bottom: .0625rem solid #ebebeb;
+    border-bottom: 0.0625rem solid #ebebeb;
     display: grid;
-    gap: .5rem;
+    gap: 0.5rem;
     grid-template-columns: auto 1fr;
     align-items: center;
-    padding-inline: .5rem;
+    padding-inline: 0.5rem;
   }
 
   .uikit-properties-panel__content {
-    padding-inline: .5rem;
+    padding-inline: 0.5rem;
     padding-block: 1rem;
     overflow-y: scroll;
     display: flex;

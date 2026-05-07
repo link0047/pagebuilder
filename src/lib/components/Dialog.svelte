@@ -5,17 +5,21 @@
   import Button from "./Button.svelte";
   import Icon from "./Icon.svelte";
   import { setDialogState } from "./dialog-state.svelte";
-  
+
   type Variant = "default" | "fullscreen" | "lightbox";
   type Size = "sm" | "md" | "lg" | "xl";
 
-  type Props =  {
+  // Replaced `[key: string]: unknown` index signature with HTMLAttributes
+  // intersection — this preserves excess property checking while still
+  // allowing arbitrary HTML attributes to be forwarded via restProps.
+  interface Props extends Record<string, unknown> {
     header?: Snippet;
     footer?: Snippet;
     controls?: Snippet;
     children?: Snippet;
     title?: string;
     disclosure: HTMLElement | undefined;
+    trigger?: boolean;
     open?: boolean;
     hasBackdrop?: boolean;
     hasCloseButton?: boolean;
@@ -23,8 +27,7 @@
     closeOnOutsideClick?: boolean;
     size?: Size;
     variant?: Variant;
-    ref?: HTMLElement,
-    [key: string]: unknown;
+    ref?: HTMLElement;
   }
 
   let {
@@ -34,6 +37,7 @@
     children,
     title,
     disclosure,
+    trigger = true,
     open = $bindable(false),
     hasBackdrop = true,
     hasCloseButton = true,
@@ -45,10 +49,14 @@
     ...restProps
   }: Props = $props();
 
+  // Pass a reactive options getter so the state class always reads the
+  // current prop values — no need for extra setters or constructor churn.
   const dialogState = setDialogState(
-		() => open, 
-		(value) => open = value
-	);
+    () => open,
+    (value) => open = value,
+    () => ({ closeOnEsc, closeOnOutsideClick }),
+    () => trigger
+  );
   const id = dialogState.id;
 
   onMount(() => {
@@ -61,7 +69,7 @@
     if (ref) {
       dialogState.dialogElement = ref;
     }
-  })
+  });
 
   $effect(() => {
     dialogState.disclosure = disclosure;
@@ -73,7 +81,10 @@
 </script>
 
 <Portal>
-  <Backdrop {open} />
+  <!-- hasBackdrop now actually controls rendering -->
+  {#if hasBackdrop}
+    <Backdrop {open} />
+  {/if}
   <div
     class="uikit-dialog-wrapper"
     class:uikit-dialog-wrapper--open={open}
@@ -129,47 +140,47 @@
 
 <style>
   .uikit-dialog-wrapper {
-		position: fixed;
-		inset: 0;
-		z-index: 519;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		overflow-y: auto;
+    position: fixed;
+    inset: 0;
+    z-index: 519;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
     visibility: hidden;
     pointer-events: none;
     transition: visibility 0s linear .25s;
-	}
+  }
 
   .uikit-dialog-wrapper--open {
     visibility: visible;
     pointer-events: initial;
     transition: visibility 0s linear 0s;
   }
-	
-	.uikit-dialog {
+
+  .uikit-dialog {
     position: relative;
     box-sizing: border-box;
-		font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-		background-color: #fff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    background-color: #fff;
     box-shadow: 0 6px 12px -2px rgba(50,50,93,0.25),0 3px 7px -3px rgba(0,0,0,0.3);
-		border-radius: .75rem;
+    border-radius: .75rem;
     contain: content;
-		height: fit-content; 
-	  min-height: 0;
-		width: 100%;
-		max-width: 560px;
+    height: fit-content;
+    min-height: 0;
+    width: 100%;
+    max-width: 560px;
     opacity: 0;
     transform: scale(0.95);
     will-change: opacity, transform;
     transition: opacity .25s ease-in-out, transform .25s cubic-bezier(0.2, 0, 0.2, 1);
     display: grid;
     grid-template-columns: minmax(0, auto) 1fr minmax(0, auto);
-    grid-template-areas: 
+    grid-template-areas:
       "header header header"
       "content content content"
       "footer footer footer";
-	}
+  }
 
   .uikit-dialog__controls {
     display: flex;
@@ -185,25 +196,25 @@
   .uikit-dialog__header {
     grid-area: header;
     height: 4rem;
-		display: flex;
-		padding-inline: 1.5rem;
-		align-items: center;
-		border-bottom: 1px solid #d1d1d1;
+    display: flex;
+    padding-inline: 1.5rem;
+    align-items: center;
+    border-bottom: 1px solid #d1d1d1;
   }
 
   .uikit-dialog__title {
     font-size: 1.25rem;
     font-weight: 500;
-		color: #212121;
-		margin: 0;
-		line-height: 1;
-	}
+    color: #212121;
+    margin: 0;
+    line-height: 1;
+  }
 
-	.uikit-dialog__content,
+  .uikit-dialog__content,
   .uikit-dialog__footer {
-		padding-inline: 1.5rem;
-		padding-block: 1rem;
-	}
+    padding-inline: 1.5rem;
+    padding-block: 1rem;
+  }
 
   .uikit-dialog__content {
     grid-area: content;
@@ -243,7 +254,7 @@
   .uikit-dialog--lightbox {
     width: calc(100vw - 1rem);
     max-width: 1400px;
-    min-height: 400px; 
+    min-height: 400px;
     height: 80vh;
   }
 </style>

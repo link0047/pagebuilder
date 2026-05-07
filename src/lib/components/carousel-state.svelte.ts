@@ -158,7 +158,7 @@ class CarouselState {
 		updateBreakpoint();
 
 		mediaQueries.forEach(({ mql }) => {
-			mql.addEventListener('change', updateBreakpoint, { signal: this.#controller.signal });
+			mql.addEventListener("change", updateBreakpoint, { signal: this.#controller.signal });
 		});
 	}
 

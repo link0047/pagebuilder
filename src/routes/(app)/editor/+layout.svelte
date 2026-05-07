@@ -18,5 +18,5 @@
   <PropertiesPanel title={appState.selectedComponent?.meta.label} />
 </AppSidebar>
 <PreviewPane maxWidth="{appState.previewWidth}px">
-  <Preview bind:pageTree={appState.pageTree} />
+  <Preview pageTree={appState.pageTree} />
 </PreviewPane>

@@ -1,121 +1,64 @@
 <script lang="ts">
-  import Hero from "./Hero.svelte";
-	import Card from "./Card.svelte";
-  import FeaturedCategories from "./FeaturedCategories.svelte";
-  import FeaturedCategory from "./FeaturedCategory.svelte";
-  import StoryBlock from "./StoryBlock.svelte";
-  import CollectionBlock from "./CollectionBlock.svelte";
-  import ProductCard from "./ProductCard.svelte";
-  import StoryCard from "./StoryCard.svelte";
-	import Self from "./Preview.svelte";
-  import HeroCTA from "./HeroCTA.svelte";
+  import Self from "./Preview.svelte";
+  import { componentRegistry } from "./component-registry";
+  import type { PageTreeNode } from "./types";
+  import DOMPurify from "dompurify";
 
-  type ComponentMeta = {
-    locked: boolean;
-    hidden: boolean;
-    label: string;
+  type Props = {
+    pageTree?: PageTreeNode;
   };
 
-  type ComponentNode = {
-    type: "component";
-    name: string;
-    meta: ComponentMeta;
-    props: Record<string, any>;
-    data: Record<string, any>;
-    children?: PageTreeNode[];
-  };
+  let { pageTree }: Props = $props();
 
-  type RootNode = {
-    name: string;
-    type: "root";
-    children: PageTreeNode[];
-  };
+  const shouldRender = $derived(
+    pageTree?.type !== "component" || !pageTree.meta.hidden
+  );
 
-  // Union type for all possible node types
-  type PageTreeNode = RootNode | ComponentNode;
+  // Resolve the Svelte component constructor from the registry, or null if unknown
+  const ResolvedComponent = $derived(
+    pageTree?.type === "component"
+      ? (componentRegistry[pageTree.name] ?? null)
+      : null
+  );
 
-	type Props = {
-    pageTree?: PageTreeNode 
-	}
-
-	let {
-		pageTree = $bindable()
-	}: Props = $props();
-
-  const shouldRender = $derived(pageTree?.type !== "component" || !pageTree.meta.hidden);
+  // Sanitize data.content once — used by components that render rich text
+  const safeContent = $derived(
+    pageTree?.type === "component" && pageTree.data?.content
+      ? DOMPurify.sanitize(pageTree.data.content)
+      : null
+  );
 </script>
 
-{#if pageTree?.type === "root" && pageTree.children.length <= 0}
-  <div class="preview-empty">
-    <svg class="preview-empty__icon" width="64" height="64">
-      <use href="/favicon.svg" />
-    </svg>
-    <h2 class="preview-empty__title">Start Building</h2>
-    <div class="preview-empty__description">
-      Select a build from "My Builds" or go to the "Editor" tab to create a new one
+{#if pageTree?.type === "root"}
+  {#if pageTree.children.length === 0}
+    <div class="preview-empty">
+      <svg class="preview-empty__icon" width="64" height="64">
+        <use href="/favicon.svg" />
+      </svg>
+      <h2 class="preview-empty__title">Start Building</h2>
+      <p class="preview-empty__description">
+        Select a build from "My Builds" or go to the "Editor" tab to create a new one
+      </p>
     </div>
-  </div>
-{/if}
-
-{#if pageTree?.type === "root" && pageTree.children.length > 0}
-	{#each pageTree.children as child}
-		<Self pageTree={child} />
-	{/each}
-{/if}
-
-{#if pageTree?.type === "component" && shouldRender}
-  {#if pageTree.name === "Hero"}
-    <Hero {...pageTree.props}>
-      {#if pageTree.children}
-        {#each pageTree.children as child}
-          <Self pageTree={child} />
-        {/each}
-      {/if}
-    </Hero>
-  {:else if pageTree.name === "HeroCTA"}
-    <HeroCTA {...pageTree.props} />
-  {:else if pageTree.name === "StoryBlock"}
-    <StoryBlock {...pageTree.props}>
-      {#if pageTree.children}
-        {#each pageTree.children as child}
-          <Self pageTree={child} />
-        {/each}
-      {/if}
-    </StoryBlock>
-  {:else if pageTree.name === "StoryCard"}
-    <StoryCard {...pageTree.props}>
-      {#if pageTree.data.content}
-        {@html pageTree.data.content}
-      {/if}
-    </StoryCard>
-  {:else if pageTree.name === "CollectionBlock"}
-    <CollectionBlock {...pageTree.props}>
-      {#if pageTree.data.content}
-        {@html pageTree.data.content}
-      {/if}
-      {#if pageTree.children}
-        {#each pageTree.children as child}
-          <Self pageTree={child} />
-        {/each}
-      {/if}
-    </CollectionBlock>
-  {:else if pageTree.name === "ProductCard"}
-    <ProductCard {...pageTree.props}>
-      {#if pageTree.data.content}
-        {@html pageTree.data.content}
-      {/if}
-    </ProductCard>
-  {:else if pageTree.name === "FeaturedCategories"}
-    <FeaturedCategories {...pageTree.props}>
-      {#if pageTree.children}
-        {#each pageTree.children as child}
-          <Self pageTree={child} />
-        {/each}
-      {/if}
-    </FeaturedCategories>
-  {:else if pageTree.name === "FeaturedCategory"}
-    <FeaturedCategory {...pageTree.props} />
+  {:else}
+    {#each pageTree.children as child}
+      <Self pageTree={child} />
+    {/each}
   {/if}
+{/if}
+
+{#if pageTree?.type === "component" && shouldRender && ResolvedComponent}
+  <ResolvedComponent {...pageTree.props}>
+    {#if pageTree.children}
+      {#each pageTree.children as child}
+        <Self pageTree={child} />
+      {/each}
+    {/if}
+
+    {#if safeContent}
+      {@html safeContent}
+    {/if}
+  </ResolvedComponent>
 {/if}
 
 <style>
@@ -141,7 +84,7 @@
 
   .preview-empty__description {
     color: #555;
-    font-size: .875rem;
+    font-size: 0.875rem;
     text-align: center;
     text-wrap: balance;
   }

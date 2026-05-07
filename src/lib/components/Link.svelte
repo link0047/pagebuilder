@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type Snippet } from "svelte";
+  import type { Snippet } from "svelte";
 
   type Variant = "default" | "underline" | "outlined" | "button";
   type Color = "default" | "primary";
@@ -21,13 +21,13 @@
   }: Props = $props();
 </script>
 
-<a 
+<a
   class="link"
   class:link--color-primary={color === "primary"}
   class:link--underline={variant === "underline"}
   class:link--outlined={variant === "outlined"}
   class:link--button={variant === "button"}
-  {href} 
+  {href}
   {...restProps}>
   {@render children?.()}
 </a>
@@ -39,7 +39,7 @@
     :root {
       --uikit-link-height: 2.5rem;
       --uikit-link-padding-inline: .5rem;
-      
+
       /* Typography */
       --uikit-link-font-size: 1rem;
       --uikit-link-font-weight: 400;
@@ -47,7 +47,7 @@
       --uikit-link-decoration: none;
       --uikit-link-letter-spacing: .04em;
       --uikit-link-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-      
+
       /* Border styles */
       --uikit-link-border-width: 0;
       --uikit-link-border-style: solid;
@@ -59,10 +59,10 @@
       --uikit-link-outline-style: solid;
       --uikit-link-outline-width: 2px;
       --uikit-link-outline-offset: 2px;
-      
+
       /* Default colors */
       --uikit-link-bg-color: initial;
-      
+
       /* Hover state */
       --uikit-link-hover-bg-color: initial;
       --uikit-link-hover-color: #616161;
@@ -116,7 +116,7 @@
     .link--underline {
       --uikit-link-decoration: underline;
     }
-    
+
     .link--outlined {
       --uikit-link-border-width: 2px;
       --uikit-link-border-color: #333335;

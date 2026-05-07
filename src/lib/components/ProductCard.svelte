@@ -7,7 +7,7 @@
 		href?: string;
 		src?: { desktop: string; mobile: string };
 		name: string;
-		price: { original: number; sale?: number };
+		price: { original: number; sale?: number | null };
 		onAddToCart?: () => void | Promise<void>;
 		isAddingToCart?: boolean;
 		badge?: Snippet;

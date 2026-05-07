@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { LayoutProps } from "./$types";
+
   import { page } from "$app/state";
   import AppHeader from "$lib/components/AppHeader.svelte";
   import NavigationRail from "$lib/components/NavigationRail.svelte";
@@ -12,117 +14,115 @@
   import Menu from "$lib/components/Menu.svelte";
   import MenuItem from "$lib/components/MenuItem.svelte";
   import { setAppState } from "$lib/components/app-state.svelte";
-  import type { LayoutProps } from "./$types";
+  import SplitButton from "$lib/components/SplitButton.svelte";
+  import Dialog from "$lib/components/Dialog.svelte";
+  import EditLabel from "$lib/components/EditLabel.svelte";
+
   import { copyToClipboard } from "$lib/utils/clipboard";
   import { attempt } from "$lib/utils/attempt";
   import { getInitials } from "$lib/utils/getInitials";
+  import { generateBuildName } from "$lib/utils/buildName";
+  import { downloadHTML } from "$lib/utils/fileUtils";
+
   import { signout, getUser } from "$lib/api/auth.remote";
-  import { createBuild, updateBuild } from "$lib/api/builds.remote";
-  import Badge from "$lib/components/Badge.svelte";
-  import ModeIndicator from "$lib/components/ModeIndicator.svelte";
-  import SplitButton from "$lib/components/SplitButton.svelte";
+  import { createBuild, updateBuild, deleteBuild } from "$lib/api/builds.remote";
 
   let {
     children
   }: LayoutProps = $props();
 
-  let avatarRef = $state<HTMLButtonElement>();
-  let isCopied = $state(false);
-  let isLoading = $state(false);
-
   const appState = setAppState();
-  const copyButtonText = $derived(() => {
-    if (isLoading) return "Copying...";
-    if (isCopied) return "Copied!";
-    return "Copy Code";
-  });
 
-  async function handleCopyHTML() {
-    isLoading = true;
+  let avatarRef = $state<HTMLButtonElement>();
+  let exitDialogDisclosure = $state<HTMLButtonElement>();
+  let isSaving = $state(false);
+  let showExitModal = $state(false);
+  let cachedHTML = $state<string | null>(null);
+  let isRenaming = $state(false);
 
-    try {
-      const formData = new FormData();
-      formData.append("props", JSON.stringify({ pageTree: appState?.pageTree }));
+  const { name } = await getUser();
+  const userInitials = getInitials(name);
 
-      const [fetchError, response] = await attempt(
-        fetch("/api/generate-html", {
-          method: "POST",
-          body: formData
-        })
-      );
+  function createStatusManager<T extends string>(initial: T) {
+    let status = $state(initial);
+    let timer: ReturnType<typeof setTimeout>;
 
-      if (fetchError) {
-        console.error("Fetch error:", fetchError);
-        return;
+    function set(value: T, duration?: number) {
+      status = value;
+      clearTimeout(timer);
+      if (duration) {
+        timer = setTimeout(() => (status = initial), duration);
       }
-
-      if (!response.ok) {
-        console.error(`HTTP error! status: ${response.status}`);
-        return;
-      }
-
-      const [parseError, res] = await attempt(response.json());
-
-      if (parseError) {
-        console.error("JSON parse error:", parseError);
-        return;
-      }
-
-      if (!res.success || !res.html) {
-        console.error("Invalid response:", res);
-        return;
-      }
-
-      const [copyError, copySuccess] = await attempt(copyToClipboard(res.html));
-
-      if (copyError || !copySuccess) {
-        console.error("Failed to copy to clipboard:", copyError);
-        return;
-      }
-
-      // Success!
-      isCopied = true;
-      console.log("HTML copied to clipboard");
-
-      // Reset success state after 2 seconds
-      setTimeout(() => {
-        isCopied = false;
-      }, 2000);
-
-    } finally {
-      isLoading = false;
     }
+
+    return {
+      get status() { return status; },
+      set,
+    };
   }
 
-  function generateHomepageTimestamp() {
-    const now = new Date();
-    const dateOptions: Intl.DateTimeFormatOptions = {
-      month: "short",
-      day: "numeric",
-      year: "numeric"
-    };
+  const copy = createStatusManager<"idle" | "copying" | "copied" | "error">("idle");
+  const save = createStatusManager<"idle" | "saved" | "error">("idle");
 
-    const formattedDate = now.toLocaleDateString("en-US", dateOptions);
+  const copyButtonText = $derived(
+    copy.status === "copying" ? "Copying..." :
+    copy.status === "copied"  ? "Copied!"    :
+    copy.status === "error"   ? "Failed"     :
+    "Copy Code"
+  );
 
-    return `Homepage - ${formattedDate}`;
+  async function generateHTML(): Promise<string | null> {
+    if (cachedHTML) return cachedHTML;
+
+    const formData = new FormData();
+    formData.append("props", JSON.stringify({ pageTree: appState.pageTree }));
+
+    const [fetchError, response] = await attempt(
+      fetch("/api/generate-html", { method: "POST", body: formData })
+    );
+
+    if (fetchError || !response.ok) return null;
+
+    const [parseError, res] = await attempt(response.json());
+
+    if (parseError || !res.success || !res.html) return null;
+
+    cachedHTML = res.html;
+    return cachedHTML;
+  }
+
+  async function handleCopyHTML() {
+    if (copy.status === "copying" || copy.status === "error") return;
+    copy.set("copying");
+
+    const html = await generateHTML();
+    if (!html) { copy.set("error", 3000); return; }
+
+    const [copyError, copySuccess] = await attempt(copyToClipboard(html));
+    if (copyError || !copySuccess) { copy.set("error", 3000); return; }
+
+    copy.set("copied", 2000);
+  }
+
+  async function handleDownloadHTML() {
+    const html = await generateHTML();
+    if (!html) return; // optionally surface an error state here too
+    downloadHTML(html, `${appState.buildName ?? "homepage"}.html`);
   }
 
   async function saveBuild() {
-    const content = $state.snapshot(appState.pageTree);
-    const name = generateHomepageTimestamp();
+    if (isSaving || !appState.isDirty) return;
+
+    isSaving = true;
+    save.set("idle");
+
+    const { content, isNew, id } = appState.getSavePayload();
+    const name = appState.buildName ?? generateBuildName("Homepage");
 
     try {
-      console.log({ currentBuildId: appState.currentBuildId });
-
-      if (appState.currentBuildId) {
-        await updateBuild({
-          id: appState.currentBuildId,
-          content,
-          name
-        });
-
-        // update this later to provide user feedback (inline alert most likely)
-        console.log("build updated successfully");
+      if (!isNew && id) {
+        await updateBuild({ id, content, name });
+        appState.onSaveSuccess(id, name);
       } else {
         const newBuild = await createBuild({
           name,
@@ -130,15 +130,55 @@
           content,
           thumbnailUrl: "https://placehold.co/400x400"
         });
-
-        // update this later to provide user feedback (inline alert most likely)
-        console.log("Build created successfully");
-        console.log({ newBuild });
+        appState.onSaveSuccess(newBuild.id, name);
       }
+
+      // clear dirty state - currently read-only prop
+      save.set("saved", 2500);
     } catch (error) {
-      // update this later to provide user feedback (inline alert most likely)
       console.error("Failed to save build", error);
+      save.set("error"); // no auto-dismiss — user must see that save failed
+    } finally {
+      isSaving = false;
     }
+  }
+
+  async function handleRename(name: string) {
+    if (!appState.currentBuildId || !name.trim()) return;
+
+    await updateBuild({
+      id: appState.currentBuildId,
+      name
+    });
+
+    appState.renameBuild(name);
+  }
+
+  async function handleDelete() {
+    if (!appState.currentBuildId) return;
+    await deleteBuild({ id: appState.currentBuildId });
+    appState.clearBuild();
+  }
+
+  function handleExit() {
+    if (appState.isDirty) {
+      showExitModal = true;
+    } else {
+      appState.clearBuild();
+    }
+  }
+
+  async function handleSaveAndExit() {
+    await saveBuild();
+    setTimeout(() => {
+      showExitModal = false;
+      appState.clearBuild();
+    }, 250);
+  }
+
+  function handleDiscardAndExit() {
+    showExitModal = false;
+    setTimeout(() => appState.clearBuild(), 250);
   }
 
   const activeRoute = $derived.by(() => {
@@ -151,27 +191,35 @@
 
   $effect(() => {
     if (activeRoute !== "editor") {
-      appState.closePropertiesPanel();
+      appState.deselectComponent();
     }
   });
-
-  const { name } = await getUser();
-
-  const userInitials = getInitials(name);
 </script>
 
 {#snippet headerLeading()}
-  <!-- <Button color="neutral">
-    <Icon size="16">
-      <use href="#exit" />
+  <a href="/" class="app-title">
+    <Icon viewBox="0 0 100 100" size="3rem">
+      <use href="#logo" />
     </Icon>
-    Exit
-  </Button> -->
-  <span class="app-title">Page Builder</span>
-  <Badge color="primary" shape="pill">
-    <ModeIndicator mode="preview" />
-    Editing
-  </Badge>
+  </a>
+
+  {#if appState.currentBuildId}
+    <Button size="sm" variant="ghost" bind:ref={exitDialogDisclosure} onclick={handleExit}>
+      <Icon>
+        <use href="#exit-to-app" />
+      </Icon>
+      Exit editing
+    </Button>
+    <EditLabel size="sm" variant="ghost" value={appState.buildName} bind:editMode={isRenaming} oncommit={handleRename}>
+      {#snippet menuItems()}
+        <MenuItem onclick={() => isRenaming = true}>Rename</MenuItem>
+        <MenuItem onclick={handleDelete}>Delete</MenuItem>
+      {/snippet}
+    </EditLabel>
+    {#if save.status === "saved"}
+      <span class="app-save-status">Saved</span>
+    {/if}
+  {/if}
 {/snippet}
 
 {#snippet headerTrailing()}
@@ -194,27 +242,32 @@
   </SegmentedControl>
   <Button
     color="success"
-    disabled={isLoading}
-    onclick={handleCopyHTML}>
+    disabled={copy.status === "copying" || copy.status === "error"}
+    onclick={handleCopyHTML}
+  >
     <Icon size={16}>
       <use href="#content-copy" />
     </Icon>
-    {copyButtonText()}
+    {copyButtonText}
   </Button>
-  <SplitButton onclick={saveBuild} disabled={appState.pageTree.children.length === 0}>
+  <SplitButton
+    onclick={saveBuild}
+    disabled={appState.pageTree.children.length === 0 || !appState.isDirty}
+    loading={isSaving}
+  >
     Save
     {#snippet menuItems()}
-      <MenuItem>
+      <MenuItem onclick={handleDownloadHTML}>
         <Icon>
-          <use href="#download" />
+          <use href="#download-circle-outline" />
         </Icon>
-        Download
+        Download HTML
       </MenuItem>
       <MenuItem>
         <Icon>
-          <use href="#share" />
+          <use href="#duplicate" />
         </Icon>
-        Share
+        Save as Template
       </MenuItem>
     {/snippet}
   </SplitButton>
@@ -237,6 +290,34 @@
     </Menu>
   {/if}
 {/snippet}
+
+<Dialog
+  title="Unsaved changes"
+  bind:open={showExitModal}
+  trigger={false}
+  disclosure={exitDialogDisclosure}
+  closeOnOutsideClick={false}
+  closeOnEsc={false}
+  hasBackdrop={true}
+  hasCloseButton={false}
+>
+  {#snippet children()}
+    <p>You have unsaved changes to "{appState.buildName}". What would you like to do before exiting?</p>
+  {/snippet}
+  {#snippet footer()}
+    <div class="exit-dialog-actions">
+      <Button color="primary" fullWidth onclick={handleSaveAndExit}>
+        Save and exit
+      </Button>
+      <Button color="danger" variant="ghost" fullWidth onclick={handleDiscardAndExit}>
+        Discard changes and exit
+      </Button>
+      <Button variant="ghost" fullWidth onclick={() => showExitModal = false}>
+        Cancel
+      </Button>
+    </div>
+  {/snippet}
+</Dialog>
 
 <Iconset>
   <symbol id="desktop">
@@ -294,6 +375,9 @@
 	<symbol id="duplicate">
 		<path d="M11,17H4A2,2 0 0,1 2,15V3A2,2 0 0,1 4,1H16V3H4V15H11V13L15,16L11,19V17M19,21V7H8V13H6V7A2,2 0 0,1 8,5H19A2,2 0 0,1 21,7V21A2,2 0 0,1 19,23H8A2,2 0 0,1 6,21V19H8V21H19Z" />
 	</symbol>
+	<symbol id="download-circle-outline">
+	  <path d="M8 17V15H16V17H8M16 10L12 14L8 10H10.5V6H13.5V10H16M12 2C17.5 2 22 6.5 22 12C22 17.5 17.5 22 12 22C6.5 22 2 17.5 2 12C2 6.5 6.5 2 12 2M12 4C7.58 4 4 7.58 4 12C4 16.42 7.58 20 12 20C16.42 20 20 16.42 20 12C20 7.58 16.42 4 12 4Z" />
+	</symbol>
 	<symbol id="delete">
 		<path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
 	</symbol>
@@ -312,8 +396,21 @@
   <symbol id="pencil-outline">
     <path d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z" />
   </symbol>
-  <symbol id="exit">
+  <symbol id="exit-to-app">
     <path  d="M11.7,5h4.7c.5,0,1,0,1.3,0,.4,0,.7,0,1.1.3.5.3.9.7,1.2,1.2.2.3.2.7.3,1.1,0,.4,0,.8,0,1.3v5.9c0,.5,0,1,0,1.3,0,.4,0,.7-.3,1.1-.3.5-.7.9-1.2,1.2-.3.2-.7.2-1.1.3-.4,0-.8,0-1.3,0h-4.9c-.2,0-.3,0-.5,0-1.3-.1-2.3-1.2-2.5-2.5,0-.1,0-.3,0-.5h0c0-.5.3-.8.8-.8s.8.3.8.8,0,.3,0,.4c0,.6.5,1.1,1.1,1.1,0,0,.1,0,.4,0h4.8c.6,0,1,0,1.3,0,.3,0,.4,0,.5-.1.2-.1.4-.3.5-.5,0,0,0-.2.1-.5,0-.3,0-.7,0-1.3v-5.9c0-.6,0-1,0-1.3,0-.3,0-.4-.1-.5-.1-.2-.3-.4-.5-.5l.3-.7-.3.7c0,0-.2,0-.5-.1-.3,0-.7,0-1.3,0h-4.6c-.5,0-.6,0-.7,0-.5,0-.9.5-1,1,0,.1,0,.2,0,.7s-.3.8-.8.8-.8-.3-.8-.8h0c0-.5,0-.8,0-1,.2-1.1,1.1-1.9,2.2-2.2.3,0,.6,0,1,0h0ZM6.1,12.5l1,1c.3.3.3.8,0,1.1-.3.3-.8.3-1,0l-2.2-2.2c-.3-.3-.3-.8,0-1.1l2.2-2.2c.3-.3.8-.3,1.1,0,.3.3.3.8,0,1.1,0,0,0,0,0,0l-1,1h6.7c.4,0,.8.3.8.8s-.3.8-.8.8h-6.7Z"/>
+  </symbol>
+  <symbol id="logo">
+    <rect x="25" y="70" width="50" height="8" rx="1" fill="none" stroke="#111" stroke-width="2.5"/>
+    <rect x="28" y="56" width="20" height="12" rx="1" fill="none" stroke="#111" stroke-width="2.5"/>
+    <rect x="52" y="50" width="12" height="18" rx="1" fill="none" stroke="#111" stroke-width="2.5"/>
+    <rect x="30" y="46" width="10" height="8" rx="1" fill="none" stroke="#111" stroke-width="2.5"/>
+    <rect x="42" y="42" width="16" height="12" rx="1" fill="none" stroke="#111" stroke-width="2.5"/>
+    <rect x="32" y="30" width="12" height="14" rx="1" fill="none" stroke="#111" stroke-width="2.5"/>
+    <rect x="48" y="34" width="8" height="6" rx="1" fill="none" stroke="#111" stroke-width="2.5"/>
+    <rect x="58" y="36" width="10" height="8" rx="1" fill="none" stroke="#111" stroke-width="2.5"/>
+    <rect x="34" y="24" width="6" height="4" rx="0.5" fill="none" stroke="#111" stroke-width="2.5"/>
+    <rect x="42" y="22" width="8" height="6" rx="0.5" fill="none" stroke="#111" stroke-width="2.5"/>
+    <rect x="52" y="26" width="6" height="5" rx="0.5" fill="none" stroke="#111" stroke-width="2.5"/>
   </symbol>
 </Iconset>
 
@@ -364,8 +461,23 @@
   }
 
   .app-title {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-flow: column nowrap;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     font-weight: 700;
-    font-size: 1rem;
+    font-size: .75rem;
+    line-height: 1;
+    gap: 0;
+  }
+
+  .app-title:is(:link, :visited) {
+    color: #212121;
+    text-decoration: none;
+  }
+
+  .app-save-status {
+    font-size: .875rem;
   }
 </style>

@@ -17,7 +17,7 @@
   import { getAppState } from "$lib/components/app-state.svelte";
   import { goto } from "$app/navigation";
   import Badge from "$lib/components/Badge.svelte";
-  import { type RemoteQuery } from "@sveltejs/kit";
+  import type { RemoteQuery } from "@sveltejs/kit";
 
   const BUILDS_TABS = {
     ALL: "all",
@@ -25,16 +25,6 @@
   } as const;
 
   type BuildsTab = typeof BUILDS_TABS[keyof typeof BUILDS_TABS];
-
-  type BuildData = {
-    id: string;
-    name: string;
-    build_type: string;
-    updated_at: string;
-    content: any; // or RootNode if you import it
-    thumbnail_url: string | null;
-    author: string;
-  };
 
   let isDialogOpen = $state(false);
   let newBuildButtonRef = $state<HTMLButtonElement>();
@@ -46,7 +36,7 @@
   const templates = ["Blank", "Spencer's Homepage", "Spirit Homepage"];
   const buildsQuery = getBuilds();
   const userBuildsQuery = getUserBuilds();
-  
+
   let recentBuilds = $derived.by(() => {
     return buildsQuery.current?.slice(0, 5) ?? [];
   });
@@ -55,14 +45,14 @@
     return activeBuildsTab === BUILDS_TABS.MY_BUILDS ? userBuildsQuery : buildsQuery;
   });
 
-  function editBuild(build: BuildData) {
+  function editBuild(build: BuildResult) {
+    appState.loadBuild(build?.content, build.id, build.name);
     goto("/editor");
-    appState.loadBuild(build?.content, build.id);
   }
 
-  async function handleDeletingBuild(build: BuildData) {
+  async function handleDeletingBuild(build: BuildResult) {
     const { id } = build;
-    
+
     try {
       await deleteBuild({ id });
       // Refresh both queries to keep them in sync
@@ -73,9 +63,9 @@
     }
   }
 
-  async function handleDuplicatingBuild(build: BuildData) {
+  async function handleDuplicatingBuild(build: BuildResult) {
     const { id } = build;
-    
+
     try {
       await duplicateBuild({ id });
       // Refresh both queries to keep them in sync
@@ -90,7 +80,7 @@
   $effect(() => {
     const allBuilds = buildsQuery.current ?? [];
     const allBuildIds = new Set(allBuilds.map(b => b.id));
-    
+
     // Remove refs for builds that no longer exist in all builds
     Object.keys(allBuildMoreButtonRefs).forEach(id => {
       if (!allBuildIds.has(id)) {
@@ -103,7 +93,7 @@
   $effect(() => {
     const myBuilds = userBuildsQuery.current ?? [];
     const myBuildIds = new Set(myBuilds.map(b => b.id));
-    
+
     // Remove refs for builds that no longer exist in my builds
     Object.keys(myBuildMoreButtonRefs).forEach(id => {
       if (!myBuildIds.has(id)) {
@@ -140,10 +130,10 @@
                   Edit
                 </Button>
               {/if}
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                shape="circle" 
+              <Button
+                variant="ghost"
+                size="sm"
+                shape="circle"
                 bind:ref={moreButtonRefs[build.id]}
               >
                 <Icon size="16">
@@ -162,7 +152,7 @@
                   {/snippet}
                   Duplicate
                 </MenuItem>
-                <MenuItem 
+                <MenuItem
                   onclick={() => handleDeletingBuild(build)}
                   disabled={appState.currentBuildId === build.id}
                 >
@@ -193,7 +183,7 @@
       New
     </Button>
     <Dialog
-      title="Create New Build" 
+      title="Create New Build"
       disclosure={newBuildButtonRef}
       size="lg"
       bind:open={isDialogOpen}
@@ -210,7 +200,7 @@
             {/each}
           </div>
         </section>
-        
+
         <section class="build-section build-section--recent" aria-labelledby="start-from-recent-heading">
           <h3 class="build-section__heading" id="start-from-recent-heading">Start From Recent</h3>
           <div class="build-section__wrapper">
@@ -266,14 +256,14 @@
 		flex-direction: column;
 		gap: 1rem;
 	}
-	
+
 	.build-section__heading {
 		font-size: 1rem;
 		margin: 0;
 		line-height: 1;
 		color: #4f4f4f;
 	}
-	
+
 	.build-section__wrapper {
 		display: flex;
 		flex-direction: row;
@@ -284,14 +274,14 @@
     flex-direction: column;
     gap: .5rem;
   }
-	
+
 	.build-card {
 		display: flex;
 		flex-direction: column;
 		gap: .25rem;
 		align-items: center;
 	}
-	
+
 	.build-card__screenshot {
 		display: flex;
 		width: 120px;

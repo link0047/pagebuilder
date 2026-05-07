@@ -4,9 +4,9 @@
 
 	type Variant = "default" | "filled" | "outlined" | "ghost" | "tabs" | "flush";
 	type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default"
-	type Size = "xs" | "small" | "sm" | "medium" | "md" | "large" | "lg" | "xl";
+	type Size = "xs" | "sm" |  "md" | "large" | "lg" | "xl";
 	type Shape = "default" | "square" | "pill";
-	
+
 	type Props = {
     ref?: HTMLButtonElement
 		children?: Snippet,
@@ -21,7 +21,7 @@
 
 	const controlState = getSegmentedControlState();
 	const styleContext = getContext("segmented-style") || {};
-	
+
 	let {
 		ref = $bindable(),
 		children,
@@ -50,13 +50,13 @@
 		const buttonValue = value?.toString() || ref?.textContent?.trim() || "";
 		buttonIndex = controlState.registerButton(buttonValue);
 	});
-	
+
 	onDestroy(() => {
 		if (buttonIndex !== -1) {
 			controlState.unregisterButton(buttonIndex);
 		}
 	});
-	
+
 	const isSelected = $derived(controlState.selectedIndex === buttonIndex && buttonIndex !== -1);
 </script>
 
@@ -84,7 +84,7 @@
 	    --uikit-segmented-button-height: 2.5rem;
 	    --uikit-segmented-button-gap: 1ch;
 	    --uikit-segmented-button-padding-inline: 1rem;
-	    
+
 	    /* Typography */
 	    --uikit-segmented-button-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 			--uikit-segmented-button-font-size: .875rem;
@@ -97,26 +97,26 @@
 	    --uikit-segmented-button-border-style: solid;
 	    --uikit-segmented-button-border-color: #333335;
 	    --uikit-segmented-button-border-radius: .5rem;
-	    
+
 	    /* Default colors */
 	    --uikit-segmented-button-bg-color: #fff;
-	    
+
 	    /* Hover state */
 	    --uikit-segmented-button-hover-bg-color: #555659;
 	    --uikit-segmented-button-hover-border-color: #555659;
-	    
+
 	    /* Focus state */
 	    --uikit-segmented-button-outline-color: #007acc;
 	    --uikit-segmented-button-outline-style: solid;
 	    --uikit-segmented-button-outline-width: 2px;
 	    --uikit-segmented-button-outline-offset: 0;
-	    
+
 	    /* Disabled state */
 	    --uikit-segmented-button-disabled-bg-color: #eeeeef;
 	    --uikit-segmented-button-disabled-font-color: #444547;
 	    --uikit-segmented-button-disabled-font-weight: 400;
 	    --uikit-segmented-button-disabled-border-color: #eeeeef;
-	    
+
 	    /* Animation */
 	    --uikit-segmented-button-transition-duration: 0.2s;
 	    --uikit-segmented-button-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
@@ -164,21 +164,21 @@
     --uikit-segmented-button-padding-inline: 0.5rem;
     --uikit-segmented-button-gap: 0.25rem;
   }
-  
+
   .uikit-segmented-button--size-sm {
     --uikit-segmented-button-height: 2rem;
     --uikit-segmented-button-font-size: 0.8125rem;
     --uikit-segmented-button-padding-inline: 0.75rem;
     --uikit-segmented-button-gap: 0.375rem;
   }
-  
+
   .uikit-segmented-button--size-lg {
     --uikit-segmented-button-height: 3rem;
     --uikit-segmented-button-font-size: 1rem;
     --uikit-segmented-button-padding-inline: 1.5rem;
     --uikit-segmented-button-gap: 0.625rem;
   }
-  
+
   .uikit-segmented-button--size-xl {
     --uikit-segmented-button-height: 3.5rem;
     --uikit-segmented-button-font-size: 1.125rem;

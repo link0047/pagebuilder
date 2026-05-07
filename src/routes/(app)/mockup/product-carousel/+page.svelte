@@ -3,6 +3,7 @@
 	import CollectionBlockItem from "$lib/components/CollectionBlockItem.svelte";
 
 	const products = [{
+		"href": "#<product-url>",
 		"src": {
 			"desktop": "https://spencers.scene7.com/is/image/Spencers/04559738%2Da?fmt=webp&wid=300&hei=300",
 			"mobile": "https://spencers.scene7.com/is/image/Spencers/04559738%2Da?fmt=webp&wid=300&hei=300"
@@ -14,6 +15,7 @@
 		},
 		"badge": "New lower price"
 	}, {
+		"href": "#<product-url>",
 		"src": {
 			"desktop": "https://spencers.scene7.com/is/image/Spencers/08608945%2Da?fmt=webp&wid=300&hei=300",
 			"mobile": "https://spencers.scene7.com/is/image/Spencers/08608945%2Da?fmt=webp&wid=300&hei=300"
@@ -24,6 +26,7 @@
 			"sale": null
 		}
 	}, {
+		"href": "#<product-url>",
 		"src": {
 			"desktop": "https://spencers.scene7.com/is/image/Spencers/04662813%2Db?fmt=webp&wid=300&hei=300",
 			"mobile": "https://spencers.scene7.com/is/image/Spencers/04662813%2Db?fmt=webp&wid=300&hei=300"
@@ -34,6 +37,7 @@
 			"sale": null
 		}
 	}, {
+		"href": "#<product-url>",
 		"src": {
 			"desktop": "https://spencers.scene7.com/is/image/Spencers/04789871%2Da?fmt=webp&wid=300&hei=300",
 			"mobile": "https://spencers.scene7.com/is/image/Spencers/04789871%2Da?fmt=webp&wid=300&hei=300"
@@ -45,6 +49,7 @@
 		},
 		"badge": "Bestseller"
 	}, {
+		"href": "#<product-url>",
 		"src": {
 			"desktop": "https://spencers.scene7.com/is/image/Spencers/04703450%2Da?fmt=webp&wid=300&hei=300",
 			"mobile": "https://spencers.scene7.com/is/image/Spencers/04703450%2Da?fmt=webp&wid=300&hei=300"
@@ -55,6 +60,7 @@
 			"sale": null
 		}
 	}, {
+		"href": "#<product-url>",
 		"src": {
 			"desktop": "https://spencers.scene7.com/is/image/Spencers/04714705%2Da?fmt=webp&wid=300&hei=300",
 			"mobile": "https://spencers.scene7.com/is/image/Spencers/04714705%2Da?fmt=webp&wid=300&hei=300"
@@ -65,6 +71,7 @@
 			"sale": null
 		}
 	}, {
+		"href": "#<product-url>",
 		"src": {
 			"desktop": "https://spencers.scene7.com/is/image/Spencers/04813978%2Da?fmt=webp&wid=300&hei=300",
 			"mobile": "https://spencers.scene7.com/is/image/Spencers/04813978%2Da?fmt=webp&wid=300&hei=300"
@@ -75,6 +82,7 @@
 			"sale": null
 		}
 	}, {
+		"href": "#<product-url>",
 		"src": {
 			"desktop": "https://spencers.scene7.com/is/image/Spencers/04881009%2Da?fmt=webp&wid=300&hei=300",
 			"mobile": "https://spencers.scene7.com/is/image/Spencers/04881009%2Da?fmt=webp&wid=300&hei=300"
@@ -85,6 +93,7 @@
 			"sale": null
 		}
 	}, {
+		"href": "#<product-url>",
 		"src": {
 			"desktop": "https://spencers.scene7.com/is/image/Spencers/04786497%2Da?fmt=webp&wid=300&hei=300",
 			"mobile": "https://spencers.scene7.com/is/image/Spencers/04786497%2Da?fmt=webp&wid=300&hei=300"
@@ -95,6 +104,7 @@
 			"sale": null
 		}
 	}, {
+		"href": "#<product-url>",
 		"src": {
 			"desktop": "https://spencers.scene7.com/is/image/Spencers/04831269%2Da?fmt=webp&wid=300&hei=300",
 			"mobile": "https://spencers.scene7.com/is/image/Spencers/04831269%2Da?fmt=webp&wid=300&hei=300"

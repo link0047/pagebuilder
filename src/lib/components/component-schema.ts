@@ -28,7 +28,7 @@ type ComponentSchema = {
 };
 
 // Define component names as a union type
-export type ComponentName = "Hero" | "ProductCard" | "StoryBlock" | "StoryCard" | "FeaturedCategories" | "FeaturedCategory";
+export type ComponentName = "Hero" | "ProductCard" | "StoryBlock" | "StoryCard" | "FeaturedCategories" | "FeaturedCategory" | "CollectionBlock" | "CollectionBlockItem";
 
 export const componentSchemas: Record<ComponentName, ComponentSchema> = {
   Hero: {
@@ -378,6 +378,56 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
     ]
   },
 
+  CollectionBlock: {
+    sections: [
+      {
+        title: "Styling",
+        controls: [
+          {
+            type: "colorpicker",
+            label: "Background Color",
+            property: "props.backgroundColor",
+            defaultValue: "#fff"
+          }
+        ]
+      }
+    ],
+  },
+
+  CollectionBlockItem: {
+    sections: [
+      {
+        title: "Content",
+        controls: [
+          {
+            type: "textfield",
+            label: "Title",
+            property: "props.title",
+            placeholder: "Story title"
+          },
+          {
+            type: "segmentedbutton",
+            label: "Title Alignment",
+            property: "props.titleAlignment",
+            options: ["left", "center", "right"],
+            defaultValue: "center"
+          },
+        ]
+      },
+      {
+        title: "Styling",
+        controls: [
+          {
+            type: "colorpicker",
+            label: "Background Color",
+            property: "props.backgroundColor",
+            defaultValue: "#fff"
+          }
+        ]
+      }
+    ]
+  },
+
   StoryCard: {
     sections: [
       {
@@ -467,7 +517,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                       { value: "span 11", text: "Span 11 columns" },
                       { value: "span 12", text: "Span 12 columns" }
                     ]
-                  }, 
+                  },
                   {
                     type: "select",
                     label: "Row Span",
@@ -576,7 +626,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             label: "Details",
             property: "props.supportingText",
             placeholder: "Enter subhead"
-          }, 
+          },
           {
             type: "segmentedbutton",
             label: "Text Alignment",
@@ -585,7 +635,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             defaultValue: "center"
           }
         ]
-      }, 
+      },
       {
         title: "Promo Badge",
         controls: [
@@ -600,7 +650,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             label: "Badge Text",
             property: "props.promo.value",
             placeholder: "e.g., $4, 40%, $15.99, Free"
-          }, 
+          },
           {
             type: "select",
             label: "Badge Position",
@@ -656,7 +706,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             type: "select",
             label: "Heading Level",
             property: "props.headingLevel",
-            description: "Choose appropiate headin level for document structure",
+            description: "Choose appropriate heading level for document structure",
             defaultValue: "2",
             options: [
               { value: "1", text: "H1 - Section heading" },
@@ -682,7 +732,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             label: "Category Text",
             property: "props.text",
             placeholder: "Category Name"
-          }, 
+          },
           {
             type: "textfield",
             label: "Link URL",
@@ -690,7 +740,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             placeholder: "https://example.com/category"
           }
         ]
-      }, 
+      },
       {
         title: "Image",
         controls: [

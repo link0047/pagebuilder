@@ -1,42 +1,65 @@
 import { getContext, setContext, tick } from "svelte";
 import { scrollLock } from "$lib/utils/scroll-lock";
 
-type GetValue = () => boolean;
-type SetValue = (value: boolean) => void;
-type ElementRef = HTMLElement | undefined | null;
+type Getter<T> = () => T;
+type Setter<T> = (value: T) => void;
+type MaybeElement = HTMLElement | undefined | null;
 
 const DIALOG_KEY = Symbol("DIALOG");
+
+export interface DialogOptions {
+  closeOnEsc: boolean;
+  closeOnOutsideClick: boolean;
+}
 
 class DialogState {
   static #id = 0;
   static #FOCUSABLE_SELECTOR = ":is(input:not([type='hidden']):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), summary:not([disabled]), a[href], [tabindex]:not([tabindex='-1']), iframe, object, embed, area[href], audio[controls], video[controls], [contenteditable]:not([contenteditable='false'])):not([inert])";
+
   #dialogId;
   #dialogDisclosureId;
   #dialogTitleId;
   #dialogContentId;
-  #dialogElement = $state<ElementRef>(null);
-  #disclosure = $state<ElementRef>(null);
-  #getValue: GetValue;
-	#setValue: SetValue;
+  #dialogElement = $state<MaybeElement>(null);
+  #disclosure = $state<MaybeElement>(null);
+  #getValue: Getter<boolean>;
+  #setValue: Setter<boolean>;
+  #options: Getter<DialogOptions>;
+  #trigger: Getter<boolean>;
   #controller = new AbortController();
   #disclosureController: AbortController | undefined;
 
-  constructor(getValue: GetValue, setValue: SetValue) {
+
+  constructor(getValue: Getter<boolean>, setValue: Setter<boolean>, getOptions: Getter<DialogOptions>, getTrigger: Getter<boolean>) {
     this.#dialogId = `uikit-dialog-${DialogState.#id++}`;
     this.#dialogDisclosureId = `${this.#dialogId}-disclosure`;
     this.#dialogTitleId = `${this.#dialogId}-title`;
     this.#dialogContentId = `${this.#dialogId}-content`;
     this.#getValue = getValue;
-		this.#setValue = setValue;
+    this.#setValue = setValue;
+    this.#options = getOptions;
+    this.#trigger = getTrigger;
+
+    $effect(() => {
+      if (this.#getValue()) {
+        scrollLock.lock();
+        this.#applyInert(true);
+        tick().then(() => this.#focusFirstElement());
+      } else {
+        scrollLock.unlock();
+        this.#applyInert(false);
+        this.#disclosure?.focus();
+      }
+    });
   }
 
   get id() {
-		return this.#dialogId;
-	}
+    return this.#dialogId;
+  }
 
-	get disclosureId() {
-		return this.#dialogDisclosureId;
-	}
+  get disclosureId() {
+    return this.#dialogDisclosureId;
+  }
 
   get titleId() {
     return this.#dialogTitleId;
@@ -46,66 +69,64 @@ class DialogState {
     return this.#dialogContentId;
   }
 
-  set disclosure(element: ElementRef) {
-    if (this.#disclosureController) {
-      this.#disclosureController.abort();
-      this.#disclosureController = undefined;
-    }
-
+  set disclosure(element: MaybeElement) {
     this.#disclosure = element;
 
-    if (!element) return;
+    if (!element || !(element instanceof HTMLElement)) return;
 
-    if (!(element instanceof HTMLElement)) {
-      console.warn("DialogState: disclosure must be an HTMLElement");
-			return;
-    }
+    if (!element.id) element.id = this.#dialogDisclosureId;
+
+    element.setAttribute("aria-haspopup", "dialog");
+    element.setAttribute("aria-controls", this.#dialogId);
+    element.setAttribute("aria-expanded", String(this.isOpen));
+
+    if (!this.#trigger()) return;
 
     this.#disclosureController = new AbortController();
     const { signal } = this.#disclosureController;
 
-    if (!element.id) {
-      element.id = this.#dialogDisclosureId;
-    }
-
-    element.setAttribute("aria-haspopup", "true");
-		element.setAttribute("aria-controls", this.#dialogId);
-		element.setAttribute("aria-expanded", String(this.isOpen));
-
-    element.addEventListener("click", (event) => {
-      event.stopPropagation();
+    element.addEventListener("click", () => {
       this.toggle();
     }, { signal });
   }
 
-  set dialogElement(element: ElementRef) {
+  set dialogElement(element: MaybeElement) {
     const { signal } = this.#controller;
 
     this.#dialogElement = element;
 
-		document.addEventListener("click", this.#handleClickOutside, { signal, capture: true });
-    document.addEventListener("keydown", this.#handleKeydown, { signal });
-	}
+    document.addEventListener("click", this.#onClickOutside, { signal, capture: true });
+    document.addEventListener("keydown", this.#onKeydown, { signal });
+  }
 
   get isOpen() {
-		return this.#getValue();
-	}
+    return this.#getValue();
+  }
 
-	set isOpen(value: boolean) {
-		this.#setValue(value);
-		
-		if (this.#disclosure) {
-			this.#disclosure.setAttribute("aria-expanded", String(value));
-		}
+  set isOpen(value: boolean) {
+    this.#setValue(value);
 
-    if (value) {
-      scrollLock.lock();
-      tick().then(() => this.#focusFirstElement());
-    } else {
-      scrollLock.unlock();
-      this.#disclosure?.focus();
+    if (this.#disclosure) {
+      this.#disclosure.setAttribute("aria-expanded", String(value));
     }
-	}
+  }
+
+  // Set inert on all siblings of the dialog's portal root to prevent
+  // background interaction for pointer users and assistive technology.
+  #applyInert(open: boolean) {
+    const portalRoot = this.#dialogElement?.closest("[data-portal]") ?? this.#dialogElement?.parentElement;
+    if (!portalRoot) return;
+
+    for (const sibling of Array.from(document.body.children)) {
+      if (sibling !== portalRoot && sibling instanceof HTMLElement) {
+        if (open) {
+          sibling.inert = true;
+        } else {
+          sibling.inert = false;
+        }
+      }
+    }
+  }
 
   #isVisible(element: HTMLElement) {
     if (typeof element.checkVisibility === "function") {
@@ -115,14 +136,14 @@ class DialogState {
       });
     }
 
-    return element.offsetParent !== null; 
+    return element.offsetParent !== null;
   }
 
   #isFocusable(element: HTMLElement) {
     if (
-      element.inert || 
+      element.inert ||
       element.matches(":disabled") ||
-      !this.#isVisible(element) || 
+      !this.#isVisible(element) ||
       element.tabIndex < 0
     ) return false;
 
@@ -137,11 +158,11 @@ class DialogState {
     while (activeElement?.shadowRoot?.activeElement) {
       activeElement = activeElement.shadowRoot.activeElement;
     }
-    
+
     return activeElement;
   }
 
-  #collectFocusableElements(root: Node | ElementRef = this.#dialogElement): HTMLElement[] {
+  #collectFocusableElements(root: Node | MaybeElement = this.#dialogElement): HTMLElement[] {
     if (!root) return [];
 
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
@@ -171,28 +192,29 @@ class DialogState {
     return elements;
   }
 
+  // tick() already waits for DOM updates; no need for an extra rAF frame.
   #focusFirstElement() {
-    requestAnimationFrame(() => {
-      const focusableElements = this.#collectFocusableElements();
-      if (focusableElements.length > 0) {
-        focusableElements[0].focus();
-      } else {
-        this.#dialogElement?.focus();
-      }
-    });
+    const focusableElements = this.#collectFocusableElements();
+    if (focusableElements.length > 0) {
+      focusableElements[0].focus();
+    } else {
+      this.#dialogElement?.focus();
+    }
   }
 
-  #handleKeydown = (event: KeyboardEvent) => {
+  #onKeydown = (event: KeyboardEvent) => {
     if (!this.isOpen) return;
 
     const { key, shiftKey } = event;
 
-		if (key === "Escape" || key === "Esc") {
+    if (key === "Escape" || key === "Esc") {
+      // Guard against the prop being false.
+      if (!this.#options().closeOnEsc) return;
       event.stopPropagation();
-			this.close();
-			this.#disclosure?.focus();
+      this.close();
+      this.#disclosure?.focus();
       return;
-		}
+    }
 
     if (key === "Tab") {
       const focusableElements = this.#collectFocusableElements();
@@ -217,11 +239,12 @@ class DialogState {
         elementToFocus.focus();
       }
     }
-	}
+  }
 
-  #handleClickOutside = ({ target }: MouseEvent) => {
+  #onClickOutside = ({ target }: MouseEvent) => {
     if (
       this.isOpen &&
+      this.#options().closeOnOutsideClick && // Guard against the prop being false.
       !this.#dialogElement?.contains(target as Node) &&
       !this.#disclosure?.contains(target as Node)
     ) {
@@ -230,26 +253,30 @@ class DialogState {
   }
 
   toggle = () => {
-		this.isOpen = !this.isOpen;
-	}
+    this.isOpen = !this.isOpen;
+  }
 
-	open = () =>{
-		this.isOpen = true;
-	}
+  open = () => {
+    this.isOpen = true;
+  }
 
-	close = () => {
-		this.isOpen = false;
-	}
+  close = () => {
+    this.isOpen = false;
+  }
 
-	destroy() {
+  destroy() {
     if (this.#disclosureController) this.#disclosureController.abort();
-	  this.#controller.abort();
-    scrollLock.destroy();
-	}
+    this.#controller.abort();
+    // unlock(), not destroy() — destroying a shared singleton here would
+    // break any other open dialogs on the page.
+    scrollLock.unlock();
+    // Ensure inert is cleaned up if the component is destroyed while open.
+    this.#applyInert(false);
+  }
 }
 
-export function setDialogState(getValue: GetValue, setValue: SetValue) {
-  return setContext(DIALOG_KEY, new DialogState(getValue, setValue));
+export function setDialogState(getValue: Getter<boolean>, setValue: Setter<boolean>, getOptions: Getter<DialogOptions>, getTrigger: Getter<boolean>) {
+  return setContext(DIALOG_KEY, new DialogState(getValue, setValue, getOptions, getTrigger));
 }
 
 export function getDialogState(): DialogState {

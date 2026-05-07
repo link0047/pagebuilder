@@ -1,60 +1,54 @@
 import { getContext, setContext } from "svelte";
+import type { ComponentNode, RootNode, PageTreeNode, TreePath, PreviewMode } from "./types";
+import type { PartialComponentNode } from "./component-registry";
 
 const APP_KEY = Symbol("pagetree");
 
-type ComponentMeta = {
-  locked: boolean;
-  hidden: boolean;
-  label: string;
-  id?: string;
-  parentId?: string;
+const PREVIEW_WIDTHS: Record<PreviewMode, number> = {
+  mobile: 375,
+  tablet: 768,
+  desktop: 1200,
 };
 
-type ComponentNode = {
-  id?: string;
-  type: "component";
-  name: string;
-  meta: ComponentMeta;
-  props: Record<string, any>;
-  data: Record<string, any>;
-  children?: PageTreeNode[];
+const EMPTY_TREE: RootNode = {
+  name: "root",
+  type: "root",
+  children: [],
 };
-
-type RootNode = {
-  name: string;
-  type: "root";
-  children: PageTreeNode[];
-};
-
-type PageTreeNode = RootNode | ComponentNode;
-type TreePath = number[];
-type PreviewMode = "mobile" | "tablet" | "desktop";
 
 class AppState {
-  #isPropertiesPanelOpen = $state(false);
-  selectedComponentPath = $state<number[] | null>(null);
-  selectedComponent = $state<ComponentNode | null>(null);
-  #pageTree = $state<RootNode>({
-		name: "root",
-		type: "root",
-		children: []
-	});
-  #previewMode = $state<PreviewMode>("desktop");
-  #currentBuildId = $state<string | null>(null);
+  // -------------------------
+  // Private state
+  // -------------------------
 
-  constructor() {}
-  
+  #pageTree = $state<RootNode>(structuredClone(EMPTY_TREE));
+  #previewMode = $state<PreviewMode>("desktop");
+
+  #currentBuildId = $state<string | null>(null);
+  #buildName = $state<string | null>(null);
+  #lastSavedAt = $state<Date | null>(null);
+  #isDirty = $state(false);
+
+  #isLocked = $state(false);
+  #lockedBy = $state<string | null>(null);
+
+  #selectedComponentPath = $state<number[] | null>(null);
+  #selectedComponent = $state<ComponentNode | null>(null);
+  #isPropertiesPanelOpen = $state(false);
+
+  #hoveredComponentPath = $state<number[] | null>(null);
+
+  // -------------------------
+  // Getters — page tree
+  // -------------------------
+
   get pageTree(): RootNode {
     return this.#pageTree;
   }
 
-  get isPropertiesPanelOpen() {
-    return this.#isPropertiesPanelOpen;
-  }
-
-  set isPropertiesPanelOpen(value) {
-    this.#isPropertiesPanelOpen = value;
-  }
+  // -------------------------
+  // Getters — preview
+  // -------------------------
 
   get previewMode(): PreviewMode {
     return this.#previewMode;
@@ -65,164 +59,317 @@ class AppState {
   }
 
   get previewWidth(): number {
-    switch (this.#previewMode) {
-      case "mobile":
-        return 375;
-      case "tablet":
-        return 768;
-      case "desktop":
-        return 1200;
-      default:
-        return 1200;
-    }
+    return PREVIEW_WIDTHS[this.#previewMode] ?? PREVIEW_WIDTHS.desktop;
   }
+
+  // -------------------------
+  // Getters — build identity
+  // -------------------------
 
   get currentBuildId(): string | null {
     return this.#currentBuildId;
   }
 
-  set currentBuildId(id: string | null) {
-    this.#currentBuildId = id;
+  get buildName(): string | null {
+    return this.#buildName;
   }
 
-  loadBuild(buildData: RootNode, buildId?: string): void {
-    // Validate that we have a proper root node structure
+  get lastSavedAt(): Date | null {
+    return this.#lastSavedAt;
+  }
+
+  get isDirty(): boolean {
+    return this.#isDirty;
+  }
+
+  // -------------------------
+  // Getters — lock state
+  // -------------------------
+
+  get isLocked(): boolean {
+    return this.#isLocked;
+  }
+
+  get lockedBy(): string | null {
+    return this.#lockedBy;
+  }
+
+  // -------------------------
+  // Getters — selection
+  // -------------------------
+
+  get selectedComponent(): ComponentNode | null {
+    return this.#selectedComponent;
+  }
+
+  get selectedComponentPath(): number[] | null {
+    return this.#selectedComponentPath;
+  }
+
+  get isPropertiesPanelOpen(): boolean {
+    return this.#isPropertiesPanelOpen;
+  }
+
+  // -------------------------
+  // Getters — hover
+  // -------------------------
+
+  get hoveredComponentPath(): number[] | null {
+    return this.#hoveredComponentPath;
+  }
+
+  // -------------------------
+  // Build management
+  // -------------------------
+
+  loadBuild(
+    buildData: RootNode,
+    buildId?: string,
+    buildName?: string,
+  ): void {
     if (!buildData || buildData.type !== "root") {
-      console.error("Invalid build data");
+      console.error("Invalid build data: expected a root node");
       return;
     }
 
-    // Replace the entire page tree with the loaded build
-    this.#pageTree = buildData;
-    this.#currentBuildId = buildId || null; 
-    
-    // Reset selection state when loading a new build
-    this.selectedComponentPath = null;
-    this.selectedComponent = null;
-    this.isPropertiesPanelOpen = false;
+    this.#pageTree = structuredClone(buildData);
+    this.#currentBuildId = buildId ?? null;
+    this.#buildName = buildName ?? null;
+    this.#lastSavedAt = null;
+    this.#isDirty = false;
+    this.#resetSelection();
   }
 
   clearBuild(): void {
-    this.#pageTree = {
-      name: "root",
-      type: "root",
-      children: []
-    };
-    this.selectedComponentPath = null;
-    this.selectedComponent = null;
-    this.isPropertiesPanelOpen = false;
-    this.#currentBuildId = null; // Clear the build ID
+    this.#pageTree = structuredClone(EMPTY_TREE);
+    this.#currentBuildId = null;
+    this.#buildName = null;
+    this.#lastSavedAt = null;
+    this.#isDirty = false;
+    this.#isLocked = false;
+    this.#lockedBy = null;
+    this.#resetSelection();
   }
 
-  addComponent(
-    component: Omit<ComponentNode, "meta"> & { meta: Partial<ComponentMeta> },
+  getSavePayload(): { content: RootNode; isNew: boolean; id: string | null } {
+    return {
+      content: $state.snapshot(this.#pageTree) as RootNode,
+      isNew: !this.#currentBuildId,
+      id: this.#currentBuildId,
+    };
+  }
+
+  onSaveSuccess(id: string, name: string): void {
+    this.#currentBuildId = id;
+    this.#buildName = name;
+    this.#isDirty = false;
+    this.#lastSavedAt = new Date();
+  }
+
+  renameBuild(name: string): void {
+    this.#buildName = name;
+  }
+
+  // -------------------------
+  // Lock management
+  // -------------------------
+
+  acquireLock(userId: string): void {
+    this.#isLocked = true;
+    this.#lockedBy = userId;
+  }
+
+  releaseLock(): void {
+    this.#isLocked = false;
+    this.#lockedBy = null;
+  }
+
+  // -------------------------
+  // Tree mutation
+  // -------------------------
+
+  insertComponent(
+    component: PartialComponentNode,
     path: TreePath = []
   ): void {
     const target = this.getNodeAtPath(path);
     if (!target) return;
 
-    const newComponent: ComponentNode = {
-      ...component,
-      meta: {
-        locked: false,
-        hidden: false,
-        label: component.name,
-        id: crypto.randomUUID(),
-        ...component.meta
-      }
-    };
+    const newComponent = this.#normalizeComponent(component);
 
     if (target.type === "root" || target.children) {
-      target.children = target.children || [];
+      target.children = target.children ?? [];
       target.children.push(newComponent);
+      this.#isDirty = true;
     }
   }
 
   removeComponent(path: TreePath): boolean {
     if (path.length === 0) return false;
-    
+
     const parentPath = path.slice(0, -1);
     const childIndex = path[path.length - 1];
     const parent = this.getNodeAtPath(parentPath);
-    
-    if (!parent || !parent.children || !parent.children[childIndex]) {
-      return false;
-    }
-    
+
+    if (!parent?.children?.[childIndex]) return false;
+
     parent.children.splice(childIndex, 1);
+    this.#isDirty = true;
     return true;
   }
 
-  selectComponentForEditing(path: number[]) {
-    const component = this.getNodeAtPath(path);
-    if (component?.type === "component") {
-      this.selectedComponentPath = path;
-      this.selectedComponent = component;
-      this.isPropertiesPanelOpen = true;
-    }
+  moveComponent(path: TreePath, direction: "up" | "down"): boolean {
+    if (path.length === 0) return false;
+
+    const parentPath = path.slice(0, -1);
+    const index = path[path.length - 1];
+    const parent = this.getNodeAtPath(parentPath);
+
+    if (!parent?.children) return false;
+
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= parent.children.length) return false;
+
+    const children = parent.children;
+    [children[index], children[targetIndex]] = [children[targetIndex], children[index]];
+
+    this.#isDirty = true;
+    return true;
   }
 
-  updateComponentProperty(propertyPath: string, value: any) {
-    if (!this.selectedComponentPath) return;
+  // -------------------------
+  // Selection
+  // -------------------------
 
-    const component = this.getNodeAtPath(this.selectedComponentPath);
+  selectComponent(path: number[]): void {
+    const component = this.getNodeAtPath(path);
     if (component?.type !== "component") return;
 
-    const parts = propertyPath.split(".");
-    const [section, ...keyParts] = parts;
-    
-    let target: Record<string, any>;
-    if (section === "props") {
-      target = component.props;
-    } else if (section === "data") {
-      target = component.data;
-    } else if (section === "meta") {
-      target = component.meta as Record<string, any>;
-    } else {
-      return;
-    }
-
-    if (keyParts.length === 1) {
-      // Simple property like "props.title"
-      target[keyParts[0]] = value;
-    } else {
-      // Nested property like "props.images.desktop" or "props.promo.value"
-      let current = target;
-      
-      // Navigate to the nested property, creating objects as needed
-      for (let i = 0; i < keyParts.length - 1; i++) {
-        const key = keyParts[i];
-        if (!current[key] || typeof current[key] !== 'object') {
-          current[key] = {};
-        }
-        current = current[key];
-      }
-      
-      // Set the final value
-      const finalKey = keyParts[keyParts.length - 1];
-      current[finalKey] = value;
-    }
-
-    // Update the selected component reference to trigger reactivity
-    this.selectedComponent = component;
+    this.#selectedComponentPath = path;
+    this.#selectedComponent = component;
+    this.#isPropertiesPanelOpen = true;
   }
 
-  closePropertiesPanel() {
-    this.isPropertiesPanelOpen = false;
-    this.selectedComponentPath = null;
-    this.selectedComponent = null;
+  deselectComponent(): void {
+    this.#resetSelection();
   }
+
+  // -------------------------
+  // Hover
+  // -------------------------
+
+  hoverComponent(path: number[] | null): void {
+    this.#hoveredComponentPath = path;
+  }
+
+  // -------------------------
+  // Property updates
+  // -------------------------
+
+  updateProperty(propertyPath: string, value: any): void {
+    if (!this.#selectedComponentPath) return;
+
+    const component = this.getNodeAtPath(this.#selectedComponentPath);
+    if (component?.type !== "component") return;
+
+    const target = this.#resolveSection(component, propertyPath);
+    if (!target) return;
+
+    const keyParts = propertyPath.split(".").slice(1);
+    this.#setNestedValue(target, keyParts, value);
+
+    this.#selectedComponent = component;
+    this.#isDirty = true;
+  }
+
+  getPropertyValue(propertyPath: string): any {
+    if (!this.#selectedComponent) return "";
+
+    const source = this.#resolveSection(this.#selectedComponent, propertyPath);
+    if (!source) return "";
+
+    const keyParts = propertyPath.split(".").slice(1);
+    return this.#getNestedValue(source, keyParts) ?? "";
+  }
+
+  // -------------------------
+  // Tree traversal
+  // -------------------------
 
   getNodeAtPath(path: TreePath): PageTreeNode | null {
     let current: PageTreeNode = this.#pageTree;
-    
+
     for (const index of path) {
-      if (!current.children || !current.children[index]) {
-        return null;
-      }
+      if (!current.children?.[index]) return null;
       current = current.children[index];
     }
-    
+
+    return current;
+  }
+
+  // -------------------------
+  // Private helpers
+  // -------------------------
+
+  #normalizeComponent(component: PartialComponentNode): ComponentNode {
+    return {
+      ...component,
+      id: component.id ?? crypto.randomUUID(),
+      meta: {
+        locked: false,
+        hidden: false,
+        label: component.name,
+        ...component.meta,
+        id: crypto.randomUUID(),
+      },
+      children: component.children?.map((child) => this.#normalizeComponent(child)),
+    };
+  }
+
+  #resetSelection(): void {
+    this.#selectedComponentPath = null;
+    this.#selectedComponent = null;
+    this.#isPropertiesPanelOpen = false;
+  }
+
+  #resolveSection(
+    component: ComponentNode,
+    propertyPath: string
+  ): Record<string, any> | null {
+    const section = propertyPath.split(".")[0];
+
+    if (section === "props") return component.props;
+    if (section === "data") return component.data;
+    if (section === "meta") return component.meta as Record<string, any>;
+
+    return null;
+  }
+
+  #setNestedValue(target: Record<string, any>, keyParts: string[], value: any): void {
+    let current = target;
+
+    for (let i = 0; i < keyParts.length - 1; i++) {
+      const key = keyParts[i];
+      if (!current[key] || typeof current[key] !== "object") {
+        current[key] = {};
+      }
+      current = current[key];
+    }
+
+    current[keyParts[keyParts.length - 1]] = value;
+  }
+
+  #getNestedValue(source: Record<string, any>, keyParts: string[]): any {
+    let current = source;
+
+    for (const key of keyParts) {
+      if (current && typeof current === "object" && key in current) {
+        current = current[key];
+      } else {
+        return undefined;
+      }
+    }
+
     return current;
   }
 }
@@ -231,6 +378,6 @@ export function setAppState(): AppState {
   return setContext(APP_KEY, new AppState());
 }
 
-export function getAppState() {
+export function getAppState(): AppState {
   return getContext<AppState>(APP_KEY);
 }

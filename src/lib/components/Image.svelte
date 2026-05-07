@@ -8,7 +8,7 @@
 	  message: string;
 	  src?: string;
 	}
-	
+
 	type Props = {
 	  src: string | undefined;
 	  width: number;
@@ -24,11 +24,11 @@
 		fallbackSrc?: string;
 		[key: string]: unknown;
 	}
-	
+
 	const DEFAULT_WIDTH = 300;
 	const DEFAULT_HEIGHT = 300;
 	const DEFAULT_PLACEHOLDER = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" fill="lightgray"><text x="50%" y="50%" text-anchor="middle" alignment-baseline="middle" font-family="Arial" font-size="20">No Image</text></svg>`;
-	
+
 	let {
 	  src,
 	  width = DEFAULT_WIDTH,
@@ -45,7 +45,7 @@
 	  ...restProps
 	}: Props = $props();
 
-	let currentSrc = $state(src);
+	let currentSrc = $derived(src);
   let hasError = $state(false);
 
   $effect(() => {
@@ -75,7 +75,7 @@
 
 	function handleError() {
 		if (hasError) return;
-    
+
     hasError = true;
 
 	  const warning: WarningType = {
@@ -83,14 +83,14 @@
 	    message: `Failed to load image from: ${src}. Fallback placeholder will be used.`,
 	    src
 	  };
-	  
+
 	  showWarnings && console.warn(warning.message);
 	  onWarning?.(warning);
 	  onError?.(currentSrc);
-	  
+
 		if (useFallback) {
 			currentSrc = fallbackSrc;
-		} 
+		}
 	}
 </script>
 
@@ -114,7 +114,7 @@
     --uikit-image-height: auto;
 		--uikit-image-object-fit: contain;
     --uikit-image-border-radius: 0;
-    
+
     /* Print Media Variables */
     --uikit-image-print-max-width: 100%;
     --uikit-image-print-color-adjust: exact;

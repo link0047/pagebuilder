@@ -2,82 +2,81 @@
 	import { onMount, getContext, setContext, type Snippet } from "svelte";
 	import { getTreeState, LEVEL_KEY } from "./tree-state.svelte";
 
-  type Props = {
-    children?: Snippet;
-    text?: Snippet;
-    expanded?: boolean;
-    hasChildren?: boolean;
-    tag?: "li" | "button" | "div";
-    [key: string]: unknown;
-  }
+	type Props = {
+		children?: Snippet;
+		text?: Snippet;
+		expanded?: boolean;
+		hasChildren?: boolean;
+		tag?: "li" | "div";
+		[key: string]: unknown;
+	};
 
 	let {
 		children,
 		text,
 		expanded = false,
-    hasChildren: hasChildrenProp, 
+		hasChildren: hasChildrenProp,
 		tag = "li",
-		...restProps 
+		...restProps
 	}: Props = $props();
 
 	let ref = $state<HTMLElement | undefined>();
-	let contentRef: HTMLDivElement;
-	
+
 	const treeState = getTreeState();
 	const parentLevel: number = getContext<number>(LEVEL_KEY) ?? 0;
 	const currentLevel: number = parentLevel + 1;
-	
+
 	setContext<number>(LEVEL_KEY, currentLevel);
-	
-	const hasChildren = $derived<boolean>(hasChildrenProp ?? (typeof children === "function"));
-	const itemState = $derived(treeState.getItem(ref!));
+
+	const hasChildren = $derived<boolean>(hasChildrenProp ?? typeof children === "function");
 	const isSelected = $derived<boolean>(ref ? treeState.isSelected(ref) : false);
 	const isExpanded = $derived<boolean>(ref ? treeState.isExpanded(ref) : false);
-	const isFirstItem = $derived<boolean>(ref ? treeState.isFirstItem(ref) : false);
 	const isFocused = $derived<boolean>(ref ? treeState.isFocused(ref) : false);
+
+	// Roving tabindex: the focused item holds tabindex=0. Before anything is
+	// focused, the first root item holds it so the tree is reachable by Tab.
 	const tabindex = $derived.by((): number => {
 		if (!ref) return -1;
-		if (isSelected) return 0;
-		if (treeState.hasNoSelection() && treeState.isFirstItem(ref)) {
-			return 0;
-		}
+		if (isFocused) return 0;
+		if (treeState.focusedItem === null && treeState.isFirstRootItem(ref)) return 0;
 		return -1;
 	});
 
-	// $inspect({ expanded, isExpanded, ref, hasChildren });
+	// Calls element.focus() when this item becomes the focused item.
+	// Kept here (not in TreeState) so the state class stays DOM-free.
+	$effect(() => {
+		if (isFocused && ref && document.activeElement !== ref) {
+			ref.focus();
+		}
+	});
 
 	function handleClick(event: MouseEvent): void {
 		if (!ref) return;
-
 		event.stopPropagation();
-		treeState.updateItem(ref, "selected", true);
 		treeState.selectItem(ref);
+		// Sync the roving focus position to the clicked item so that subsequent
+		// keyboard navigation starts from the right place.
+		treeState.focusOnClick(ref);
 	}
 
 	function handleExpandClick(event: MouseEvent) {
 		event.stopPropagation();
-
-    if (!ref) return;
+		if (!ref) return;
 
 		if (treeState.isExpanded(ref)) {
-			treeState.collapseTreeItem(ref);
+			treeState.collapse(ref);
 		} else {
-			treeState.expandTreeItem(ref);
+			treeState.expand(ref);
 		}
 	}
 
 	onMount(() => {
-		if (!ref) {
-			return;
-		}
+		if (!ref) return;
 
-		treeState.registerItem(ref, {
-			level: currentLevel,
-			hasChildren
-		});
+		treeState.registerItem(ref, { level: currentLevel, hasChildren });
 
 		if (expanded && hasChildren) {
-			treeState.expandTreeItem(ref);
+			treeState.expand(ref);
 		}
 
 		return () => {
@@ -87,53 +86,51 @@
 		};
 	});
 
-	
+	// Only syncs hasChildren when the children slot changes dynamically.
+	// Never touches expansion state.
 	$effect(() => {
 		if (ref) {
-			console.log(isExpanded);
-			// Update the tree state when hasChildren changes
 			treeState.updateItem(ref, "hasChildren", hasChildren);
-			
-			// Then handle expansion
-			if (expanded && hasChildren) {
-				console.log("expanding");
-				treeState.expandTreeItem(ref);
-			} else if (!expanded) {
-				treeState.collapseTreeItem(ref);
-			}
 		}
 	});
 </script>
 
-<li
+<svelte:element
+	this={tag}
 	bind:this={ref}
 	class="uikit-treeitem"
 	class:uikit-treeitem--focused={isFocused}
 	role="treeitem"
 	aria-level={currentLevel}
 	aria-selected={isSelected}
-	aria-expanded={hasChildren ? isExpanded : null}
-	tabindex={tabindex}
+	aria-expanded={hasChildren ? isExpanded : undefined}
+	{tabindex}
 	style="--uikit-treeitem-depth:{parentLevel}"
-  {...restProps}
+	{...restProps}
 >
 	<div
-		class="uikit-treeitem__content" 
-		bind:this={contentRef}
+		class="uikit-treeitem__content"
 		onclick={handleClick}
 		role="none"
 	>
 		{#if hasChildren}
-			<svg
-				role="presentation"
-				class="uikit-treeitem__expand-icon"
-				focusable="false"
-				aria-hidden="true" 
-				viewBox="0 0 24 24"
+			<button
+				class="uikit-treeitem__expand-btn"
+				tabindex="-1"
+				aria-label={isExpanded ? "Collapse" : "Expand"}
 				onclick={handleExpandClick}
 			>
-				<path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
-			</svg>
+				<svg
+					class="uikit-treeitem__expand-icon"
+					focusable="false"
+					aria-hidden="true"
+					viewBox="0 0 24 24"
+				>
+					<path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
+				</svg>
+			</button>
+		{:else}
+			<span class="uikit-treeitem__expand-spacer" aria-hidden="true"></span>
 		{/if}
 		<span class="uikit-treeitem__text">
 			{@render text?.()}
@@ -148,7 +145,7 @@
 			{@render children?.()}
 		</ul>
 	{/if}
-</li>
+</svelte:element>
 
 <style>
 	.uikit-treeitem {
@@ -159,28 +156,64 @@
 		justify-content: center;
 		background-color: transparent;
 		cursor: pointer;
-		border-radius: .25rem;
+		border-radius: 0.25rem;
 		--uikit-treeitem-indentation-size: 1.5rem;
 	}
 
-	.uikit-treeitem {
+	.uikit-treeitem:focus {
 		outline: none;
+	}
+
+	.uikit-treeitem:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 1px;
+	}
+
+	.uikit-treeitem__expand-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: var(--uikit-treeitem-indentation-size);
+		height: var(--uikit-treeitem-indentation-size);
+		padding: 0;
+		margin: 0;
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		color: inherit;
+		border-radius: 0.2rem;
+		flex-shrink: 0;
+	}
+
+	.uikit-treeitem__expand-btn:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 1px;
+	}
+
+	.uikit-treeitem__expand-spacer {
+		display: inline-block;
+		width: var(--uikit-treeitem-indentation-size);
+		height: var(--uikit-treeitem-indentation-size);
+		flex-shrink: 0;
 	}
 
 	.uikit-treeitem__expand-icon {
 		width: var(--uikit-treeitem-indentation-size);
 		height: var(--uikit-treeitem-indentation-size);
 		fill: currentcolor;
+		transition: transform 150ms ease;
 	}
-	
+
 	.uikit-treeitem__content {
 		display: flex;
-		gap: .5rem;
+		gap: 0.5rem;
 		align-items: center;
 		min-height: 2rem;
-		border-radius: .25rem;
+		border-radius: 0.25rem;
 		user-select: none;
-		padding-inline-start: calc(.5rem + var(--uikit-treeitem-indentation-size) * var(--uikit-treeitem-depth));
+		padding-inline-start: calc(
+			0.5rem + var(--uikit-treeitem-indentation-size) * var(--uikit-treeitem-depth)
+		);
 	}
 
 	.uikit-treeitem__text {
@@ -194,7 +227,7 @@
 	}
 
 	.uikit-treeitem__group[hidden]:not([hidden="until-found"]) {
-	  display: none !important;
+		display: none !important;
 	}
 
 	.uikit-treeitem[aria-selected="true"] > .uikit-treeitem__content {
@@ -210,7 +243,10 @@
 		background-color: hsla(220, 20%, 65%, 0.08);
 	}
 
-	.uikit-treeitem[aria-expanded="true"] > .uikit-treeitem__content > .uikit-treeitem__expand-icon {
+	.uikit-treeitem[aria-expanded="true"]
+		> .uikit-treeitem__content
+		> .uikit-treeitem__expand-btn
+		> .uikit-treeitem__expand-icon {
 		transform: rotate(90deg);
 	}
 </style>

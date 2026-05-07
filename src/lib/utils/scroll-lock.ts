@@ -1,29 +1,26 @@
 class ScrollLock {
   #locked: boolean = false;
+  #lockCount: number = 0;
   #scrollPosition: number = 0;
   #scrollbarWidth: number = 0;
+  #savedPaddingRight: string = "";
   #controller: AbortController | null = null;
 
   lock(): void {
-    if (this.#locked) return;
+    if (typeof window === "undefined") return;
+    this.#lockCount++;
+    if (this.#lockCount > 1) return;
 
-    // Create fresh controller for this lock
     this.#controller = new AbortController();
     const { signal } = this.#controller;
 
-    // Store current scroll position
-    this.#scrollPosition = window.scrollY || document.documentElement.scrollTop;
-
-    // Get scrollbar width before hiding it
+    this.#scrollPosition = window.scrollY;
     this.#scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    this.#savedPaddingRight = document.documentElement.style.paddingRight;
 
-    // Prevent scroll
     document.documentElement.style.overflow = "hidden";
     document.documentElement.style.paddingRight = `${this.#scrollbarWidth}px`;
-    document.body.style.overflow = "hidden";
-    document.body.style.paddingRight = `${this.#scrollbarWidth}px`;
 
-    // Prevent scroll on touch devices
     document.addEventListener("touchmove", this.#preventScroll, { passive: false, signal });
     document.addEventListener("wheel", this.#preventScroll, { passive: false, signal });
 
@@ -31,30 +28,28 @@ class ScrollLock {
   }
 
   unlock(): void {
-    if (!this.#locked) return;
+    if (typeof window === "undefined") return;
+    if (this.#lockCount === 0) return;
+    this.#lockCount--;
+    if (this.#lockCount > 0) return;
 
-    // Remove overflow hidden
     document.documentElement.style.overflow = "";
-    document.documentElement.style.paddingRight = "";
-    document.body.style.overflow = "";
-    document.body.style.paddingRight = "";
+    document.documentElement.style.paddingRight = this.#savedPaddingRight;
 
     this.#controller?.abort();
     this.#controller = null;
 
-    // Restore scroll position
     window.scrollTo(0, this.#scrollPosition);
-
     this.#locked = false;
   }
 
   destroy(): void {
-    if (this.#locked) {
-      this.unlock();
-    }
+    if (this.#locked) this.unlock();
   }
 
   #preventScroll = (event: Event): void => {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("[data-scroll-lock-ignore]")) return;
     event.preventDefault();
   };
 }

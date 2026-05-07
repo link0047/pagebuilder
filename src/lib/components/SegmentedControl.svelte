@@ -4,22 +4,27 @@
 
 	type Variant = "default" | "filled" | "outlined" | "ghost" | "tabs" | "flush";
 	type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default";
-	type Size = "xs" | "small" | "sm" | "medium" | "md" | "large" | "lg" | "xl";
+	// Aliases removed — canonical sizes only, matching SegmentedButton
+	type Size = "xs" | "sm" | "md" | "lg" | "xl";
 	type Shape = "default" | "square" | "pill";
-	
+	type HeadingTag = "div" | "p" | "span" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+
 	type Props = {
-		value?: string | number | undefined,
-		label?: string,
-		headingLabel?: string,
-		headingTag?: string,
-		variant?: Variant,
-		size?: Size,
-		color?: Color,
-		shape?: Shape,
-		children: Snippet,
+		value?: string | undefined;
+		/** Accessible label for the group when no visible heading is shown. */
+		label?: string;
+		/** Renders a visible label element above the control and links it via aria-labelledby. */
+		headingLabel?: string;
+		/** HTML tag for the heading element. Constrained to safe/semantic tags. */
+		headingTag?: HeadingTag;
+		variant?: Variant;
+		size?: Size;
+		color?: Color;
+		shape?: Shape;
+		children: Snippet;
 		[key: string]: unknown;
 	};
-	
+
 	let {
 		value = $bindable(),
 		label,
@@ -27,7 +32,7 @@
 		headingTag = "div",
 		variant = "default",
 		size = "md",
-		color = "default", 
+		color = "default",
 		shape = "default",
 		children,
 		...restProps
@@ -35,37 +40,78 @@
 
 	const controlState = setSegmentedControlState(value);
 	const headingId = controlState.headingId;
-	setContext("segmented-style", { variant, size, color, shape });
-	
-	// Sync internal state changes to external value
+
+	// Context is a reactive $state object so child buttons react to prop changes.
+	const styleContext = $state({ variant, size, color, shape });
 	$effect(() => {
-		const selectedValue = controlState.selectedValue;
-		if (selectedValue !== undefined && selectedValue !== value) {
-			value = selectedValue;
+		styleContext.variant = variant;
+		styleContext.size = size;
+		styleContext.color = color;
+		styleContext.shape = shape;
+	});
+	setContext("segmented-style", styleContext);
+
+	// Sync internal selection back to the bindable `value` prop.
+	$effect(() => {
+		const selected = controlState.selectedValue;
+		if (selected !== undefined && selected !== value) {
+			value = selected;
 		}
 	});
+
+	// ── ARIA labelling ──────────────────────────────────────────────────────────
+	// Prefer aria-labelledby when a visible heading is present; fall back to
+	// aria-label for an invisible label string. Never set both simultaneously.
+	const ariaLabelledBy = $derived(headingLabel ? headingId : undefined);
+	const ariaLabel = $derived(!headingLabel ? label : undefined);
+
+	// ── Arrow-key handler lives here so the DOM structure (role=radiogroup) ─────
+	// owns the keyboard contract, not each individual button.
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+			event.preventDefault();
+			controlState.selectNext();
+		} else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+			event.preventDefault();
+			controlState.selectPrevious();
+		}
+	}
 </script>
 
-{#if headingLabel}
-	<svelte:element this={headingTag} id={headingId ?? ""} class="uikit-segmented-control-heading">
-		{headingLabel}
-	</svelte:element>
-{/if}
-<div class="uikit-segmented-control" role="group" aria-label={label} {...restProps}>
-	{@render children?.()}
+<div class="uikit-segmented">
+  {#if headingLabel}
+  	<svelte:element this={headingTag} id={headingId} class="uikit-segmented-control-heading">
+  		{headingLabel}
+  	</svelte:element>
+  {/if}
+  <div
+  	class="uikit-segmented-control"
+  	role="radiogroup"
+  	aria-labelledby={ariaLabelledBy}
+  	aria-label={ariaLabel}
+  	onkeydown={handleKeydown}
+  	{...restProps}
+  >
+  	{@render children?.()}
+  </div>
 </div>
-
 <style>
+  .uikit-segmented {
+	  display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
 	.uikit-segmented-control-heading {
 		line-height: 1;
-		font-size: .875rem;
+		font-size: 0.875rem;
 	}
 
 	.uikit-segmented-control {
 		display: inline-flex;
 		background: #f5f5f5;
-		border-radius: .5rem;
+		border-radius: 0.5rem;
 		padding: 0.125rem;
-		gap: 0.0625rem
+		gap: 0.0625rem;
 	}
 </style>

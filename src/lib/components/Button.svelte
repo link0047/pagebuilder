@@ -1,13 +1,15 @@
 <script lang="ts">
-	import { type Snippet } from "svelte";
+	import type { Snippet } from "svelte";
+	import type { HTMLButtonAttributes } from "svelte/elements";
 
 	type Variant = "filled" | "outlined" | "ghost" | "link";
 	type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default" | "neutral";
-	type Size = "xs" | "small" | "sm" | "medium" | "md" | "large" | "lg" | "xl";
+	type Size = "xs" | "sm" | "md" | "lg" | "xl";
 	type Shape = "default" | "square" | "rounded-square" | "pill" | "circle";
 	type Attached = "none" | "left" | "right" | "both";
+	type IndicatorPosition = "left" | "right" | "overlay";
 
-	type Props = {
+	interface Props extends HTMLButtonAttributes {
 		children?: Snippet,
 		variant?: Variant,
 		size?: Size,
@@ -15,10 +17,12 @@
 		shape?: Shape,
 		type?: "button" | "submit" | "reset",
     fullWidth?: boolean,
-    ref?: HTMLButtonElement,
+    ref?: HTMLButtonElement | null,
     attached?: Attached;
 		truncate?: boolean;
-    [key: string]: unknown;
+		loading?: boolean;
+		loadingIndicator?: Snippet;
+		indicatorPosition?: IndicatorPosition;
 	}
 
 	let {
@@ -32,9 +36,52 @@
 		ref = $bindable(),
 		attached = "none",
 		truncate = true,
+		loading = false,
+		loadingIndicator,
+		indicatorPosition = "left",
+		onclick,
+		"aria-disabled": ariaDisabledProp,
 		...restProps
 	}: Props = $props();
+
+	let isCurrentlyDisabled = $derived(loading || ariaDisabledProp === true || ariaDisabledProp === "true");
+	let effectiveIndicatorPosition = $derived(shape === "circle" || shape === "square" || shape === "rounded-square"
+    ? "overlay"
+    : indicatorPosition
+	);
+
+	function guardedClick(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
+    if (isCurrentlyDisabled) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    if (typeof onclick === "function") {
+      onclick?.(event);
+    }
+	}
 </script>
+
+{#snippet defaultSpinner()}
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="uikit-button__indicator-icon">
+    <path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
+  </svg>
+{/snippet}
+
+{#snippet indicator(hasOverlay = false)}
+	<span
+		class="uikit-button__indicator"
+		class:uikit-button__indicator--overlay={hasOverlay}
+		aria-hidden="true"
+	>
+		{#if loadingIndicator}
+			{@render loadingIndicator()}
+		{:else}
+			{@render defaultSpinner()}
+		{/if}
+	</span>
+{/snippet}
 
 <button
 	bind:this={ref}
@@ -61,14 +108,31 @@
   class:uikit-button--neutral={color === "neutral"}
 	class:uikit-button--info={color === "info"}
 	{type}
+	aria-busy={loading || undefined}
+	aria-disabled={isCurrentlyDisabled || undefined}
+	data-loading={loading || undefined}
+	onclick={guardedClick}
 	{...restProps}
 >
+	{#if loading && effectiveIndicatorPosition === "left"}
+    {@render indicator()}
+  {/if}
+
 	<span
 		class="uikit-button__content"
 		class:uikit-button__content--truncate={truncate}
+		class:uikit-button__content--hidden={loading && effectiveIndicatorPosition === "overlay"}
 	>
 		{@render children?.()}
 	</span>
+
+	{#if loading && effectiveIndicatorPosition === "right"}
+    {@render indicator()}
+  {/if}
+
+  {#if loading && effectiveIndicatorPosition === "overlay"}
+    {@render indicator(true)}
+  {/if}
 </button>
 
 <style>
@@ -97,6 +161,7 @@
 
     /* Default colors */
     --uikit-button-bg-color: #333335;
+		--uikit-button-outline-shadow-color: rgba(0, 122, 204, 0.25);
 
     /* Hover state */
     --uikit-button-hover-bg-color: #555659;
@@ -113,6 +178,7 @@
     --uikit-button-disabled-font-color: #444547;
     --uikit-button-disabled-font-weight: 400;
     --uikit-button-disabled-border-color: #eeeeef;
+		--uikit-button-aria-disabled-opacity: .85;
 
     /* Animation */
     --uikit-button-transition-duration: 0.2s;
@@ -149,10 +215,38 @@
     transition: background-color var(--uikit-button-transition-duration) var(--uikit-button-transition-timing),border-color var(--uikit-button-transition-duration) var(--uikit-button-transition-timing),transform var(--uikit-button-transition-duration) var(--uikit-button-transition-timing);
 	}
 
+	.uikit-button__content {
+		display: inline-flex;
+		align-items: center;
+    justify-content: center;
+		gap: var(--uikit-button-gap);
+	}
+
 	.uikit-button__content--truncate {
 		overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+	}
+
+	.uikit-button__content--hidden {
+	  opacity: 0;
+		pointer-events: none;
+	  user-select: none;
+	}
+
+	.uikit-button__indicator-icon {
+	  width: 1em;
+	  height: 1em;
+	  fill: currentcolor;
+	  animation: uikit-spin 0.6s linear infinite;
+	}
+
+	.uikit-button__indicator--overlay {
+	  position: absolute;
+	  inset: 0;
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
 	}
 }
 
@@ -182,10 +276,6 @@
 		--uikit-button-color: #38393b;
 		--uikit-button-hover-bg-color: #eeeeef;
 		--uikit-button-hover-border-color: #eeeeef;
-  }
-
-  .uikit-button--full-width {
-    width: 100%;
   }
 
   .uikit-button--full-width {
@@ -280,9 +370,9 @@
 	}
 
 	.uikit-button--danger:is(.uikit-button--outlined, .uikit-button--ghost, .uikit-button--link) {
-		--uikit-button-color: #b22327;
+	  --uikit-button-color: #fff;
     --uikit-button-border-color: #cb2a2f;
-		--uikit-button-hover-bg-color: #fff0f0;
+		--uikit-button-hover-bg-color: #e74c51;
 	}
 
 	.uikit-button--danger:is(.uikit-button--ghost, .uikit-button--link) {
@@ -333,15 +423,27 @@
     cursor: pointer;
   }
 
-  .uikit-button:active {
+  .uikit-button:not(:disabled):active {
     transform: scale(var(--uikit-button-transform-scale));
   }
 
   .uikit-button:focus-visible {
     outline-offset: var(--uikit-button-outline-offset);
     outline: var(--uikit-button-outline-width) var(--uikit-button-outline-style) var(--uikit-button-outline-color);
-    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.25);
+    box-shadow: 0 0 0 2px var(--uikit-button-outline-shadow-color);
   }
+
+	.uikit-button[aria-disabled="true"] {
+		opacity: var(--uikit-button-aria-disabled-opacity, 0.5);
+	}
+
+	.uikit-button[aria-disabled="true"]:not([data-loading]) {
+	  cursor: not-allowed;
+	}
+
+	.uikit-button[data-loading]:hover {
+	  cursor: wait;
+	}
 }
 
 @layer sizes {
@@ -351,6 +453,16 @@
     --uikit-button-padding-inline: 0.5rem;
     --uikit-button-gap: 0.25rem;
   }
+
+	.uikit-button--size-xs::before {
+	  content: '';
+	  position: absolute;
+	  top: 50%;
+	  left: 50%;
+	  min-width: 44px;
+	  min-height: 44px;
+	  transform: translate(-50%, -50%);
+	}
 
   .uikit-button--size-sm {
     --uikit-button-height: 2rem;
@@ -424,6 +536,10 @@
     .uikit-button:active {
       transform: none;
     }
+
+		.uikit-button__indicator-icon {
+	    animation: none;
+	  }
   }
 
   @media (forced-colors: active) {
@@ -434,5 +550,9 @@
       outline: 3px solid;
     }
   }
+}
+
+@keyframes uikit-spin {
+	to { transform: rotate(360deg); }
 }
 </style>

@@ -1,142 +1,82 @@
 <script lang="ts">
-	import PageStructure from "./PageStructure.svelte";
+  import PageStructure from "./PageStructure.svelte";
   import Button from "./Button.svelte";
   import Tree from "./Tree.svelte";
   import TreeItem from "./TreeItem.svelte";
-  import { getAppState } from "./app-state.svelte";
   import Icon from "./Icon.svelte";
+  import { getAppState } from "./app-state.svelte";
+  import { childConfigs, componentRegistry } from "./component-registry";
+  import type { PageTreeNode } from "./types";
 
-  type ComponentMeta = {
-    locked: boolean;
-    hidden: boolean;
-    label: string;
-  };
-
-  type ComponentNode = {
-    id?: string;
-    type: "component";
-    name: string;
-    meta: ComponentMeta;
-    props: Record<string, any>;
-    data: Record<string, any>;
-    children?: PageTreeNode[];
-  };
-
-  type RootNode = {
-    id?: string;
-    name: string;
-    type: "root";
-    children: PageTreeNode[];
-  };
-
-  // Union type for all possible node types
-  type PageTreeNode = RootNode | ComponentNode;
-
-	type Props = {
-    pageTree?: PageTreeNode,
+  type Props = {
+    pageTree?: PageTreeNode;
     path?: number[];
-	}
+  };
 
-  const knownComponents = ["Hero", "StoryBlock", "CollectionBlock", "Card", "ProductCard", "StoryCard",  "FeaturedCategories", "FeaturedCategory"];
-  const componentsWithChildren = new Set(["StoryBlock", "CollectionBlock", "FeaturedCategories"]);
-
-	let {
-		pageTree,
-    path = []
-	}: Props = $props();
+  let { pageTree, path = [] }: Props = $props();
 
   let appState = getAppState();
-  let canHaveChildren = $derived(pageTree?.type === "component" && componentsWithChildren.has(pageTree.name));
-  let isKnownComponent = $derived(pageTree?.type === "component" &&  knownComponents.includes(pageTree.name));
+
+  let childConfig = $derived(
+    pageTree?.type === "component" ? (childConfigs[pageTree.name] ?? null) : null
+  );
+
+  let isKnownComponent = $derived(
+    pageTree?.type === "component" && pageTree.name in componentRegistry
+  );
+
+  // Sibling context — needed to know if up/down should be disabled
+  let siblingCount = $derived(() => {
+    if (path.length === 0) return 0;
+    const parentPath = path.slice(0, -1);
+    const parent = appState.getNodeAtPath(parentPath);
+    return parent?.children?.length ?? 0;
+  });
+
+  let currentIndex = $derived(path[path.length - 1] ?? 0);
+  let canMoveUp = $derived(path.length > 0 && currentIndex > 0);
+  let canMoveDown = $derived(path.length > 0 && currentIndex < siblingCount() - 1);
 
   function deleteComponent() {
-    if (appState && path.length > 0) {
-      appState.removeComponent(path)
+    if (path.length > 0) {
+      appState.removeComponent(path);
     }
   }
 
   function editProperties() {
-    if (appState && path.length > 0) {
-      appState.selectComponentForEditing(path);
+    if (path.length > 0) {
+      appState.selectComponent(path);
     }
   }
 
-  function addCard() {
-    if (appState && canHaveChildren) {
-      // Default card component to add
-      const defaultCard = {
-        id: crypto.randomUUID(),
-        type: "component" as const,
-        name: "StoryCard",
-        props: {
-          // headline: "New Card",
-          // subhead: "Card subtitle",
-          // supportingText: "Card description",
-          images: {
-            desktop: "",
-            tablet: "",
-            mobile: "",
-          },
-          backgroundColor: "#fff",
-          textAlignment: "center"
-        },
-        data: {},
-        meta: {
-          label: "Story Card",
-          locked: false,
-          hidden: false
-        }
-      };
-
-      appState.addComponent(defaultCard, path);
-    }
+  function moveUp(event: MouseEvent) {
+    event.stopPropagation();
+    if (canMoveUp) appState.moveComponent(path, "up");
   }
 
-  function addFeaturedCategory() {
-    if (appState && canHaveChildren) {
-      const defaultCategory = {
-        id: crypto.randomUUID(),
-        type: "component" as const,
-        name: "FeaturedCategory",
-        props: {
-          image: "",
-          text: "",
-          href: ""
-        },
-        data: {},
-        meta: {
-          label: "Featured Category",
-          locked: false,
-          hidden: false
-        }
-      };
-
-      appState.addComponent(defaultCategory, path);
-    }
+  function moveDown(event: MouseEvent) {
+    event.stopPropagation();
+    if (canMoveDown) appState.moveComponent(path, "down");
   }
 
-  function addHeroCTA() {
-    if (appState && canHaveChildren) {
-      const defaultCategory = {
-        id: crypto.randomUUID(),
-        type: "component" as const,
-        name: "HeroCTA",
-        props: {
-          href: "",
-          variant: "solid",
-          size: "medium",
-          color: "default"
-        },
+  function addChild() {
+    if (!childConfig || pageTree?.type !== "component") return;
+
+    appState.insertComponent(
+      {
+        type: "component",
+        name: childConfig.childName,
+        props: childConfig.defaultProps,
         data: {},
         meta: {
-          label: "Hero CTA",
           locked: false,
-          hidden: false
-        }
-      };
-
-      appState.addComponent(defaultCategory, path);
-    }
+          hidden: false,
+          label: childConfig.defaultMeta.label ?? childConfig.childName,
+          ...childConfig.defaultMeta,
+        },
+      },
+      path
+    );
   }
 </script>
 
@@ -144,9 +84,9 @@
   <TreeItem>
     {#snippet text()}
       <div class="uikit-page-structure-add-action">
-        <button 
-          class="uikit-page-structure-add-action__button" 
-          type="button" 
+        <button
+          class="uikit-page-structure-add-action__button"
+          type="button"
           {onclick}
         >
           <Icon>
@@ -160,49 +100,83 @@
 {/snippet}
 
 {#if pageTree?.type === "root" && pageTree.children.length > 0}
-  {#key pageTree.children.length}
-    <Tree>
-      {#each pageTree.children as child, index (child.id)}
-        <PageStructure pageTree={child} path={[...path, index]} />
-      {/each}
-    </Tree>
-  {/key}
+  <Tree>
+    {#each pageTree.children as child, index (child.id ?? index)}
+      <PageStructure pageTree={child} path={[...path, index]} />
+    {/each}
+  </Tree>
 {/if}
 
 {#if pageTree?.type === "component" && isKnownComponent}
-  <TreeItem 
-    hasChildren={canHaveChildren && !!pageTree.children && pageTree.children.length > 0}
+  <TreeItem
+    hasChildren={!!childConfig && !!pageTree.children && pageTree.children.length > 0}
     expanded={true}
   >
     {#snippet text()}
       {#if pageTree.meta}
-      <span class="uikit-page-structure-meta">
-        <button class="uikit-page-structure-meta__edit-properties" type="button" onclick={editProperties}>
-          <span>{pageTree.meta.label}</span>
-        </button>
-        <Button onclick={deleteComponent} variant="ghost" size="sm" shape="rounded-square">
-          <Icon size="16">
-            <use href="#delete" />
-          </Icon>
-        </Button>
-      </span>  
-      {/if}   
+        <span class="uikit-page-structure-meta">
+          <button
+            class="uikit-page-structure-meta__edit-properties"
+            type="button"
+            onclick={editProperties}
+          >
+            <span>{pageTree.meta.label}</span>
+          </button>
+
+          {#if path.length > 0}
+            {#if canMoveUp}
+              <Button
+                onclick={moveUp}
+                disabled={!canMoveUp}
+                variant="ghost"
+                size="sm"
+                shape="rounded-square"
+                aria-label="Move up"
+              >
+                <Icon size="16">
+                  <path d="M7.03 9.97H11.03V18.89L13.04 18.92V9.97H17.03L12.03 4.97Z" />
+                </Icon>
+              </Button>
+            {/if}
+            {#if canMoveDown}
+              <Button
+                onclick={moveDown}
+                disabled={!canMoveDown}
+                variant="ghost"
+                size="sm"
+                shape="rounded-square"
+                aria-label="Move down"
+              >
+                <Icon size="16">
+                  <path d="M7.03 13.92H11.03V5L13.04 4.97V13.92H17.03L12.03 18.92Z" />
+                </Icon>
+              </Button>
+            {/if}
+          {/if}
+
+          <Button
+            onclick={deleteComponent}
+            variant="ghost"
+            size="sm"
+            shape="rounded-square"
+            aria-label="Delete"
+          >
+            <Icon size="16">
+              <use href="#delete" />
+            </Icon>
+          </Button>
+        </span>
+      {/if}
     {/snippet}
 
-    {#if canHaveChildren && pageTree.children}
-      {#each pageTree.children as child, index (child.id)}
+    {#if childConfig && pageTree.children}
+      {#each pageTree.children as child, index (child.id ?? index)}
         <PageStructure pageTree={child} path={[...path, index]} />
       {/each}
     {/if}
 
-    {#if canHaveChildren}
-      {#if pageTree.name === "StoryBlock"}
-        {@render addAction("Add Story Card", addCard)}
-      {:else if pageTree.name === "FeaturedCategories"}
-        {@render addAction("Add Featured Category", addFeaturedCategory)}
-      {:else if pageTree.name === "Hero"}
-        {@render addAction("Add CTA", addHeroCTA)}
-      {/if}
+    {#if childConfig}
+      {@render addAction(childConfig.label, addChild)}
     {/if}
   </TreeItem>
 {/if}
@@ -213,9 +187,9 @@
     height: 100%;
     width: 100%;
     flex-direction: row;
-    gap: .25rem;
-    padding-block: .25rem;
-    padding-inline-end: .5rem;
+    gap: 0.25rem;
+    padding-block: 0.25rem;
+    padding-inline-end: 0.5rem;
   }
 
   .uikit-page-structure-add-action__button,
@@ -232,11 +206,13 @@
   .uikit-page-structure-add-action__button {
     display: inline-flex;
     align-items: center;
-    gap: .5ch;
-    letter-spacing: .04em;
+    gap: 0.5ch;
+    letter-spacing: 0.04em;
     font-weight: 500;
     height: 2.5rem;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol", "Noto Color Emoji";
     color: #2a508f;
   }
 </style>

@@ -8,7 +8,7 @@ class SegmentedControlState {
 	#headingId = $state<string | null>(null);
   #buttons = $state<string[]>([]);
 	#initialValue: string | undefined;
-	
+
 	constructor(initialValue: unknown) {
 		this.#initialValue = initialValue?.toString();
 	}
@@ -33,7 +33,7 @@ class SegmentedControlState {
     if (typeof value !== "string") {
 		  return -1;
 	  }
-    
+
 		const index = this.#buttons.length;
 		this.#buttons.push(value);
 
@@ -41,7 +41,7 @@ class SegmentedControlState {
 		if (this.#initialValue && value === this.#initialValue) {
 			this.#selectedIndex = index;
 		}
-		
+
 		return index;
 	}
 

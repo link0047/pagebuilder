@@ -1,85 +1,92 @@
 <script lang="ts">
-	import { type Snippet, onMount } from "svelte";
-  import { setTreeState } from "./tree-state.svelte";
-	
-  type Props = {
-    children?: Snippet;
-    multiselect?: boolean;
-    [key: string]: unknown;
-  }
+	import { type Snippet } from "svelte";
+	import { setTreeState } from "./tree-state.svelte";
+
+	type Props = {
+		children?: Snippet;
+		multiselect?: boolean;
+		label?: string;
+		[key: string]: unknown;
+	};
 
 	let {
 		children,
 		multiselect = false,
+		label,
 		...restProps
 	}: Props = $props();
 
-	const treeState = setTreeState();
+	// `multiselect` is intentionally read once at initialisation. Changing it
+	// after mount is not supported — it would require rebuilding the entire
+	// TreeState, discarding all selection, focus, and expansion state.
+	// svelte-ignore state_referenced_locally
+	const treeState = setTreeState(multiselect);
 
-	function handleKeyup(event: KeyboardEvent) {
-		event.preventDefault();
+	function handleKeydown(event: KeyboardEvent) {
 		const { key } = event;
 
 		switch (key) {
 			case "Enter":
-			case " ":
-				const focusedItem = treeState.focusedItem;
-				if (focusedItem) {
-					treeState.selectItem(focusedItem);
+			case " ": {
+				const focused = treeState.focusedItem;
+				if (focused) {
+					event.preventDefault();
+					treeState.selectItem(focused);
 				}
 				break;
+			}
 			case "ArrowUp":
-				treeState.setFocusToPrevItem();
+				event.preventDefault();
+				treeState.focusPrev();
 				break;
 			case "ArrowDown":
-				treeState.setFocusToNextItem();
+				event.preventDefault();
+				treeState.focusNext();
 				break;
 			case "ArrowLeft":
-				if (!treeState.focusedItemExpandable()) {
-					// Not expandable - go to parent (if not root)
-					treeState.setFocusToParentItem();
+				event.preventDefault();
+				if (treeState.isFocusedItemExpanded()) {
+					treeState.collapseFocused();
 				} else {
-					// Is expandable
-					if (treeState.canCollapseFocusedItem()) {
-						// Expanded - collapse it
-						treeState.collapseFocusedItem();
-					} else {
-						// Collapsed - go to parent (if not root)
-						treeState.setFocusToParentItem();
-					}
+					treeState.focusParent();
 				}
 				break;
 			case "ArrowRight":
-				if (treeState.focusedItemExpandable()) {
-					if (treeState.canExpandFocusedItem()) {
-						treeState.expandFocusedItem();
-					} else {
-						treeState.setFocusToNextItem();
-					}
+				event.preventDefault();
+				if (treeState.isFocusedItemCollapsed()) {
+					treeState.expandFocused();
 				}
+				// Already expanded or leaf: do nothing (spec-correct)
 				break;
 			case "Home":
+				event.preventDefault();
+				treeState.focusFirst();
 				break;
 			case "End":
+				event.preventDefault();
+				treeState.focusLast();
 				break;
 			case "*":
+				event.preventDefault();
+				treeState.expandSiblings();
 				break;
 			default:
 				break;
 		}
 	}
 
-	function handleFocus() {
-		treeState.setFocus();
+	function handleFocusin() {
+		treeState.focusOnEntry();
 	}
 </script>
 
-<ul 
+<ul
 	class="uikit-tree"
 	role="tree"
 	aria-multiselectable={multiselect}
-	onkeyup={handleKeyup}
-	onfocusin={handleFocus}
+	aria-label={label}
+	onkeydown={handleKeydown}
+	onfocusin={handleFocusin}
 	{...restProps}
 >
 	{@render children?.()}

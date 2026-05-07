@@ -1,29 +1,25 @@
 <script lang="ts">
   import { type Snippet } from "svelte";
-  import { generateId }	from "$lib/utils/unique-id-generator.js";
+  import { generateId } from "$lib/utils/unique-id-generator.js";
   import Icon from "./Icon.svelte";
 
   type Props = {
-    children?: Snippet,
-    title: string,
-    icon?: string
+    children?: Snippet;
+    title: string;
+    icon?: string;
   };
 
   const id = generateId("properties-section");
   const uid = `uikit-properties-section-title-${id}`;
 
-  let {
-    children,
-    title,
-    icon
-  }: Props = $props();
+  let { children, title, icon }: Props = $props();
 </script>
 
 <div class="uikit-properties-section" role="group" aria-labelledby={uid}>
   <div class="uikit-properties-section__header">
     {#if icon}
       <Icon size="1rem">
-        <use href="#{icon}"/>
+        <use href="#{icon}" />
       </Icon>
     {/if}
     <span id={uid} class="uikit-properties-section__title">{title}</span>
@@ -36,8 +32,10 @@
 <style>
   .uikit-properties-section {
     display: flex;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    gap: .5rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol", "Noto Color Emoji";
+    gap: 0.5rem;
     flex-flow: column nowrap;
   }
 
@@ -57,9 +55,9 @@
 
   .uikit-properties-section__content {
     display: flex;
-    gap: .5rem;
+    gap: 1.5rem;
     flex-flow: column nowrap;
-    padding-inline-start: .5rem;
+    padding-inline-start: 0.5rem;
     --uikit-textfield-label-color: #4d4d4d;
   }
 </style>

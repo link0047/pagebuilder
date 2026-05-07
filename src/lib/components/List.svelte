@@ -1,33 +1,38 @@
 <script lang="ts">
-  import { type Snippet } from "svelte";
-  import { getBoundingRects } from "$lib/utils/getBoundingRects";
+  import type { Snippet } from "svelte";
+  import type { HTMLAttributes } from "svelte/elements";
 
-  type Props = {
+  type Props = Omit<HTMLAttributes<HTMLUListElement>, "children"> & {
     children?: Snippet;
     label?: string;
+    gap?: string;
   };
 
   let {
     children,
-    label = "List"
+    label = "List",
+    gap = "0",
+    ...restProps
   }: Props = $props();
 </script>
 
 <ul
   role="list"
-  class="uikit-list"
-  data-testid="list"
+  class="wcag-list"
   aria-label={label}
+  style="--wcag-list-gap:{gap}"
+  {...restProps}
 >
   {@render children?.()}
 </ul>
 
 <style>
-  .uikit-list {
+  .wcag-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--wcag-list-gap, 0);
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
   }
 </style>

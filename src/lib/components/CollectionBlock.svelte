@@ -1,20 +1,23 @@
 <script lang="ts">
-	import { type Snippet } from "svelte";
-	import Carousel from "./Carousel.svelte";
+	import { type Snippet, onMount } from "svelte";
 
 	type HeadingSize = "sm" | "md" | "lg" | "xl";
+	type HeadingAlignment = "left" | "center" | "right";
 	type Props = {
-		heading: string;
+		heading?: string;
 		hero?: Snippet;
 		children?: Snippet;
 		backgroundColor?: string;
     headingColor?: string;
     headingSize?: HeadingSize;
+		headingAlign?: HeadingAlignment;
     ctaBackgroundColor?: string;
-		breakpoints?: Record<string, { slidesPerView: number }>
+		ctaTextColor?: string;
+		breakpoints?: Record<string, { slidesPerView: number, slidesPerGroup?: number }>
 	};
 
 	let id = crypto.randomUUID();
+
 	const headerId = `collection-heading-${id}`;
 	const headingSizes = {
     sm: "1.25rem",
@@ -33,22 +36,25 @@
 		ctaBackgroundColor,
 		ctaTextColor,
 		breakpoints = {
-      "320": { slidesPerView: 1.5 },
-      "768": { slidesPerView: 4 },
-      "1024": { slidesPerView: 5 }
+      "320": { slidesPerView: 2.5, slidesPerGroup: 2.5 },
+      "768": { slidesPerView: 4, slidesPerGroup: 4 },
+      "1024": { slidesPerView: 5, slidesPerGroup: 5 }
     },
 		children
 	}: Props = $props();
 
-	let currentHeadingSize = $derived(headingSizes[headingSize]);
+	onMount(async () => {
+	  await import("$lib/components/web-components/wcag-ui-carousel");
+    await import("$lib/components/web-components/wcag-ui-carousel-item");
+	});
 </script>
 
 <section
 	class="collection-block"
-	aria-labelledby={headerId}
+	aria-labelledby={heading ? headerId : undefined}
 	style:--collection-block-bg-color={backgroundColor}
   style:--collection-block-heading-color={headingColor}
-  style:--collection-block-heading-size={currentHeadingSize}
+  style:--collection-block-heading-size={headingSizes[headingSize]}
   style:--collection-block-heading-text-align={headingAlign}
   style:--product-card-cta-bg-color={ctaBackgroundColor}
   style:--product-card-cta-text-color={ctaTextColor}
@@ -58,13 +64,15 @@
 			{@render hero()}
 		</div>
 	{/if}
-	<header class="collection-block__header">
-		<h2 id={headerId} class="collection-block__title">{heading}</h2>
-	</header>
+	{#if heading}
+  	<header class="collection-block__header">
+  		<h2 id={headerId} class="collection-block__title">{heading}</h2>
+  	</header>
+	{/if}
 	<div class="collection-block__content">
-		<Carousel {breakpoints}>
+		<wcag-ui-carousel breakpoints={JSON.stringify(breakpoints)}>
 			{@render children?.()}
-		</Carousel>
+		</wcag-ui-carousel>
 	</div>
 </section>
 
