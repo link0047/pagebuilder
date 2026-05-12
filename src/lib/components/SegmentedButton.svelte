@@ -4,7 +4,7 @@
 
 	type Variant = "default" | "filled" | "outlined" | "ghost" | "tabs" | "flush";
 	type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default"
-	type Size = "xs" | "sm" |  "md" | "large" | "lg" | "xl";
+	type Size = "xs" | "sm" |  "md" | "lg" | "xl";
 	type Shape = "default" | "square" | "pill";
 
 	type Props = {
@@ -151,9 +151,13 @@
 
 	@layer states {
 		.uikit-segmented-button--selected {
-			background: white;
+			background: #fff;
 	    color: #000;
 	    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		}
+
+		.uikit-segmented-button:not(.uikit-segmented-button--selected):hover {
+			background: #e6e6e6;
 		}
 	}
 

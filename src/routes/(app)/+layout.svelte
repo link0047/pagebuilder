@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { LayoutProps } from "./$types";
+  import type { RootNode } from "$lib/components/types";
 
   import { page } from "$app/state";
   import AppHeader from "$lib/components/AppHeader.svelte";
@@ -38,6 +39,7 @@
   let isSaving = $state(false);
   let showExitModal = $state(false);
   let cachedHTML = $state<string | null>(null);
+  let cachedTreeHash = $state<string | null>(null);
   let isRenaming = $state(false);
 
   const { name } = await getUser();
@@ -71,8 +73,16 @@
     "Copy Code"
   );
 
+  function hashTree(tree: RootNode): string {
+    return JSON.stringify(tree);
+  }
+
   async function generateHTML(): Promise<string | null> {
-    if (cachedHTML) return cachedHTML;
+    const currentHash = hashTree(appState.pageTree);
+
+    if (cachedHTML && cachedTreeHash === currentHash) {
+      return cachedHTML;
+    }
 
     const formData = new FormData();
     formData.append("props", JSON.stringify({ pageTree: appState.pageTree }));
@@ -88,6 +98,7 @@
     if (parseError || !res.success || !res.html) return null;
 
     cachedHTML = res.html;
+    cachedTreeHash = currentHash;
     return cachedHTML;
   }
 
@@ -242,7 +253,7 @@
   </SegmentedControl>
   <Button
     color="success"
-    disabled={copy.status === "copying" || copy.status === "error"}
+    disabled={appState.pageTree.children.length === 0 || copy.status === "copying" || copy.status === "error"}
     onclick={handleCopyHTML}
   >
     <Icon size={16}>
@@ -306,13 +317,13 @@
   {/snippet}
   {#snippet footer()}
     <div class="exit-dialog-actions">
-      <Button color="primary" fullWidth onclick={handleSaveAndExit}>
+      <Button color="primary" onclick={handleSaveAndExit}>
         Save and exit
       </Button>
-      <Button color="danger" variant="ghost" fullWidth onclick={handleDiscardAndExit}>
+      <Button color="danger" variant="outlined" onclick={handleDiscardAndExit}>
         Discard changes and exit
       </Button>
-      <Button variant="ghost" fullWidth onclick={() => showExitModal = false}>
+      <Button variant="ghost" onclick={() => showExitModal = false}>
         Cancel
       </Button>
     </div>
@@ -479,5 +490,11 @@
 
   .app-save-status {
     font-size: .875rem;
+  }
+
+  .exit-dialog-actions {
+    display: flex;
+    gap: .75rem;
+    flex-direction: row-reverse;
   }
 </style>

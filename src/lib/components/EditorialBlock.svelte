@@ -5,7 +5,7 @@
 	type TitleAlignment = "left" | "center" | "right";
 	type ImagePosition = "above" | "below" | "overlay";
 	type OverlayPosition = "top-left" | "top-center" | "top-right" | "center-left" | "center" | "center-right" | "bottom-left" | "bottom-center" | "bottom-right";
-	
+
 	type Props = {
 		children?: Snippet,
 		title?: string,
@@ -15,7 +15,7 @@
 	}
 
 	const DIMENSIONS = {
-		width: 1200,
+		width: 1400,
 		height: 260
 	} as const;
 
@@ -28,76 +28,76 @@
 	}: Props = $props();
 </script>
 
-<section 
-	class="uikit-storyblock"
-	style:--uikit-storyblock-background={backgroundColor}
+<section
+	class="spn-ui-editorial-block"
+	style:--spn-ui-editorialblock-background={backgroundColor}
 >
 	{#if title}
-		<header 
-			class="uikit-storyblock__header"
-			class:uikit-storyblock__header--alignment-center={titleAlignment === "center"}
-			class:uikit-storyblock__header--alignment-right={titleAlignment === "right"}
+		<header
+			class="spn-ui-editorial-block__header"
+			class:spn-ui-editorial-block__header--alignment-center={titleAlignment === "center"}
+			class:spn-ui-editorial-block__header--alignment-right={titleAlignment === "right"}
 		>
-			<h2 class="uikit-storyblock__title">
+			<h2 class="spn-ui-editorial-block__title">
 				{title}
 			</h2>
 			{#if imageURL}
-				<div class="uikit-storyblock__hero-image">
-					<picture class="uikit-storyblock__media">
+				<div class="spn-ui-editorial-block__hero-image">
+				<picture class="spn-ui-editorial-block__media">
 						<Image src={imageURL} width={DIMENSIONS.width} height={DIMENSIONS.height} alt="" />
 					</picture>
 				</div>
 			{/if}
 		</header>
 	{/if}
-	<div class="uikit-storyblock__container">
+	<div class="spn-ui-editorial-block__container">
 		{@render children?.()}
 	</div>
 </section>
 
 <style>
 	:root {
-		--uikit-storyblock-columns: 12;
-		--uikit-storyblock-gap: 1rem;
-		--uikit-storyblock-background: #fff;
+		--spn-ui-editorialblock-columns: 12;
+		--spn-ui-editorialblock-gap: 1rem;
+		--spn-ui-editorialblock-background: #fff;
 	}
-	
-	.uikit-storyblock {
-		max-width: 1200px;
+
+	.spn-ui-editorial-block {
+		max-width: 1400px;
 		width: 100%;
 		display: grid;
 		gap: 1rem;
 		container-type: inline-size;
-		background-color: var(--uikit-storyblock-background);
+		background-color: var(--spn-ui-editorialblock-background);
 		padding-bottom: 1rem;
 	}
 
-	.uikit-storyblock__header {
+	.spn-ui-editorial-block__header {
 		display: grid;
 	}
-	
-	.uikit-storyblock__title {
+
+	.spn-ui-editorial-block__title {
 		margin: 0;
 		line-height: 1.2;
 		font-weight: 600;
 		font-size: 1.75rem;
 	}
 
-	.uikit-storyblock__header--alignment-center {
+	.spn-ui-editorial-block__header--alignment-center {
 		text-align: center;
 	}
-	
-	.uikit-storyblock__header--alignment-right {
+
+	.spn-ui-editorial-block__header--alignment-right {
 		text-align: right;
 	}
-	
-	.uikit-storyblock__hero-image {
+
+	.spn-ui-editorial-block__hero-image {
 		width: 100%;
 	}
-	
-	.uikit-storyblock__container {
+
+	.spn-ui-editorial-block__container {
 		display: grid;
-		grid-template-columns: repeat(var(--uikit-storyblock-columns), 1fr);
-		gap: var(--uikit-storyblock-gap);
+		grid-template-columns: repeat(var(--spn-ui-editorialblock-columns), 1fr);
+		gap: var(--spn-ui-editorialblock-gap);
 	}
 </style>

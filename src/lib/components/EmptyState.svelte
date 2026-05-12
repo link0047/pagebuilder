@@ -32,6 +32,7 @@
     gap: .5rem;
     text-align: center;
     align-items: center;
+    padding: 1rem;
   }
 
   .empty-state__title {

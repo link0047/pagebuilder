@@ -69,7 +69,6 @@
 		display: flex;
 		flex-flow: column nowrap;
 		gap: 1rem;
-		margin-block-end: .5rem;
 	}
 
 	.auth-card__title,

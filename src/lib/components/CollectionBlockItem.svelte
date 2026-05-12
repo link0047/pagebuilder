@@ -1,36 +1,28 @@
 <script lang="ts">
-	import Badge from "./Badge.svelte";
-	import ProductCard from "./ProductCard.svelte";
+  import ProductCard, { type Props as ProductCardProps } from "./ProductCard.svelte";
 
-	type Product = {
-		href: string;
-		src: { desktop: string; mobile: string };
-		name: string;
-		price: { original: number; sale: number | null };
-		badge?: string;
-	};
+  type Props = {
+    product?: ProductCardProps;
+    [key: string]: unknown;
+  };
 
-	type Props = {
-		product?: Product;
-		[key: string]: unknown;
-	};
-
-	let { product }: Props = $props();
+  let { product }: Props = $props();
 </script>
 
 {#if product}
-	{@const { href, src, name, price, badge } = product}
-	{#snippet badgeSnippet()}
-		<Badge shape="pill">{badge}</Badge>
-	{/snippet}
+  {@const { href, src = { desktop: "", tablet: "", mobile: "" }, name, price, badge } = product}
+  {@const originalPrice = Number(price?.original) || 0}
+  {@const salePrice = price?.sale !== null && price?.sale !== undefined
+    ? Number(price.sale) || null
+    : null}
 
-	<wcag-ui-carousel-item>
-		<ProductCard
-			href={href}
-			src={src}
-			name={name}
-			price={price}
-			badge={badge ? badgeSnippet : undefined}
-		/>
-	</wcag-ui-carousel-item>
+  <wcag-ui-carousel-item>
+    <ProductCard
+      href={href}
+      src={src}
+      name={name ?? ""}
+      price={{ original: originalPrice, sale: salePrice }}
+      badge={badge?.text ? badge : undefined}
+    />
+  </wcag-ui-carousel-item>
 {/if}

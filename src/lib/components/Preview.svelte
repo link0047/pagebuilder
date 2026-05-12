@@ -53,6 +53,8 @@
       {#each pageTree.children as child}
         <Self pageTree={child} />
       {/each}
+    {:else if pageTree.props.text}
+      {pageTree.props.text}
     {/if}
 
     {#if safeContent}

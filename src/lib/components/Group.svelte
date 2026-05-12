@@ -7,7 +7,7 @@
 		direction?: Direction,
 		gap?: string
 	}
-	
+
 	let {
 		children,
 		direction = "vertical",
@@ -16,21 +16,23 @@
 </script>
 
 <div
-	class="uikit-group"
+	class="wcag-ui-group"
 	role="group"
 	data-direction={direction}
-	style:--uikit-group-gap={gap}>
+	style:--wcag-ui-group-gap={gap}>
 	{@render children?.()}
 </div>
 
-<style>	
-	.uikit-group {
+<style>
+	.wcag-ui-group {
+	--wcag-ui-group-gap: 0;
+
 		display: flex;
 		flex-direction: column;
-		gap: var(--uikit-group-gap, 0);
+		gap: var(--wcag-ui-group-gap);
 	}
 
-	.uikit-group[data-direction="horizontal"] {
+	.wcag-ui-group[data-direction="horizontal"] {
 		flex-direction: row;
 	}
 </style>

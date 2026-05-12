@@ -9,14 +9,15 @@
   import Tab from "$lib/components/Tab.svelte";
   import TabPanel from "$lib/components/TabPanel.svelte";
   import BuildCard from "$lib/components/BuildCard.svelte";
+  import BuildCardSkeleton from "$lib/components/BuildCardSkeleton.svelte";
   import ScrollableArea from "$lib/components/ScrollableArea.svelte";
   import Menu from "$lib/components/Menu.svelte";
   import MenuItem from "$lib/components/MenuItem.svelte";
   import Dialog from "$lib/components/Dialog.svelte";
   import RecentCard from "$lib/components/RecentCard.svelte";
+  import Badge from "$lib/components/Badge.svelte";
   import { getAppState } from "$lib/components/app-state.svelte";
   import { goto } from "$app/navigation";
-  import Badge from "$lib/components/Badge.svelte";
   import type { RemoteQuery } from "@sveltejs/kit";
 
   const BUILDS_TABS = {
@@ -31,6 +32,8 @@
   let allBuildMoreButtonRefs = $state<Record<string, HTMLButtonElement>>({});
   let myBuildMoreButtonRefs = $state<Record<string, HTMLButtonElement>>({});
   let activeBuildsTab = $state<BuildsTab>(BUILDS_TABS.ALL);
+  let showSkeleton = $state(false);
+  let skeletonTimer: ReturnType<typeof setTimeout>;
 
   const appState = getAppState();
   const templates = ["Blank", "Spencer's Homepage", "Spirit Homepage"];
@@ -101,11 +104,24 @@
       }
     });
   });
+
+  $effect(() => {
+    if (buildsQuery.loading || userBuildsQuery.loading) {
+      skeletonTimer = setTimeout(() => {
+        showSkeleton = true;
+      }, 250);
+    } else {
+      clearTimeout(skeletonTimer);
+      showSkeleton = false;
+    }
+
+    return () => clearTimeout(skeletonTimer);
+  });
 </script>
 
 {#snippet BuildsList(query: RemoteQuery<BuildResult[]>, emptyDescription: string, moreButtonRefs: Record<string, HTMLButtonElement>)}
-  {#if query.loading}
-    {"loading"}
+  {#if query.loading && showSkeleton}
+    <BuildCardSkeleton />
   {:else if query.current}
     {@const builds = query.current}
     {#if builds.length === 0}

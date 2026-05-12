@@ -14,13 +14,10 @@
   const appState = getAppState();
 
   let addSectionButtonRef = $state<HTMLButtonElement>();
-  let isPopoverOpen = $state(false);
 
   function addSection(name: string) {
     const config = sectionConfigs.find((s) => s.name === name);
     if (!config || config.disabled) return;
-
-    isPopoverOpen = false;
 
     appState.insertComponent({
       type: "component",

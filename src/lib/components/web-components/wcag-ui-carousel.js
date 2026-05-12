@@ -351,7 +351,9 @@ class WCAGUICarousel extends HTMLElement {
 
       case "breakpoints":
         this.#teardownBreakpoints();
-        this.#setupBreakpoints();
+        if (this.#abortController) {
+          this.#setupBreakpoints();
+        }
         break;
     }
   }
@@ -506,6 +508,7 @@ class WCAGUICarousel extends HTMLElement {
   // ---------------------------------------------------------------------------
 
   #setupBreakpoints() {
+    if (!this.#abortController) return;
     const raw = this.getAttribute("breakpoints");
     if (!raw) return;
 
@@ -543,7 +546,10 @@ class WCAGUICarousel extends HTMLElement {
     this.#slidesPerView = this.#defaultSlidesPerView;
     this.#slidesPerGroup = this.#defaultSlidesPerGroup;
     this.#spaceBetween = this.#defaultSpaceBetween;
-    this.#applyTrackCSSVars();
+
+    if (this.#abortController) {
+      this.#applyTrackCSSVars();
+    }
   }
 
   #activeBreakpointConfig() {

@@ -5,6 +5,26 @@ import { transform } from "lightningcss";
 const OUTPUT_DIR = "src/styles/generated";
 const OUTPUT_FILE = "preview-styles.css";
 
+const COMPONENT_FILES = [
+  "Hero",
+  "Heading",
+  "Text",
+  "OfferCallout",
+  "Link",
+  "Badge",
+  "CTAGroup",
+  "EditorialBlock",
+  "EditorialCard",
+  "CollectionBlock",
+  "CollectionBlockItem",
+  "FeaturedCategories",
+  "FeaturedCategory",
+  "RecommendationBlock",
+  "Card",
+  "ProductCard",
+  "Image",
+].map((name) => `src/lib/components/${name}.svelte`);
+
 async function attempt(promise) {
   try {
     const result = await promise;
@@ -37,10 +57,12 @@ async function extractCSSFromFiles(files) {
       continue;
     }
 
-    const match = /<style>([\s\S]*?)<\/style>/.exec(content);
-
-    if (match && match[1]) {
-      extractedCSS += match[1].trim();
+    const stylePattern = /<style(?:\s[^>]*)?>([\s\S]*?)<\/style>/g;
+    let match;
+    while ((match = stylePattern.exec(content)) !== null) {
+      if (match[1]?.trim()) {
+        extractedCSS += match[1].trim();
+      }
     }
   }
 
@@ -48,21 +70,9 @@ async function extractCSSFromFiles(files) {
 }
 
 async function main() {
-  const svelteFiles = [
-    "src/lib/components/Hero.svelte",
-    "src/lib/components/Card.svelte",
-    "src/lib/components/FeaturedCategories.svelte",
-    "src/lib/components/FeaturedCategory.svelte",
-    "src/lib/components/StoryBlock.svelte",
-    "src/lib/components/CollectionBlock.svelte",
-    "src/lib/components/ProductCard.svelte",
-    "src/lib/components/StoryCard.svelte",
-    "src/lib/components/HeroCTA.svelte",
-    "src/lib/components/Image.svelte",
-    "src/lib/components/PromoBadge.svelte"
-  ];
+  console.log(`Processing ${COMPONENT_FILES.length} component files`);
 
-  const [error, extractedCSS] = await attempt(extractCSSFromFiles(svelteFiles));
+  const [error, extractedCSS] = await attempt(extractCSSFromFiles(COMPONENT_FILES));
 
   if (error) {
     console.error("Failed to extract CSS", error.message);
@@ -75,7 +85,7 @@ async function main() {
   }
 
   const [writeError] = await attempt(mkdir(OUTPUT_DIR, { recursive: true }));
-  
+
   if (writeError) {
     console.error("Failed to create output directory:", writeError.message);
     process.exit(1);
@@ -110,11 +120,12 @@ async function main() {
     console.error("Failed to save CSS:", saveError.message);
     process.exit(1);
   }
-  
+
   console.log("CSS extraction completed!");
   console.log(`Total CSS: ${extractedCSS.length} characters`);
-  
+
   if (result) {
+    console.log(`Minified CSS: ${result.code.length} characters`);
     console.log("CSS has been minified and optimized with lightningcss");
   }
 }

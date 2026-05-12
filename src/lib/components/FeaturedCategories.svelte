@@ -11,7 +11,7 @@
 		gap?: string;
 		containerGap?: string;
 	};
-	
+
 	let {
 		children,
 		title = "Featured Categories",
@@ -23,28 +23,28 @@
 		containerGap
 	}: Props = $props();
 
-	const HeadingTag = `h${headingLevel}` as const;
+	const HeadingTag = $derived(`h${headingLevel}`);
 </script>
 
-<section 
-	class="uikit-featured-categories"
+<section
+	class="spn-ui-featured-categories"
 	aria-labelledby={headingId}
-	style:--uikit-featured-categories-title-align={titleAlignment}
-	style:--uikit-featured-categories-gap={gap}
-	style:--uikit-featured-categories-container-gap={containerGap}
-	style:--uikit-featured-categories-max-columns={maxColumns}
+	style:--spn-ui-featured-categories-title-align={titleAlignment}
+	style:--spn-ui-featured-categories-gap={gap}
+	style:--spn-ui-featured-categories-container-gap={containerGap}
+	style:--spn-ui-featured-categories-max-columns={maxColumns}
 >
-	<header class="uikit-featured-categories__header">
-		<svelte:element 
+	<header class="spn-ui-featured-categories__header">
+		<svelte:element
 			this={HeadingTag}
 			id={headingId}
-			class="uikit-featured-categories__heading"
+			class="spn-ui-featured-categories__heading"
 		>
 			{title}
 		</svelte:element>
 	</header>
 	<nav
-		class="uikit-featured-categories__container"
+		class="spn-ui-featured-categories__container"
 		aria-label="Browse main product categories"
 	>
 		{@render children?.()}
@@ -53,60 +53,64 @@
 
 <style>
 	:root {
-		--uikit-featured-categories-title-align: center;
-		--uikit-featured-categories-gap: 0.5rem;
-		--uikit-featured-categories-container-gap: .5rem;
-		--uikit-featured-categories-max-columns: 6;
+		--spn-ui-featured-categories-title-align: center;
+		--spn-ui-featured-categories-gap: 0.5rem;
+		--spn-ui-featured-categories-container-gap: .5rem;
+		--spn-ui-featured-categories-max-columns: 6;
+		--spn-ui-featured-categories-padding-block: 0;
 	}
-	
-	.uikit-featured-categories {
+
+	.spn-ui-featured-categories {
 		display: grid;
-		gap: var(--uikit-featured-categories-gap);
-		max-width: 1200px;
+		gap: var(--spn-ui-featured-categories-gap);
+		max-width: 1400px;
 		min-width: 320px;
 		container-type: inline-size;
 		font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+		padding-block: var(--spn-ui-featured-categories-padding-block);
 	}
-	
-	.uikit-featured-categories__header {
+
+	.spn-ui-featured-categories__header {
 		height: 2rem;
 		display: flex;
 		align-items: center;
-		justify-content: var(--uikit-featured-categories-title-align);
+		justify-content: var(--spn-ui-featured-categories-title-align);
 	}
-	
-	.uikit-featured-categories__heading {
+
+	.spn-ui-featured-categories__heading {
 		margin: 0;
 	  line-height: 1;
 	  font-weight: 600;
 	  font-size: 1.4rem;
 		letter-spacing: .03em;
 	}
-	
-	.uikit-featured-categories__container {
+
+	.spn-ui-featured-categories__container {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: var(--uikit-featured-categories-container-gap);
+		gap: var(--spn-ui-featured-categories-container-gap);
 	}
 
 	@container (min-width: 768px) {
-		.uikit-featured-categories {
-			--uikit-featured-categories-container-gap: 1rem;
+		.spn-ui-featured-categories {
+		  --spn-ui-featured-categories-padding-block: 1rem;
+		  --spn-ui-featured-categories-container-gap: 1rem;
 		}
 
-		.uikit-featured-categories__container {
-			grid-template-columns: repeat(var(--uikit-featured-categories-max-columns), 1fr);
+		.spn-ui-featured-categories__container {
+			grid-template-columns: repeat(var(--spn-ui-featured-categories-max-columns), 1fr);
 		}
 	}
-	
+
 	@supports not (container-type: inline-size) {
 		@media(min-width: 768px) {
-			.uikit-featured-categories {
-				--uikit-featured-categories-container-gap: 1rem;
+			.spn-ui-featured-categories {
+			  --spn-ui-featured-categories-padding-block: 1rem;
+			  --spn-ui-featured-categories-container-gap: 1rem;
 			}
-			
-			.uikit-featured-categories__container {
-				grid-template-columns: repeat(var(--uikit-featured-categories-max-columns), 1fr);
+
+			.spn-ui-featured-categories__container {
+				grid-template-columns: repeat(var(--spn-ui-featured-categories-max-columns), 1fr);
 			}
 		}
 	}

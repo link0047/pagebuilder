@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { type Snippet, onMount } from "svelte";
+	import { BREAKPOINTS } from "$lib/constants/breakpoints";
 
 	type HeadingSize = "sm" | "md" | "lg" | "xl";
 	type HeadingAlignment = "left" | "center" | "right";
@@ -36,9 +37,9 @@
 		ctaBackgroundColor,
 		ctaTextColor,
 		breakpoints = {
-      "320": { slidesPerView: 2.5, slidesPerGroup: 2.5 },
-      "768": { slidesPerView: 4, slidesPerGroup: 4 },
-      "1024": { slidesPerView: 5, slidesPerGroup: 5 }
+      [BREAKPOINTS.mobile]: { slidesPerView: 2.5, slidesPerGroup: 2.5 },
+      [BREAKPOINTS.tablet]: { slidesPerView: 4, slidesPerGroup: 4 },
+      [BREAKPOINTS.desktop]: { slidesPerView: 5, slidesPerGroup: 5 }
     },
 		children
 	}: Props = $props();
@@ -51,6 +52,7 @@
 
 <section
 	class="collection-block"
+	class:collection-block--noheader={!heading && !hero}
 	aria-labelledby={heading ? headerId : undefined}
 	style:--collection-block-bg-color={backgroundColor}
   style:--collection-block-heading-color={headingColor}
@@ -78,12 +80,30 @@
 
 <style>
 	.collection-block {
+	  --collection-block-gap: 0;
+		--collection-block-padding-block-end: 1rem;
+		--collection-block-border-radius: 1rem;
+		--collection-block-bg-color: #f6f5f1;
+		--collection-block-header-min-height: 3.5rem;
+		--collection-block-header-padding-inline: 1rem;
+		--collection-block-header-padding-block: 0;
+		--collection-block-heading-line-height: 1.2;
+		--collection-block-heading-text-align: center;
+    --collection-block-heading-weight: 600;
+    --collection-block-heading-size: 1.5rem;
+    --collection-block-heading-color: #000;
+    --collection-block-content-padding-inline: 0.25rem;
+
 	  display: flex;
 	  flex-direction: column;
 	  gap: var(--collection-block-gap, 0);
 	  padding-block-end: var(--collection-block-padding-block-end, 1rem);
 	  border-radius: var(--collection-block-border-radius, 1rem);
 	  background-color: var(--collection-block-bg-color, #f6f5f1);
+	}
+
+	.collection-block--noheader {
+	  padding-block-start: var(--collection-block-padding-block-end, 1rem);
 	}
 
 	.collection-block__hero {

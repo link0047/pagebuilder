@@ -2,43 +2,48 @@ import type { Component } from "svelte";
 import type { ComponentNode, ComponentMeta } from "./types";
 
 import Hero from "./Hero.svelte";
-import StoryBlock from "./StoryBlock.svelte";
-import StoryCard from "./StoryCard.svelte";
+import Heading from "./Heading.svelte";
+import Text from "./Text.svelte";
+import OfferCallout from "./OfferCallout.svelte";
+import Link from "./Link.svelte";
+import CTAGroup from "./CtaGroup.svelte";
+import EditorialBlock from "./EditorialBlock.svelte";
+import EditorialCard from "./EditorialCard.svelte";
 import CollectionBlock from "./CollectionBlock.svelte";
 import CollectionBlockItem from "./CollectionBlockItem.svelte";
 import FeaturedCategories from "./FeaturedCategories.svelte";
 import FeaturedCategory from "./FeaturedCategory.svelte";
 import Card from "./Card.svelte";
+import Badge from "./Badge.svelte";
 import ProductCard from "./ProductCard.svelte";
+import RecommendationBlock from "./RecommendationBlock.svelte";
 
 // ---------------------------------------------------------------------------
 // Component registry
-// Maps component name strings (as stored in the page tree) to their Svelte
-// component constructors. Add new components here — nowhere else.
-//
-// Component<any, any, any> is intentional — the registry holds components with
-// varying prop signatures and we don't need type-level prop safety here. Props
-// are validated at the schema level (component-schema.ts) instead.
 // ---------------------------------------------------------------------------
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const componentRegistry: Record<string, Component<any, any, any>> = {
   Hero,
-  StoryBlock,
-  StoryCard,
+  Heading,
+  Text,
+  OfferCallout,
+  Link,
+  CTAGroup,
+  EditorialBlock,
+  EditorialCard,
   CollectionBlock,
   CollectionBlockItem,
   FeaturedCategories,
   FeaturedCategory,
   Card,
+  Badge,
   ProductCard,
+  RecommendationBlock,
 };
 
 // ---------------------------------------------------------------------------
-// PartialComponentNode
-// A looser version of ComponentNode used in config definitions — id and meta
-// are optional since insertComponent fills in safe defaults for anything
-// not explicitly provided.
+// Types
 // ---------------------------------------------------------------------------
 
 export type PartialComponentNode = {
@@ -51,12 +56,18 @@ export type PartialComponentNode = {
   children?: PartialComponentNode[];
 };
 
-// ---------------------------------------------------------------------------
-// Section configs
-// Defines the top-level sections available in the "Add Section" menu, along
-// with their default props and any default children they start with.
-// The page's +page.svelte editor reads this — add new sections here only.
-// ---------------------------------------------------------------------------
+export type ChildOption = {
+  label: string;
+  childName: string;
+  defaultProps: ComponentNode["props"];
+  defaultMeta: Partial<ComponentMeta>;
+  defaultChildren?: PartialComponentNode[];
+};
+
+export type ChildConfig = {
+  label: string;
+  options: ChildOption[];
+};
 
 export type SectionConfig = {
   label: string;
@@ -68,20 +79,33 @@ export type SectionConfig = {
   defaultChildren?: PartialComponentNode[];
 };
 
+// ---------------------------------------------------------------------------
+// Section configs
+// ---------------------------------------------------------------------------
+
 export const sectionConfigs: SectionConfig[] = [
   {
     label: "Hero",
     name: "Hero",
     defaultProps: {
-      images: {
-        desktop: "https://placehold.co/1200x460",
-        tablet: "https://placehold.co/460x380",
-        mobile: "https://placehold.co/460x380",
+      config: {
+        mobile: {
+          image: { src: "https://placehold.co/390x260" },
+          content: { placement: "center", padding: "1rem" },
+        },
+        tablet: {
+          image: { src: "https://placehold.co/768x320" },
+        },
+        desktop: {
+          image: { src: "https://placehold.co/1024x400" },
+        },
+        wide: {
+          image: { src: "https://placehold.co/1400x480" },
+        },
       },
-      width: 1200,
-      height: 460,
     },
-    defaultData: { content: "" },
+    defaultData: {},
+    defaultChildren: [],
   },
   {
     label: "Featured Categories",
@@ -99,19 +123,20 @@ export const sectionConfigs: SectionConfig[] = [
     ],
   },
   {
-    label: "Story Block",
-    name: "StoryBlock",
+    label: "Editorial Block",
+    name: "EditorialBlock",
     defaultProps: { titleAlignment: "center" },
     defaultData: {},
     defaultChildren: [
       {
         type: "component",
-        name: "StoryCard",
+        name: "EditorialCard",
         data: {},
         props: {
           images: { desktop: "", tablet: "", mobile: "" },
         },
-        meta: { label: "Story Card" },
+        meta: { label: "Editorial Card" },
+        children: [],
       },
     ],
   },
@@ -128,16 +153,17 @@ export const sectionConfigs: SectionConfig[] = [
         props: {
           product: {
             src: {
-              desktop: "https://placehold.co/460x380",
-              mobile: "https://placehold.co/460x380"
+              mobile: "https://placehold.co/460x380",
+              tablet: "https://placehold.co/460x380",
+              desktop: "https://placehold.co/460x380"
             },
             href: "",
             name: "",
             badge: "",
             price: {
               original: 0,
-              sale: null
-            }
+              sale: null,
+            },
           },
         },
         meta: { label: "Product Card" },
@@ -145,81 +171,182 @@ export const sectionConfigs: SectionConfig[] = [
     ],
   },
   {
-    label: "Recommendations Zone",
-    name: "RecommendationsZone",
-    disabled: true,
-    defaultProps: {},
+    label: "Recommendation Block",
+    name: "RecommendationBlock",
+    // disabled: true,
+    defaultProps: {
+      title: "Recommended For You",
+      titleAlignment: "center",
+    },
     defaultData: {},
   },
 ];
 
 // ---------------------------------------------------------------------------
-// Child component config
-// Describes which components can have children, what child type they accept,
-// and the default props for a new child. PageStructure reads this to know
-// what "Add" actions to show — no more hardcoded if/else chains.
+// Child configs
 // ---------------------------------------------------------------------------
 
-export type ChildConfig = {
-  label: string;
-  childName: string;
-  defaultProps: ComponentNode["props"];
-  defaultMeta: Partial<ComponentMeta>;
-};
-
 export const childConfigs: Record<string, ChildConfig> = {
-  StoryBlock: {
-    label: "Add Story Card",
-    childName: "StoryCard",
-    defaultProps: {
-      images: { desktop: "", tablet: "", mobile: "" },
-      backgroundColor: "#fff",
-      textAlignment: "center",
-    },
-    defaultMeta: { label: "Story Card" },
+  Hero: {
+    label: "Add Content",
+    options: [
+      {
+        label: "Heading",
+        childName: "Heading",
+        defaultProps: { text: "", level: "2" },
+        defaultMeta: { label: "Heading" },
+      },
+      {
+        label: "Text",
+        childName: "Text",
+        defaultProps: {
+          text: "",
+          size: { mobile: "md", tablet: "md", desktop: "md" },
+          weight: { mobile: "normal", tablet: "normal", desktop: "normal" },
+          color: { mobile: "inherit", tablet: "inherit", desktop: "inherit" },
+        },
+        defaultMeta: { label: "Text" },
+      },
+      {
+        label: "Offer Callout",
+        childName: "OfferCallout",
+        defaultProps: { heading: "", value: "" },
+        defaultMeta: { label: "Offer Callout" },
+      },
+      {
+        label: "CTA Group",
+        childName: "CTAGroup",
+        defaultProps: { config: {} },
+        defaultMeta: { label: "CTA Group" },
+        defaultChildren: [
+          {
+            type: "component",
+            name: "Link",
+            props: {
+              href: "",
+              text: "Shop Now",
+              variant: "button",
+              shape: "pill",
+              color: "default",
+            },
+            data: {},
+            meta: { label: "CTA" },
+          },
+        ],
+      },
+    ],
+  },
+
+  CTAGroup: {
+    label: "Add CTA",
+    options: [
+      {
+        label: "CTA",
+        childName: "Link",
+        defaultProps: {
+          href: "",
+          text: "Shop Now",
+          variant: "button",
+          shape: "pill",
+          color: "default",
+        },
+        defaultMeta: { label: "CTA" },
+      },
+    ],
+  },
+
+  EditorialBlock: {
+    label: "Add Card",
+    options: [
+      {
+        label: "Editorial Card",
+        childName: "EditorialCard",
+        defaultProps: {
+          images: { desktop: "", tablet: "", mobile: "" },
+          backgroundColor: "#fff",
+          textAlignment: "center",
+        },
+        defaultMeta: { label: "Editorial Card" },
+        defaultChildren: [],
+      },
+    ],
+  },
+
+  EditorialCard: {
+    label: "Add Content",
+    options: [
+      {
+        label: "Text",
+        childName: "Text",
+        defaultProps: {
+          text: "",
+          size: { mobile: "md" },
+          weight: { mobile: "normal" },
+          color: { mobile: "inherit" },
+        },
+        defaultMeta: { label: "Text" },
+      },
+      {
+        label: "Offer Callout",
+        childName: "OfferCallout",
+        defaultProps: { heading: "", value: "" },
+        defaultMeta: { label: "Offer Callout" },
+      },
+      {
+        label: "Badge",
+        childName: "Badge",
+        defaultProps: {
+          text: "New",
+          variant: "filled",
+          color: "primary",
+          shape: "pill",
+          size: "md",
+          position: ""
+        },
+        defaultMeta: { label: "Badge" },
+      },
+    ],
   },
 
   CollectionBlock: {
     label: "Add Product Card",
-    childName: "CollectionBlockItem",
-    defaultProps: {
-      product: {
-        src: {
-          desktop: "https://placehold.co/460x380",
-          mobile: "https://placehold.co/460x380"
+    options: [
+      {
+        label: "Product Card",
+        childName: "CollectionBlockItem",
+        defaultProps: {
+          product: {
+            src: {
+              desktop: "https://placehold.co/460x380",
+              mobile: "https://placehold.co/460x380",
+            },
+            href: "",
+            name: "",
+            badge: "",
+            price: {
+              original: 0,
+              sale: null,
+            },
+          },
         },
-        href: "",
-        name: "",
-        badge: "",
-        price: {
-          original: 0,
-          sale: null
-        }
-      }
-    },
-    defaultMeta: { label: "Product Card" },
+        defaultMeta: { label: "Product Card" },
+      },
+    ],
   },
 
   FeaturedCategories: {
-    label: "Add Featured Category",
-    childName: "FeaturedCategory",
-    defaultProps: {
-      image: "",
-      text: "",
-      href: "",
-    },
-    defaultMeta: { label: "Featured Category" },
-  },
-
-  Hero: {
-    label: "Add CTA",
-    childName: "HeroCTA",
-    defaultProps: {
-      href: "",
-      variant: "solid",
-      size: "medium",
-      color: "default",
-    },
-    defaultMeta: { label: "Hero CTA" },
+    label: "Add Category",
+    options: [
+      {
+        label: "Featured Category",
+        childName: "FeaturedCategory",
+        defaultProps: {
+          image: "",
+          text: "",
+          href: "",
+        },
+        defaultMeta: { label: "Featured Category" },
+      },
+    ],
   },
 };

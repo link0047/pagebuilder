@@ -8,7 +8,7 @@
 
   let {
     children,
-    maxWidth = "1200px",
+    maxWidth = "1400px",
   }: Props = $props();
 </script>
 
@@ -17,9 +17,7 @@
     class="preview-content"
     style:--uikit-preview-max-width={maxWidth}
   >
-    <div class="page">
-      {@render children?.()}
-    </div>
+    {@render children?.()}
   </div>
 </main>
 
@@ -47,20 +45,6 @@
     max-height: 100dvh;
     background-color: #fff;
     border-radius: 0.5rem;
-    box-shadow:
-      0 0 1px 0 rgba(29, 34, 40, 0.1),
-      0 2px 4px 0 rgba(29, 34, 40, 0.08);
-  }
-
-  .page {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-      "Segoe UI Symbol", "Noto Color Emoji";
-    background-color: #fff;
-    direction: ltr;
-    display: flex;
-    flex-flow: column nowrap;
-    gap: 2rem;
-    padding-inline: 0.5rem;
+    box-shadow: 0 0 1px 0 rgba(29, 34, 40, 0.1), 0 2px 4px 0 rgba(29, 34, 40, 0.08);
   }
 </style>

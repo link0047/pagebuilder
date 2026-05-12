@@ -4,8 +4,10 @@
   import Tree from "./Tree.svelte";
   import TreeItem from "./TreeItem.svelte";
   import Icon from "./Icon.svelte";
+  import Menu from "./Menu.svelte";
+  import MenuItem from "./MenuItem.svelte";
   import { getAppState } from "./app-state.svelte";
-  import { childConfigs, componentRegistry } from "./component-registry";
+  import { childConfigs, componentRegistry, type ChildOption } from "./component-registry";
   import type { PageTreeNode } from "./types";
 
   type Props = {
@@ -16,6 +18,7 @@
   let { pageTree, path = [] }: Props = $props();
 
   let appState = getAppState();
+  let addChildButtonRef = $state<HTMLButtonElement>();
 
   let childConfig = $derived(
     pageTree?.type === "component" ? (childConfigs[pageTree.name] ?? null) : null
@@ -25,17 +28,16 @@
     pageTree?.type === "component" && pageTree.name in componentRegistry
   );
 
-  // Sibling context — needed to know if up/down should be disabled
-  let siblingCount = $derived(() => {
+  let siblingCount = $derived((() => {
     if (path.length === 0) return 0;
     const parentPath = path.slice(0, -1);
     const parent = appState.getNodeAtPath(parentPath);
     return parent?.children?.length ?? 0;
-  });
+  })());
 
   let currentIndex = $derived(path[path.length - 1] ?? 0);
   let canMoveUp = $derived(path.length > 0 && currentIndex > 0);
-  let canMoveDown = $derived(path.length > 0 && currentIndex < siblingCount() - 1);
+  let canMoveDown = $derived(path.length > 0 && currentIndex < siblingCount - 1);
 
   function deleteComponent() {
     if (path.length > 0) {
@@ -59,34 +61,39 @@
     if (canMoveDown) appState.moveComponent(path, "down");
   }
 
-  function addChild() {
+  function addChild(option: ChildOption) {
     if (!childConfig || pageTree?.type !== "component") return;
 
     appState.insertComponent(
       {
         type: "component",
-        name: childConfig.childName,
-        props: childConfig.defaultProps,
+        name: option.childName,
+        props: option.defaultProps,
         data: {},
         meta: {
           locked: false,
           hidden: false,
-          label: childConfig.defaultMeta.label ?? childConfig.childName,
-          ...childConfig.defaultMeta,
+          label: option.defaultMeta.label ?? option.childName,
+          ...option.defaultMeta,
         },
+        children: option.defaultChildren,
       },
       path
     );
+
+    console.log({ option });
+    console.log(JSON.stringify($state.snapshot(appState.pageTree), null, 2));
   }
 </script>
 
 {#snippet addAction(label: string, onclick: () => void)}
   <TreeItem>
     {#snippet text()}
-      <div class="uikit-page-structure-add-action">
+      <div class="page-structure-add-action">
         <button
-          class="uikit-page-structure-add-action__button"
+          class="page-structure-add-action__button"
           type="button"
+          bind:this={addChildButtonRef}
           {onclick}
         >
           <Icon>
@@ -109,14 +116,14 @@
 
 {#if pageTree?.type === "component" && isKnownComponent}
   <TreeItem
-    hasChildren={!!childConfig && !!pageTree.children && pageTree.children.length > 0}
+    hasChildren={!!childConfig}
     expanded={true}
   >
     {#snippet text()}
       {#if pageTree.meta}
-        <span class="uikit-page-structure-meta">
+        <span class="page-structure-meta">
           <button
-            class="uikit-page-structure-meta__edit-properties"
+            class="page-structure-meta__edit-properties"
             type="button"
             onclick={editProperties}
           >
@@ -169,20 +176,31 @@
       {/if}
     {/snippet}
 
-    {#if childConfig && pageTree.children}
+    {#if childConfig && pageTree.children?.length}
       {#each pageTree.children as child, index (child.id ?? index)}
         <PageStructure pageTree={child} path={[...path, index]} />
       {/each}
     {/if}
 
     {#if childConfig}
-      {@render addAction(childConfig.label, addChild)}
+      {#if childConfig.options.length === 1}
+        {@render addAction(childConfig.label, () => addChild(childConfig.options[0]))}
+      {:else}
+        {@render addAction(childConfig.label, () => {})}
+        <Menu placement="right-end" anchor={addChildButtonRef}>
+          {#each childConfig.options as option}
+            <MenuItem onclick={() => addChild(option)}>
+              {option.label}
+            </MenuItem>
+          {/each}
+        </Menu>
+      {/if}
     {/if}
   </TreeItem>
 {/if}
 
 <style>
-  .uikit-page-structure-meta {
+  .page-structure-meta {
     display: flex;
     height: 100%;
     width: 100%;
@@ -192,8 +210,8 @@
     padding-inline-end: 0.5rem;
   }
 
-  .uikit-page-structure-add-action__button,
-  .uikit-page-structure-meta__edit-properties {
+  .page-structure-add-action__button,
+  .page-structure-meta__edit-properties {
     flex-grow: 1;
     background-color: transparent;
     border: none;
@@ -203,16 +221,15 @@
     cursor: pointer;
   }
 
-  .uikit-page-structure-add-action__button {
+  .page-structure-add-action__button {
+    width: 100%;
     display: inline-flex;
     align-items: center;
     gap: 0.5ch;
     letter-spacing: 0.04em;
     font-weight: 500;
     height: 2.5rem;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-      "Segoe UI Symbol", "Noto Color Emoji";
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     color: #2a508f;
   }
 </style>

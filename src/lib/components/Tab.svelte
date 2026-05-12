@@ -157,6 +157,10 @@
 			flex: 1;
 		}
 
+		.uikit-tabs__tab:not([aria-selected="true"]):hover {
+			background-color: #eee;
+		}
+
 		/*.uikit-tabs__tab:disabled {
 
 		}*/

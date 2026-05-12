@@ -1,14 +1,9 @@
 import { getContext, setContext } from "svelte";
+import { PREVIEW_WIDTHS } from "$lib/constants/breakpoints";
 import type { ComponentNode, RootNode, PageTreeNode, TreePath, PreviewMode } from "./types";
 import type { PartialComponentNode } from "./component-registry";
 
 const APP_KEY = Symbol("pagetree");
-
-const PREVIEW_WIDTHS: Record<PreviewMode, number> = {
-  mobile: 375,
-  tablet: 768,
-  desktop: 1200,
-};
 
 const EMPTY_TREE: RootNode = {
   name: "root",

@@ -9,8 +9,8 @@
 		"aria-label"?: string;
 		[key: string]: unknown;
 	};
-	
-	let { 
+
+	let {
 		viewBox = "0 0 24 24",
 		children,
 		size,
@@ -36,14 +36,19 @@
 	{@render children?.()}
 </svg>
 
-<style>	
+<style>
 	.icon {
+	  --uikit-icon-width: 1.5rem;
+	  --uikit-icon-height: 1.5rem;
+		--uikit-icon-fill: currentcolor;
+		--uikit-icon-stroke: none;
+
 		display: inline-block;
 		vertical-align: middle;
-		width: var(--uikit-icon-width, 1.5rem);
-		height: var(--uikit-icon-height, 1.5rem);
-		fill: var(--uikit-icon-fill, currentcolor);
-  	stroke: var(--uikit-icon-stroke, none);
+		width: var(--uikit-icon-width);
+		height: var(--uikit-icon-height);
+		fill: var(--uikit-icon-fill);
+  	stroke: var(--uikit-icon-stroke);
 		flex-shrink: 0;
 	}
 </style>

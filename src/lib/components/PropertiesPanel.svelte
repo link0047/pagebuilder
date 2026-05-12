@@ -17,6 +17,7 @@
   import Select from "./Select.svelte";
   import Group from "./Group.svelte";
   import Hint from "./Hint.svelte";
+  import Checkbox from "./Checkbox.svelte";
 
   type Props = {
     title?: string;
@@ -94,6 +95,20 @@
       }}
     />
 
+  {:else if control.type === "number"}
+    <Textfield
+      type="number"
+      label={control.label || ""}
+      placeholder={control.placeholder}
+      description={control.description}
+      value={getValue(control.property as string) || control.defaultValue}
+      oninput={(event: Event) => {
+        if (control.property) {
+          setValue(control.property, (event.target as HTMLInputElement).value);
+        }
+      }}
+    />
+
   {:else if control.type === "textarea"}
     <Textarea
       label={control.label}
@@ -131,6 +146,17 @@
         }
       }}
     />
+  {:else if control.type === "checkbox"}
+    <Checkbox
+      checked={getValue(control.property as string) ?? control.defaultValue ?? false}
+      onchange={(event: Event) => {
+        if (control.property) {
+          setValue(control.property, (event.target as HTMLInputElement).checked);
+        }
+      }}
+    >
+      {control.label}
+    </Checkbox>
   {/if}
 {/snippet}
 
@@ -140,12 +166,12 @@
   that trap focus and block the rest of the UI.
 -->
 <div
-  class="uikit-properties-panel"
+  class="properties-panel"
   role="complementary"
   aria-label={title}
   aria-hidden={!isOpen}
 >
-  <header class="uikit-properties-panel__header">
+  <header class="properties-panel__header">
     <Button
       size="sm"
       variant="ghost"
@@ -157,17 +183,17 @@
         <path d="M15.41 16.58 10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.42Z" />
       </Icon>
     </Button>
-    <span class="uikit-properties-panel__title">
+    <span class="properties-panel__title">
       {title}
     </span>
   </header>
 
-  <div class="uikit-properties-panel__content">
+  <div class="properties-panel__content">
     {#if isOpen && selectedComponent && schema}
       {#each schema.sections as section}
         <PropertiesPanelSection title={section.title} icon={section.icon}>
           {#each section.controls as control}
-            {#if ["segmentedbutton", "textfield", "textarea", "select", "colorpicker", "hint"].includes(control.type)}
+            {#if ["segmentedbutton", "textfield", "textarea", "select", "colorpicker", "hint", "number", "checkbox"].includes(control.type)}
               {@render renderControls(control)}
             {:else if control.type === "tabs"}
               <Tabs>
@@ -202,7 +228,7 @@
 </div>
 
 <style>
-  .uikit-properties-panel {
+  .properties-panel {
     position: absolute;
     z-index: 99;
     display: grid;
@@ -216,12 +242,12 @@
     --uikit-button-border-radius: 0.5rem;
   }
 
-  .uikit-properties-panel[aria-hidden="true"] {
+  .properties-panel[aria-hidden="true"] {
     opacity: 0;
     pointer-events: none;
   }
 
-  .uikit-properties-panel__header {
+  .properties-panel__header {
     height: 3rem;
     border-bottom: 0.0625rem solid #ebebeb;
     display: grid;
@@ -231,7 +257,7 @@
     padding-inline: 0.5rem;
   }
 
-  .uikit-properties-panel__content {
+  .properties-panel__content {
     padding-inline: 0.5rem;
     padding-block: 1rem;
     overflow-y: scroll;

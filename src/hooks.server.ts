@@ -15,3 +15,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   return svelteKitHandler({ event, resolve, auth, building });
 }
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled rejection:", reason);
+  // Don't crash — log and continue
+  // Sentry.captureException(reason);
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught exception:", error);
+  // Don't crash — log and continue
+  // Sentry.captureException(error);
+});

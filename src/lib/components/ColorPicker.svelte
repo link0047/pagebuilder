@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createColorPickerState, ColorPickerState } from "./color-picker-state.svelte";
-	
+
 	export type ColorPickerProps = {
 		value?: string;
 		label?: string;
@@ -8,7 +8,7 @@
 		[key: string]: unknown;
 	}
 
-	type ValidationState = 
+	type ValidationState =
 		| "pristine"           // Never touched
 		| "focused"            // Focused but no changes yet
 		| "editing"            // Actively typing
@@ -16,7 +16,7 @@
 
 	const MAX_HEX_LENGTH = 7;
 	const DEFAULT_HEX_VALUE = "#000000";
-	
+
 	let {
 		value = $bindable(DEFAULT_HEX_VALUE),
 		label = "Color",
@@ -25,13 +25,13 @@
 	}: ColorPickerProps = $props();
 
 	let colorState = createColorPickerState(
-		() => value, 
+		() => value,
 		(newValue) => value = newValue
 	);
-	
+
 	let isValid = $state(true);
 	let validationState = $state<ValidationState>("pristine");
-	
+
 	function handleColorInput(event: Event & { currentTarget: HTMLInputElement }) {
 		const newValue = event.currentTarget.value;
 		colorState.value = newValue;
@@ -92,7 +92,10 @@
 	}
 </script>
 
-<fieldset class="uikit-color-picker">
+<fieldset
+  class="uikit-color-picker"
+  class:uikit-color-picker--invalid={!isValid && validationState === "validating"}
+>
 	<legend class="uikit-color-picker__legend">{label}</legend>
 	<div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
 		Selected color: {colorState.value}
@@ -143,11 +146,11 @@
 			--uikit-color-picker-padding: 0;
 			--uikit-color-picker-gap: .5rem;
 			--uikit-color-picker-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-			
+
 			--uikit-color-picker-legend-font-size: .875rem;
 			--uikit-color-picker-legend-line-height: 1;
 			--uikit-color-picker-legend-color: inherit;
-			
+
 			--uikit-color-picker-input-border-color: #989898;
 			--uikit-color-picker-input-border-width: 1px;
 			--uikit-color-picker-input-border-radius: .25rem;
@@ -155,23 +158,23 @@
 			--uikit-color-picker-input-outline-offset: -2px;
 			--uikit-color-picker-input-transition-duration: 0.2s;
 	    --uikit-color-picker-input-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
-			
+
 			--uikit-color-picker-input-color-size: 2.5rem;
 			--uikit-color-picker-input-color-background: transparent;
-			
+
 			--uikit-color-picker-input-text-font-size: 1rem;
 			--uikit-color-picker-input-text-font-weight: 400;
 			--uikit-color-picker-input-text-line-height: 1;
 			--uikit-color-picker-input-text-padding-inline: .5rem;
 			--uikit-color-picker-input-text-color: #212121;
-			
+
 			--uikit-color-picker-focus-outline-color: #2451b2;
 			--uikit-color-picker-hover-outline-color: #000;
 
 			--uikit-color-picker-error-color: #d32f2f;
 		}
 	}
-	
+
 	@layer base {
 		.uikit-color-picker {
 			box-sizing: border-box;
@@ -180,16 +183,15 @@
 			padding: var(--uikit-color-picker-padding);
 			margin: 0;
 			display: grid;
-			grid-template-areas: 
+			grid-template-areas:
 				"legend legend"
-				"color text"
-				"error error";
+				"color text";
 			grid-template-columns: auto 1fr;
 			row-gap: var(--uikit-color-picker-gap);
 			column-gap: var(--uikit-color-picker-gap);
 			font-family: var(--uikit-color-picker-font-family);
 		}
-		
+
 		.uikit-color-picker__legend {
 			grid-area: legend;
 			line-height: 1;
@@ -197,7 +199,7 @@
 			font-size: var(--uikit-color-picker-legend-font-size);
 			color: var(--uikit-color-picker-legend-color);
 		}
-		
+
 		:is(.uikit-color-picker__input-color, .uikit-color-picker__input-text) {
 			box-sizing: border-box;
 			appearance: none;
@@ -237,13 +239,13 @@
 		  height: var(--uikit-color-picker-input-color-size);
 		  border: none;
 		}
-		
+
 		.uikit-color-picker__input-color::-moz-focus-inner {
 		  padding: 0;
 		  border: none;
 			background: none;
 		}
-		
+
 		.uikit-color-picker__input-text {
 			grid-area: text;
 			font-size: var(--uikit-color-picker-input-text-font-size);
@@ -261,10 +263,17 @@
 	}
 
 	@layer states {
+		.uikit-color-picker--invalid {
+		grid-template-areas:
+			"legend legend"
+			"color text"
+			"error error";
+		}
+
 		:is(.uikit-color-picker__input-color, .uikit-color-picker__input-text):focus-visible {
 			outline-color: var(--uikit-color-picker-focus-outline-color);
 		}
-		
+
 		:is(.uikit-color-picker__input-color, .uikit-color-picker__input-text):hover {
 			outline-color: var(--uikit-color-picker-hover-outline-color);
 		}
@@ -272,14 +281,14 @@
 
 	@layer accessibility {
 		@media (prefers-reduced-motion: reduce) {
-			.uikit-color-picker__input-color, .uikit-color-picker__input-text { 
-				transition: none; 
+			.uikit-color-picker__input-color, .uikit-color-picker__input-text {
+				transition: none;
 			}
 		}
 
 		@media (prefers-contrast: high) {
-			.uikit-color-picker__input-color, .uikit-color-picker__input-text { 
-				border-width: 2px; 
+			.uikit-color-picker__input-color, .uikit-color-picker__input-text {
+				border-width: 2px;
 			}
 		}
 	}

@@ -6,6 +6,12 @@ import { minify } from "html-minifier";
 import { PurgeCSS } from "purgecss";
 import { attempt } from "$lib/utils/attempt";
 import previewStylesCSS from "$styles/generated/preview-styles.css?raw";;
+import type { RootNode, ComponentNode } from "$lib/components/types";
+
+const WEB_COMPONENT_SCRIPTS = [
+  "wcag-ui-carousel.js",
+  "wcag-ui-carousel-item.js",
+  ].map((script) => `https://spencersonline.com/static/js/${script}`);
 
 /**
  * Comprehensive cleanup function for generated HTML
@@ -14,7 +20,7 @@ import previewStylesCSS from "$styles/generated/preview-styles.css?raw";;
  * - Cleans up multiple spaces
  * - Removes Svelte event handlers (onload/onerror)
  * - Normalizes whitespace between elements
- * 
+ *
  * @param {string} html - The HTML string to clean
  * @returns {string} Cleaned HTML string
  */
@@ -29,6 +35,52 @@ function stripSvelteArtifacts(html: string): string {
     .trim();
 }
 
+function collectComponentNames(node: RootNode | ComponentNode): Set<string> {
+  const names = new Set<string>();
+
+  function walk(n: RootNode | ComponentNode) {
+    if (n.type === "component") {
+      names.add(n.name);
+    }
+    if (n.children) {
+      for (const child of n.children) {
+        walk(child);
+      }
+    }
+  }
+
+  walk(node);
+  return names;
+}
+
+function transformRecommendationBlocks(html: string, pageTree: RootNode): string {
+  const recBlocks = pageTree.children.reduce<Array<{ title?: string }>>((acc, n) => {
+    if (n.type === "component" && n.name === "RecommendationBlock") {
+      acc.push({
+        title: n.props.title as string | undefined,
+      });
+    }
+    return acc;
+  }, []);
+
+  let result = html;
+
+  for (const [index, block] of recBlocks.entries()) {
+    const id = `rec-block-${index}`;
+    const sectionPattern = new RegExp(
+      `<section\\b[^>]*\\bclass="[^"]*spn-ui-rec-block[^"]*"[^>]*>[\\s\\S]*?<\\/section>`,
+      ""  // no 'g' flag — replace one at a time
+    );
+    const replacement = block.title
+      ? `<section class="spn-ui-rec-block"><header class="spn-ui-rec-block__header"><h2 class="spn-ui-rec-block__title">${block.title}</h2></header><div id="${id}" class="spn-ui-rec-block__container"></div></section>`
+      : `<section class="spn-ui-rec-block"><div id="${id}" class="spn-ui-rec-block__container"></div></section>`;
+
+    result = result.replace(sectionPattern, replacement);
+  }
+
+  return result;
+}
+
 export const POST: RequestHandler = async ({ request }) => {
   // Get form data
   const [formDataError, data] = await attempt(request.formData());
@@ -37,16 +89,31 @@ export const POST: RequestHandler = async ({ request }) => {
   }
 
   const propsString = data.get("props")?.toString() ?? "{}";
-  
+
   // Validate JSON props
   const [parseError, props] = await attempt(Promise.resolve(JSON.parse(propsString)));
   if (parseError) {
     throw error(400, "Invalid JSON in props parameter");
   }
 
+  const pageTree = props.pageTree as RootNode;
+  if (!pageTree || pageTree.type !== "root") {
+    throw error(400, "Invalid or missing pageTree in props");
+  }
+
+  // Detect which components are used
+  const componentNames = collectComponentNames(pageTree);
+  const hasCarousel = componentNames.has("CollectionBlock");
+  const hasRecommendationBlock = componentNames.has("RecommendationBlock");
+
   // Render the component (this is synchronous and unlikely to fail)
   const result = render(PreviewComponent, { props });
-  const rawHTML = stripSvelteArtifacts(result.body);
+  let rawHTML = stripSvelteArtifacts(result.body);
+
+  // Transform recommendation blocks before minification
+  if (hasRecommendationBlock) {
+    rawHTML = transformRecommendationBlocks(rawHTML, pageTree);
+  }
 
   // Minify HTML (this is synchronous and unlikely to fail with valid input)
   const minifiedHTML = minify(rawHTML, {
@@ -61,7 +128,7 @@ export const POST: RequestHandler = async ({ request }) => {
   });
 
   // Create temporary HTML for PurgeCSS
-  const tempHTML = `<style>${previewStylesCSS}</style><main class="page">${minifiedHTML}</main>`;
+  const tempHTML = `<style>${previewStylesCSS}</style><div class="page">${minifiedHTML}</div>`;
 
   // Purge unused CSS (this is async and can fail)
   const [purgeCSSError, purgeCSSResult] = await attempt(
@@ -82,9 +149,13 @@ export const POST: RequestHandler = async ({ request }) => {
     throw error(500, "Failed to purge CSS");
   }
 
+  const scriptTags = hasCarousel
+    ? WEB_COMPONENT_SCRIPTS.map((src) => `<script src="${src}"><\/script>`).join("")
+    : "";
+
   // Generate final HTML
-  const finalHTML = `<style>${purgeCSSResult[0].css}</style><main class="page">${minifiedHTML}</main>`;
-  
+  const finalHTML = `<style>${purgeCSSResult[0].css}</style><div class="page">${minifiedHTML}</div>${scriptTags}`;
+
   // Return clean JSON response
   return json({
     success: true,
