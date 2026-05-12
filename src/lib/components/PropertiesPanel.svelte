@@ -45,10 +45,16 @@
 
   function setValue(property: string, value: unknown): void {
     let safeValue = value;
+
     if (typeof value === "string") {
-      safeValue = DOMPurify.sanitize(value, {
-        ALLOW_UNKNOWN_PROTOCOLS: false,
-      });
+      const trimmed = value.trim().toLowerCase();
+
+      if (trimmed.startsWith("javascript:") || trimmed.startsWith("data:text/html")) {
+        safeValue = "";
+        console.warn("Security: URL protocols containing scripts are not allowed.");
+      } else {
+        safeValue = DOMPurify.sanitize(value as string);
+      }
     }
 
     appState.updateProperty(property, safeValue);
