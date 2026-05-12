@@ -52,6 +52,9 @@
     display: flex;
     flex-flow: column;
     gap: 0;
+    padding-block-end: 1rem;
+    padding-inline: 1rem;
+    border-radius: 1rem;
     background-color: var(--spn-ui-rec-block-bg);
   }
 
@@ -59,6 +62,7 @@
     min-height: 3.5rem;
     display: flex;
     align-items: center;
+    padding-block: .75rem;
   }
 
   .spn-ui-rec-block__title {
@@ -68,6 +72,10 @@
     font-weight: 600;
     font-size: 1.5rem;
     color: #000;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
     text-align: var(--spn-ui-rec-block-title-alignment);
   }
 

@@ -18,10 +18,9 @@
   import Group from "./Group.svelte";
   import Hint from "./Hint.svelte";
   import Checkbox from "./Checkbox.svelte";
+  import DOMPurify from "dompurify";
 
-  type Props = {
-    title?: string;
-  };
+  type Props = { title?: string; };
 
   let { title }: Props = $props();
 
@@ -45,7 +44,14 @@
   }
 
   function setValue(property: string, value: unknown): void {
-    appState.updateProperty(property, value);
+    let safeValue = value;
+    if (typeof value === "string") {
+      safeValue = DOMPurify.sanitize(value, {
+        ALLOW_UNKNOWN_PROTOCOLS: false,
+      });
+    }
+
+    appState.updateProperty(property, safeValue);
   }
 
   function resolveOptionValue(option: string | { value: string; text: string }): string {
