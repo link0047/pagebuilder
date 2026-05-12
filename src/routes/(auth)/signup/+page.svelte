@@ -10,31 +10,46 @@
 
 	const signupForm = signup.preflight(signupSchema);
 
-	type Field = typeof signupForm.fields.email;
-
 	let hasSubmitted = $state(false);
 	let activeField = $state<string | null>(null);
 
-	function getFieldError(field: Field, fieldName: string) {
-		const issues = field.issues?.();
-		const hasError = Array.isArray(issues) && issues.length > 0;
+	function getFieldError(fieldName: "name" | "email" | "password") {
+	const issues = signupForm.fields[fieldName].issues?.() ||[];
 
 		if (activeField === fieldName) {
 			return { hasError: false, message: undefined };
 		}
 
 		return {
-			hasError,
+			hasError: issues.length > 0,
 			message: issues?.[0]?.message
 		}
 	}
 
 	function handleSubmit() {
-		// This runs on ANY submit attempt (valid or invalid).
-		// This ensures we enable live validation even if the first click failed.
 		hasSubmitted = true;
-		validateInput.cancel(); // Don't run the debounce timer immediately after submit
+		validateInput.cancel();
 	}
+
+	function handleFocusIn({ target }: FocusEvent) {
+    activeField = (target as HTMLInputElement).name;
+  }
+
+  function handleFocusOut({ target }: FocusEvent) {
+    activeField = null;
+    const input = target as HTMLInputElement;
+
+    // Validate on blur if the user has tried to submit before OR if they've typed something
+    if (hasSubmitted || input.value.length > 0) {
+      signupForm.validate();
+    }
+  }
+
+	const handleEnhance = signupForm.enhance(async ({ submit }) => {
+  	hasSubmitted = true;
+  	validateInput.cancel();
+  	await submit();
+  });
 
 	const validateInput = debounce(() => {
 		if (!hasSubmitted) return;
@@ -42,9 +57,9 @@
 		signupForm.validate();
 	}, 300);
 
-	const fullnameError = $derived(getFieldError(signupForm.fields.name, "name"));
-	const emailError = $derived(getFieldError(signupForm.fields.email, "email"));
-	const passwordError = $derived(getFieldError(signupForm.fields.password, "password"));
+	const fullnameError = $derived(getFieldError("name"));
+	const emailError = $derived(getFieldError("email"));
+	const passwordError = $derived(getFieldError("password"));
 </script>
 
 <AuthCard title="Create Account" subtitle="Get started with your page builder account">
@@ -54,42 +69,52 @@
 		</Icon>
 	{/snippet}
 	<form
-		class="form-layout"
-		{...signupForm.enhance(async ({ submit }) => {
-			hasSubmitted = true;
-			validateInput.cancel();
-			await submit();
-		})}
+		class="signup-form"
+		{...handleEnhance}
 		oninput={validateInput}
 		onsubmit={handleSubmit}
-		onfocusin={(e) => activeField = (e.target as HTMLInputElement).name}
-		onfocusout={(e) => {
-			activeField = null;
-
-			const input = e.target as HTMLInputElement;
-			const hasInput = input.value.length > 0;
-
-			if (hasSubmitted || hasInput) {
-				signupForm.validate();
-			}
-		}}
+    onfocusin={handleFocusIn}
+    onfocusout={handleFocusOut}
 	>
-		<Textfield label="Full Name" {...signupForm.fields.name.as("text")} error={fullnameError.hasError} errorMessage={fullnameError.message} />
-		<Textfield label="Email" {...signupForm.fields.email.as("email")} error={emailError.hasError} errorMessage={emailError.message} />
-		<Textfield label="Password" {...signupForm.fields.password.as("password")} error={passwordError.hasError} errorMessage={passwordError.message} description="Must be at least 8 characters with a mix of letters and numbers"/>
-		<Button type="submit" fullWidth>
+		<Textfield
+		  label="Full Name"
+			{...signupForm.fields.name.as("text")}
+			error={fullnameError.hasError}
+			errorMessage={fullnameError.message}
+		/>
+		<Textfield
+		  label="Email"
+			{...signupForm.fields.email.as("email")}
+			error={emailError.hasError}
+			errorMessage={emailError.message}
+		/>
+		<Textfield
+		  label="Password"
+			{...signupForm.fields.password.as("password")}
+			error={passwordError.hasError}
+			errorMessage={passwordError.message}
+			description="Must be at least 8 characters with a mix of letters and numbers"
+		/>
+		<Button type="submit" shape="pill" fullWidth loading={Boolean(signupForm.pending)}>
 			Create Account
 		</Button>
 	</form>
 	{#snippet footer()}
-		<span>Already have an account? <Link href="/login">Sign in</Link></span>
+		<span class="signup-footer__text">Already have an account? <Link href="/login" underline="always">Sign in</Link></span>
 	{/snippet}
 </AuthCard>
 
 <style>
-	.form-layout {
+	.signup-form {
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
 	}
+
+	.signup-footer__text {
+    --wcag-ui-link-font-weight: 500;
+
+    font-size: 0.875rem;
+    color: #5d5d5d;
+  }
 </style>

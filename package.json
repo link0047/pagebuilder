@@ -13,14 +13,14 @@
 		"migrate": "node scripts/run-migrate.js"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^7.0.0",
-		"@sveltejs/kit": "^2.50.1",
-		"@sveltejs/vite-plugin-svelte": "^6.2.4",
-		"@types/node": "^25.0.10",
-		"svelte": "^5.48.2",
-		"svelte-check": "^4.3.5",
-		"typescript": "^5.9.3",
-		"vite": "^7.3.1"
+		"@sveltejs/adapter-auto": "^7.0.1",
+		"@sveltejs/kit": "^2.59.1",
+		"@sveltejs/vite-plugin-svelte": "^7.1.2",
+		"@types/node": "^25.7.0",
+		"svelte": "^5.55.5",
+		"svelte-check": "^4.4.8",
+		"typescript": "^6.0.3",
+		"vite": "^8.0.12"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [
@@ -29,15 +29,15 @@
 	},
 	"packageManager": "pnpm@8.15.3+sha512.dd85cd6eca6417c6f73db32ba1eb4767ffb4cba4f5bf0727846722c92b6b9e56a2cc218b11385bbc2b21f18a16a67da77aceae9b61a0f56a1643b25e1fb6a605",
 	"dependencies": {
-		"@neondatabase/serverless": "^1.0.2",
+		"@neondatabase/serverless": "^1.1.0",
 		"@types/html-minifier": "^4.0.6",
-		"better-auth": "^1.4.17",
-		"dompurify": "^3.4.1",
+		"better-auth": "^1.6.10",
+		"dompurify": "^3.4.2",
 		"html-minifier": "^4.0.0",
-		"lightningcss": "^1.31.1",
+		"lightningcss": "^1.32.0",
 		"purgecss": "^8.0.0",
-		"resend": "^6.8.0",
+		"resend": "^6.12.3",
 		"svelte-preprocess": "^6.0.3",
-		"valibot": "^1.2.0"
+		"valibot": "^1.4.0"
 	}
 }
