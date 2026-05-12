@@ -154,7 +154,7 @@
   {#if children}
     <div
       class="hero__content"
-      data-placement={!isSplit ? resolved.mobile.content.placement : null}
+      data-placement={resolved.mobile.content.placement ?? null}
       style:--hero-content-padding-mobile={resolved.mobile.content.padding}
       style:--hero-content-padding-tablet={resolved.tablet.content.padding}
       style:--hero-content-padding-desktop={resolved.desktop.content.padding}
@@ -229,7 +229,6 @@
       flex-direction: column;
       gap: 0.5rem;
       padding: var(--hero-content-padding-mobile);
-      padding: var(--hero-content-padding-mobile);
       z-index: 1;
     }
   }
@@ -272,8 +271,6 @@
     .hero--overlay .hero__content {
       grid-column: 1 / -1;
       grid-row: 1;
-      width: 100%;
-      height: 100%;
     }
 
     .hero--overlay .hero__content[data-placement="top-left"]      { align-self: start;  justify-self: start;  }

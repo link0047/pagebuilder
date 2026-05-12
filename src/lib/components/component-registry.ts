@@ -93,13 +93,8 @@ export const sectionConfigs: SectionConfig[] = [
           image: { src: "https://placehold.co/390x260" },
           content: { placement: "center", padding: "1rem" },
         },
-        tablet: {
-
-        },
-        desktop: {
-
-        },
-
+        tablet: { },
+        desktop: { },
       },
     },
     defaultData: {},
@@ -199,9 +194,9 @@ export const childConfigs: Record<string, ChildConfig> = {
         childName: "Text",
         defaultProps: {
           text: "",
-          size: { mobile: "md", tablet: "md", desktop: "md" },
-          weight: { mobile: "normal", tablet: "normal", desktop: "normal" },
-          color: { mobile: "inherit", tablet: "inherit", desktop: "inherit" },
+          size: { mobile: "md" },
+          weight: { mobile: "normal" },
+          color: { mobile: "inherit" },
         },
         defaultMeta: { label: "Text" },
       },
