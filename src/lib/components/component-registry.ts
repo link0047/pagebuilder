@@ -94,14 +94,12 @@ export const sectionConfigs: SectionConfig[] = [
           content: { placement: "center", padding: "1rem" },
         },
         tablet: {
-          image: { src: "https://placehold.co/768x320" },
+
         },
         desktop: {
-          image: { src: "https://placehold.co/1024x400" },
+
         },
-        wide: {
-          image: { src: "https://placehold.co/1400x480" },
-        },
+
       },
     },
     defaultData: {},

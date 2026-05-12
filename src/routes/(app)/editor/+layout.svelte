@@ -29,9 +29,9 @@
       return () => window.removeEventListener("message", handler);
     });
 
-    window.addEventListener("message", (e) => {
-      if (e.origin !== window.location.origin) return;
-      if (e.data?.type === "preview-ready") {
+    window.addEventListener("message", (event) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type === "preview-ready") {
         iframeReady = true;
         sendTree();
       }

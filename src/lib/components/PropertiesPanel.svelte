@@ -26,6 +26,7 @@
 
   let appState = getAppState();
 
+  const DANGEROUS_PROTOCOLS = /^(javascript|data|vbscript):/i;
   const isOpen = $derived(appState.isPropertiesPanelOpen);
   const selectedComponent = $derived(appState.selectedComponent);
   const schema = $derived(
@@ -38,26 +39,32 @@
     return name in componentSchemas;
   }
 
+  function sanitizeValue(property: string, value: unknown): unknown {
+    if (typeof value !== "string") return value;
+
+    const trimmed = value.trim();
+
+    const isUrlProperty = property.endsWith(".href") ||
+      property.endsWith(".src") ||
+      property.endsWith(".src2x") ||
+      property === "props.href" ||
+      property === "props.src";
+
+    if (isUrlProperty && DANGEROUS_PROTOCOLS.test(trimmed)) {
+      console.warn("Security: URL protocols containing scripts are not allowed.");
+      return "";
+    }
+
+    return value;
+  }
+
   // All reads and writes go through AppState — no local duplication
   function getValue(property: string): any {
     return appState.getPropertyValue(property);
   }
 
   function setValue(property: string, value: unknown): void {
-    let safeValue = value;
-
-    if (typeof value === "string") {
-      const trimmed = value.trim().toLowerCase();
-
-      if (trimmed.startsWith("javascript:") || trimmed.startsWith("data:text/html")) {
-        safeValue = "";
-        console.warn("Security: URL protocols containing scripts are not allowed.");
-      } else {
-        safeValue = DOMPurify.sanitize(value as string);
-      }
-    }
-
-    appState.updateProperty(property, safeValue);
+    appState.updateProperty(property, sanitizeValue(property, value));
   }
 
   function resolveOptionValue(option: string | { value: string; text: string }): string {

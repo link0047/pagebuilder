@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Snippet } from "svelte";
+	import type { Snippet } from "svelte";
 
 	type Props = {
 		leading?: Snippet;
@@ -26,7 +26,7 @@
   </div>
 </header>
 
-<style>	
+<style>
 	.app-header {
 		grid-area: header;
 		display: grid;

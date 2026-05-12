@@ -121,10 +121,7 @@
 
 {#snippet responsiveImage()}
   <picture class="hero__media">
-    <source
-      media="(min-width: {BREAKPOINTS.desktopWide}px)"
-      srcset={srcset(resolved.wide.image)}
-    />
+
     <source
       media="(min-width: {BREAKPOINTS.desktop}px)"
       srcset={srcset(resolved.desktop.image)}
@@ -330,7 +327,7 @@
       }
     }
 
-    @container (min-width: 1200px) {
+    /*@container (min-width: 1200px) {
       .hero__content {
         padding: var(--hero-content-padding-wide);
         gap: var(--hero-content-gap-wide);
@@ -340,7 +337,7 @@
         justify-content: var(--hero-split-valign-wide, center);
         align-items: var(--hero-split-halign-wide, start);
       }
-    }
+    }*/
 
     @supports not (container-type: inline-size) {
       @media (min-width: 668px) {
@@ -365,7 +362,7 @@
           align-items: var(--hero-split-halign-desktop, start);
         }
       }
-      @media (min-width: 1200px) {
+      /*@media (min-width: 1200px) {
         .hero__content {
           padding: var(--hero-content-padding-wide);
           gap: var(--hero-content-gap-wide);
@@ -375,7 +372,7 @@
           justify-content: var(--hero-split-valign-wide, center);
           align-items: var(--hero-split-halign-wide, start);
         }
-      }
+      }*/
     }
   }
 </style>
