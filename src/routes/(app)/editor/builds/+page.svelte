@@ -138,19 +138,23 @@
         {#each builds as build (build.id)}
           <BuildCard {build}>
             {#snippet actions()}
-              {#if appState.currentBuildId === build.id}
-                <Badge color="info">
-                  <Icon size="16">
-                    <use href="#pencil-outline" />
-                  </Icon>
-                  Editing
-                </Badge>
-              {:else if build.locked_by && build.locked_by !== appState.user?.id}
+              {#if build.locked_by && build.locked_by !== appState.user?.id}
                 <Badge color="warning">
-                  <Icon size="16">
-                    <use href="#lock" />
-                  </Icon>
+                  {#snippet icon()}
+                    <Icon size="16">
+                      <use href="#lock-alert-outline" />
+                    </Icon>
+                  {/snippet}
                   Editing by {build.locked_by_name ?? "another user"}
+                </Badge>
+              {:else if appState.currentBuildId === build.id}
+                <Badge color="info">
+                  {#snippet icon()}
+                    <Icon size="16">
+                      <use href="#pencil-outline" />
+                    </Icon>
+                  {/snippet}
+                  Editing
                 </Badge>
               {:else}
                 <Button color="secondary" variant="outlined" size="sm" onclick={() => editBuild(build)}>

@@ -201,6 +201,11 @@
     setTimeout(() => appState.clearBuild(), 250);
   }
 
+  function handleBeforeUnload() {
+    if (!appState.currentBuildId) return;
+    navigator.sendBeacon(`/api/builds/${appState.currentBuildId}/release-lock`);
+  }
+
   const activeRoute = $derived.by(() => {
     const path = page.url.pathname;
     if (path.startsWith("/editor/builds")) return "builds";
@@ -223,6 +228,8 @@
     return () => clearInterval(interval);
   });
 </script>
+
+<svelte:window onbeforeunload={handleBeforeUnload} />
 
 {#snippet headerLeading()}
   <a href="/" class="app-title">

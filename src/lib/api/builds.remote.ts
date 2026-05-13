@@ -45,11 +45,15 @@ export const getBuilds = query(async () => {
       b.updated_at,
       b.content,
       b.thumbnail_url,
+      b.locked_by,
+      b.locked_at,
       u1.name AS author,
-      u2.name AS updated_by_name
+      u2.name AS updated_by_name,
+      u3.name AS locked_by_name
     FROM builds b
     LEFT JOIN "user" u1 ON b.created_by  = u1.id
     LEFT JOIN "user" u2 ON b.updated_by  = u2.id
+    LEFT JOIN "user" u3 ON b.locked_by = u3.id
     ORDER BY b.created_at DESC
   ` as BuildResult[];
 

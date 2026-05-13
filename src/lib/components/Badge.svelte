@@ -17,6 +17,7 @@
     size?: Size;
     shape?: Shape;
     position?: Position;
+    icon?: Snippet;
   }
 
   let {
@@ -26,6 +27,7 @@
     size = "md",
     shape = "default",
     position = undefined,
+    icon
   }: Props = $props();
 
   const VALID_CSS_UNITS = /^-?\d*\.?\d+(px|rem|em|vh|vw|%)$/;
@@ -69,6 +71,11 @@
   data-flush={position != null && isFlush ? "" : undefined}
   style={gapValue !== "0px" ? `--wcag-ui-badge-gap: ${gapValue};` : undefined}
 >
+  {#if icon}
+    <span class="wcag-ui-badge__icon" aria-hidden="true">
+      {@render icon()}
+    </span>
+  {/if}
   <span class="wcag-ui-badge__content">
     {@render children?.()}
   </span>
@@ -120,11 +127,15 @@
       text-transform: uppercase;
       gap: .5ch;
       max-width: 100%;
+      overflow: hidden;
+
     }
     .wcag-ui-badge__content {
+      display: block;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      min-width: 0;
     }
   }
 
