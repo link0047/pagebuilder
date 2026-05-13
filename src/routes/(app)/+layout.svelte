@@ -28,9 +28,7 @@
   import { signout, getUser } from "$lib/api/auth.remote";
   import { createBuild, updateBuild, deleteBuild } from "$lib/api/builds.remote";
 
-  let {
-    children
-  }: LayoutProps = $props();
+  let { children }: LayoutProps = $props();
 
   const appState = setAppState();
 
@@ -43,6 +41,7 @@
   let isRenaming = $state(false);
 
   const { name } = await getUser();
+
   const userInitials = getInitials(name);
 
   function createStatusManager<T extends string>(initial: T) {
@@ -152,6 +151,11 @@
     } finally {
       isSaving = false;
     }
+  }
+
+  async function handleSignout(event: Event) {
+    // event.preventDefault();
+    console.log("signed out");
   }
 
   async function handleRename(name: string) {
@@ -288,14 +292,14 @@
   <Avatar bind:ref={avatarRef} text={userInitials} shape="circle" tag="button" />
   {#if avatarRef}
     <Menu anchor={avatarRef} placement="right-end">
-      <form {...signout}>
+      <form {...signout} onsubmit={handleSignout}>
         <MenuItem type="submit">
           {#snippet leading()}
             <Icon>
               <use href="#logout" />
             </Icon>
           {/snippet}
-          Signout
+          Sign out
         </MenuItem>
       </form>
     </Menu>

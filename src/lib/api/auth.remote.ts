@@ -32,14 +32,12 @@ export const login = form(loginSchema, async (user) => {
 export const signout = form(async () => {
 	try {
 		const { request } = getRequestEvent();
-		await auth.api.signOut({ headers: request.headers });
+    await auth.api.signOut({ headers: request.headers });
 	} catch (error) {
 		return {
 			error: error instanceof APIError ? error.body?.message : "Failed to sign out"
 		};
 	}
-
-	redirect(303, "/login");
 });
 
 export const resetPassword = form(resetPasswordSchema , async (data) => {
@@ -83,9 +81,9 @@ export const forgotPassword = form(forgotPasswordSchema, async (data) => {
 
 export const getUser = query(async () => {
 	const { locals } = getRequestEvent();
-	if (!locals.user) {
+  if (!locals.user) {
 		redirect(307, "/login");
-	}
+  }
 
 	return locals.user;
 });

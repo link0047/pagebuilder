@@ -40,6 +40,7 @@
     variant?: Variant;
     color?: Color;
     shape?: Shape;
+    fullWidth?: boolean;
     customColor?: CustomColor;
     children?: Snippet;
     [key: string]: unknown;
@@ -52,6 +53,7 @@
     variant = "default",
     color = "inherit",
     shape = "default",
+    fullWidth = false,
     customColor,
     children,
     ...restProps
@@ -106,6 +108,7 @@
   class:wcag-ui-link--color-default={color === "default"}
   class:wcag-ui-link--color-neutral={color === "neutral"}
   class:wcag-ui-link--shape-pill={shape === "pill"}
+  class:wcag-ui-link--full-width={fullWidth}
   style={customStyle}
   {...restProps}
 >
@@ -167,6 +170,10 @@
       border-radius: var(--wcag-ui-link-border-radius);
       transition: background-color 0.2s, color 0.2s, border-color 0.2s;
       cursor: pointer;
+    }
+
+    .wcag-ui-link--full-width {
+      width: 100%;
     }
   }
 

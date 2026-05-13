@@ -814,9 +814,45 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
               { value: "hover", text: "On hover" },
               { value: "none", text: "None" },
             ]
-          }
+          },
+          {
+            type: "checkbox",
+            label: "Full width",
+            property: "props.fullWidth",
+            defaultValue: false
+          },
+          {
+            type: "tabs",
+            tabs: [
+              {
+                label: "Base",
+                controls: [
+                  { type: "colorpicker", label: "Text", property: "props.customColor.base.color" },
+                  { type: "colorpicker", label: "Background", property: "props.customColor.base.bgColor" },
+                  { type: "colorpicker", label: "Border", property: "props.customColor.base.borderColor" },
+                ]
+              },
+              {
+                label: "Hover",
+                controls: [
+                  { type: "colorpicker", label: "Text", property: "props.customColor.hover.color" },
+                  { type: "colorpicker", label: "Background", property: "props.customColor.hover.bgColor" },
+                  { type: "colorpicker", label: "Border", property: "props.customColor.hover.borderColor" },
+                ]
+              },
+              {
+                label: "Focus",
+                controls: [
+                  { type: "colorpicker", label: "Text", property: "props.customColor.focus.color" },
+                  { type: "colorpicker", label: "Background", property: "props.customColor.focus.bgColor" },
+                  { type: "colorpicker", label: "Border", property: "props.customColor.focus.borderColor" },
+                ]
+              },
+            ]
+          },
         ]
-      }
+      },
+
     ]
   },
 

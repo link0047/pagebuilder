@@ -142,7 +142,7 @@ export const updateBuild = command(updateBuildSchema, async ({ id, name, buildTy
         thumbnail_url = COALESCE(${thumbnailUrl}, thumbnail_url),
         updated_by = ${user.id},
         updated_at = NOW()
-      WHERE id = ${id} AND created_by = ${user.id}
+      WHERE id = ${id}
       RETURNING *;
     `;
 
