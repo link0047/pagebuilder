@@ -26,7 +26,7 @@
   import { downloadHTML } from "$lib/utils/fileUtils";
 
   import { signout, getUser } from "$lib/api/auth.remote";
-  import { createBuild, updateBuild, deleteBuild } from "$lib/api/builds.remote";
+  import { createBuild, updateBuild, deleteBuild, refreshLock, releaseLock } from "$lib/api/builds.remote";
 
   let { children }: LayoutProps = $props();
 
@@ -40,9 +40,9 @@
   let cachedTreeHash = $state<string | null>(null);
   let isRenaming = $state(false);
 
-  const { name } = await getUser();
-
-  const userInitials = getInitials(name);
+  const userQuery = await getUser();
+  const userInitials = getInitials(userQuery.name ?? "");
+  appState.setUser(userQuery);
 
   function createStatusManager<T extends string>(initial: T) {
     let status = $state(initial);
@@ -175,16 +175,20 @@
     appState.clearBuild();
   }
 
-  function handleExit() {
+  async function handleExit() {
     if (appState.isDirty) {
       showExitModal = true;
     } else {
+      if (appState.currentBuildId) {
+        await releaseLock({ id: appState.currentBuildId });
+      }
       appState.clearBuild();
     }
   }
 
   async function handleSaveAndExit() {
     await saveBuild();
+    if (appState.currentBuildId) releaseLock({ id: appState.currentBuildId });
     setTimeout(() => {
       showExitModal = false;
       appState.clearBuild();
@@ -192,6 +196,7 @@
   }
 
   function handleDiscardAndExit() {
+    if (appState.currentBuildId) releaseLock({ id: appState.currentBuildId });
     showExitModal = false;
     setTimeout(() => appState.clearBuild(), 250);
   }
@@ -208,6 +213,14 @@
     if (activeRoute !== "editor") {
       appState.deselectComponent();
     }
+  });
+
+  $effect(() => {
+    const id = appState.currentBuildId;
+    if (!id) return;
+
+    const interval = setInterval(() => refreshLock({ id }), 3 * 60 * 1000);
+    return () => clearInterval(interval);
   });
 </script>
 
@@ -349,6 +362,9 @@
   </symbol>
   <symbol id="video">
     <path d="M21.5 6.4c-.3 0-.5 0-.8.2L17 8.8V8c0-1.7-1.3-3-3-3H4C2.3 5 1 6.3 1 8v8c0 1.7 1.3 3 3 3h10c1.7 0 3-1.3 3-3v-1.1l3.7 2.4c.3.2.5.2.8.2.5 0 1-.2 1.3-.7.2-.2.3-.5.3-.8V7.9c0-.8-.7-1.5-1.5-1.5ZM15 16c0 .6-.4 1-1 1H4c-.6 0-1-.4-1-1V8c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v8Zm6-.9-4-2.7V11l4-2.3v6.4Z"/>
+  </symbol>
+  <symbol id="lock-alert-outline">
+    <path d="M10 17C8.9 17 8 16.1 8 15C8 13.9 8.9 13 10 13C11.1 13 12 13.9 12 15S11.1 17 10 17M16 20V10H4V20H16M16 8C17.1 8 18 8.9 18 10V20C18 21.1 17.1 22 16 22H4C2.9 22 2 21.1 2 20V10C2 8.9 2.9 8 4 8H5V6C5 3.2 7.2 1 10 1S15 3.2 15 6V8H16M10 3C8.3 3 7 4.3 7 6V8H13V6C13 4.3 11.7 3 10 3M22 7H20V13H22V7M22 15H20V17H22V15Z" />
   </symbol>
   <symbol id="styling" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>

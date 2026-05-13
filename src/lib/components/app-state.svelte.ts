@@ -2,6 +2,7 @@ import { getContext, setContext } from "svelte";
 import { PREVIEW_WIDTHS } from "$lib/constants/breakpoints";
 import type { ComponentNode, RootNode, PageTreeNode, TreePath, PreviewMode } from "./types";
 import type { PartialComponentNode } from "./component-registry";
+import type { User } from "better-auth";
 
 const APP_KEY = Symbol("pagetree");
 
@@ -21,6 +22,7 @@ class AppState {
 
   #currentBuildId = $state<string | null>(null);
   #buildName = $state<string | null>(null);
+  #user = $state<User | null>(null);
   #lastSavedAt = $state<Date | null>(null);
   #isDirty = $state(false);
 
@@ -111,6 +113,14 @@ class AppState {
 
   get hoveredComponentPath(): number[] | null {
     return this.#hoveredComponentPath;
+  }
+
+  get user() {
+    return this.#user;
+  }
+
+  setUser(user: User): void {
+    this.#user = user;
   }
 
   // -------------------------

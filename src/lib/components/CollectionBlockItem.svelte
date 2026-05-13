@@ -10,7 +10,7 @@
 </script>
 
 {#if product}
-  {@const { href, src = { desktop: "", tablet: "", mobile: "" }, name, price, badge } = product}
+  {@const { href, src = { mobile: "" }, name, price, badge } = product}
   {@const originalPrice = Number(price?.original) || 0}
   {@const salePrice = price?.sale !== null && price?.sale !== undefined
     ? Number(price.sale) || null

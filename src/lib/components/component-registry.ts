@@ -310,7 +310,6 @@ export const childConfigs: Record<string, ChildConfig> = {
         defaultProps: {
           product: {
             src: {
-              desktop: "https://placehold.co/460x380",
               mobile: "https://placehold.co/460x380",
             },
             href: "",

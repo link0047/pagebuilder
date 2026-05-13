@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { deleteBuild, duplicateBuild, getBuilds, getUserBuilds, type BuildResult } from "$lib/api/builds.remote";
+  import { deleteBuild, duplicateBuild, getBuilds, getUserBuilds, acquireLock, type BuildResult } from "$lib/api/builds.remote";
   import AppSidebarHeader from "$lib/components/AppSidebarHeader.svelte";
   import EmptyState from "$lib/components/EmptyState.svelte";
   import Button from "$lib/components/Button.svelte";
@@ -48,9 +48,16 @@
     return activeBuildsTab === BUILDS_TABS.MY_BUILDS ? userBuildsQuery : buildsQuery;
   });
 
-  function editBuild(build: BuildResult) {
-    appState.loadBuild(build?.content, build.id, build.name);
-    goto("/editor");
+  async function editBuild(build: BuildResult) {
+    try {
+      await acquireLock({ id: build.id });
+      appState.loadBuild(build.content, build.id, build.name);
+      appState.acquireLock(appState.user?.id ?? ""); // sync local state
+      goto("/editor");
+    } catch (error) {
+      // 423 means locked by someone else
+      console.error(`This build is currently being edited by ${build.locked_by_name ?? "another user"}`);
+    }
   }
 
   async function handleDeletingBuild(build: BuildResult) {
@@ -138,6 +145,13 @@
                   </Icon>
                   Editing
                 </Badge>
+              {:else if build.locked_by && build.locked_by !== appState.user?.id}
+                <Badge color="warning">
+                  <Icon size="16">
+                    <use href="#lock" />
+                  </Icon>
+                  Editing by {build.locked_by_name ?? "another user"}
+                </Badge>
               {:else}
                 <Button color="secondary" variant="outlined" size="sm" onclick={() => editBuild(build)}>
                   <Icon size="16">
@@ -159,7 +173,7 @@
               <Menu anchor={moreButtonRefs[build.id]}>
                 <MenuItem
                   onclick={() => handleDuplicatingBuild(build)}
-                  disabled={appState.currentBuildId === build.id}
+                  disabled={appState.currentBuildId === build.id || (!!build.locked_by && build.locked_by !== appState.user?.id)}
                 >
                   {#snippet leading()}
                     <Icon size="16">
@@ -170,7 +184,7 @@
                 </MenuItem>
                 <MenuItem
                   onclick={() => handleDeletingBuild(build)}
-                  disabled={appState.currentBuildId === build.id}
+                  disabled={appState.currentBuildId === build.id || (!!build.locked_by && build.locked_by !== appState.user?.id)}
                 >
                   {#snippet leading()}
                     <Icon size="16">

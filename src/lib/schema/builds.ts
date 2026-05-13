@@ -45,3 +45,7 @@ export const deleteTemplateSchema = v.object({
 export const duplicateBuildSchema = v.object({
   id: v.pipe(v.string(), v.uuid())
 });
+
+export const lockBuildSchema = v.object({
+  id: v.pipe(v.string(), v.uuid())
+});

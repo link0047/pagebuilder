@@ -1,8 +1,6 @@
 import { Pool, neonConfig } from "@neondatabase/serverless";
 import { readFile } from "node:fs/promises";
 
-neonConfig.fetchConnectionCache = true;
-
 const migrationFile = process.argv[2];
 const { DATABASE_URL } = process.env;
 

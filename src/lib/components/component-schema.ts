@@ -852,7 +852,6 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
           },
         ]
       },
-
     ]
   },
 

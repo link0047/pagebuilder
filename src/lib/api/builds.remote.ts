@@ -8,7 +8,8 @@ import {
   updateTemplateSchema,
   deleteBuildSchema,
   deleteTemplateSchema,
-  duplicateBuildSchema
+  duplicateBuildSchema,
+  lockBuildSchema,
 } from "$lib/schema/builds";
 
 export type BuildResult = {
@@ -20,6 +21,9 @@ export type BuildResult = {
   updated_at: string;
   content: any; // or RootNode if you import it
   thumbnail_url: string | null;
+  locked_by: string | null;
+  locked_at: string | null;
+  locked_by_name: string | null;
 };
 
 function requireAuth() {
@@ -63,11 +67,15 @@ export const getRecentBuilds = query(async (limit = 5) => {
       b.updated_at,
       b.content,
       b.thumbnail_url,
+      b.locked_by,
+      b.locked_at,
       u1.name AS author,
-      u2.name AS updated_by_name
+      u2.name AS updated_by_name,
+      u3.name AS locked_by_name
     FROM builds b
     LEFT JOIN "user" u1 ON b.created_by = u1.id
     LEFT JOIN "user" u2 ON b.updated_by = u2.id
+    LEFT JOIN "user" u3 ON b.locked_by = u3.id
     ORDER BY b.created_at DESC
     LIMIT ${limit}
   ` as BuildResult[];
@@ -282,4 +290,45 @@ export const deleteTemplate = command(deleteTemplateSchema, async ({ id }) => {
     console.error("Error deleting template:", err);
     error(500, "Failed to delete template");
   }
+});
+
+export const acquireLock = command(lockBuildSchema, async ({ id }) => {
+  const user = requireAuth();
+
+  const result = await sql`
+    UPDATE builds
+    SET locked_by = ${user.id}, locked_at = NOW()
+    WHERE id = ${id}
+      AND (locked_by IS NULL OR locked_by = ${user.id} OR locked_at < NOW() - INTERVAL '5 minutes')
+    RETURNING id, locked_by, locked_at
+  `;
+
+  if (result.length === 0) {
+    await sql`SELECT locked_by FROM builds WHERE id = ${id}`;
+    error(423, `Build is locked by another user`);
+  }
+
+  return result[0];
+});
+
+export const releaseLock = command(lockBuildSchema, async ({ id }) => {
+  const user = requireAuth();
+
+  await sql`
+    UPDATE builds SET locked_by = NULL, locked_at = NULL
+    WHERE id = ${id} AND locked_by = ${user.id}
+  `;
+
+  return { success: true };
+});
+
+export const refreshLock = command(lockBuildSchema, async ({ id }) => {
+  const user = requireAuth();
+
+  await sql`
+    UPDATE builds SET locked_at = NOW()
+    WHERE id = ${id} AND locked_by = ${user.id}
+  `;
+
+  return { success: true };
 });
