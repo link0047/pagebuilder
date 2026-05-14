@@ -67,13 +67,6 @@
     ...restProps
   }: Props = $props();
 
-  const resolvedImages = $derived.by(() => {
-    const mobile = images?.mobile ?? "";
-    const tablet = images?.tablet ?? mobile;
-    const desktop = images?.desktop ?? tablet;
-    return { mobile, tablet, desktop };
-  });
-
   function normalizePlacement(
     placement: OverlayPlacement | ResponsivePlacement | undefined
   ): Required<ResponsivePlacement> {
@@ -101,6 +94,27 @@
     return map[placement] ?? { align: "flex-start", justify: "flex-start" };
   }
 
+  const resolvedImages = $derived.by(() => {
+    const mobile = images?.mobile ?? "";
+    const tablet = images?.tablet ?? mobile;
+    const desktop = images?.desktop ?? tablet;
+    return { mobile, tablet, desktop };
+  });
+
+  const resolvedSpanColumn = $derived.by(() => {
+    const mobile = spanColumn?.mobile ?? "span 6";
+    const tablet = spanColumn?.tablet ?? mobile;
+    const desktop = spanColumn?.desktop ?? tablet;
+    return { mobile, tablet, desktop };
+  });
+
+  const resolvedSpanRow = $derived.by(() => {
+    const mobile = spanRow?.mobile ?? "span 1";
+    const tablet = spanRow?.tablet ?? mobile;
+    const desktop = spanRow?.desktop ?? tablet;
+    return { mobile, tablet, desktop };
+  });
+
   const overlayPlacement = $derived(normalizePlacement(overlay?.placement));
 </script>
 
@@ -108,12 +122,12 @@
   class="spn-ui-editorial-card"
   class:spn-ui-editorial-card--textAlignment-left={textAlignment === "left"}
   class:spn-ui-editorial-card--textAlignment-right={textAlignment === "right"}
-  style:--spn-ui-editoralcard-column-m={spanColumn.mobile || null}
-  style:--spn-ui-editoralcard-column-t={spanColumn.tablet || null}
-  style:--spn-ui-editoralcard-column-d={spanColumn.desktop || null}
-  style:--spn-ui-editoralcard-row-m={spanRow.mobile || null}
-  style:--spn-ui-editoralcard-row-t={spanRow.tablet || null}
-  style:--spn-ui-editoralcard-row-d={spanRow.desktop || null}
+  style:--spn-ui-editoralcard-column-m={resolvedSpanColumn.mobile}
+  style:--spn-ui-editoralcard-column-t={resolvedSpanColumn.tablet}
+  style:--spn-ui-editoralcard-column-d={resolvedSpanColumn.desktop}
+  style:--spn-ui-editoralcard-row-m={resolvedSpanRow.mobile}
+  style:--spn-ui-editoralcard-row-t={resolvedSpanRow.tablet}
+  style:--spn-ui-editoralcard-row-d={resolvedSpanRow.desktop}
   style:--spn-ui-editoralcard-background={backgroundColor}
   style:--spn-ui-editoralcard-color={textColor}
   style:--spn-ui-editoralcard-display-m={hidden.mobile ? "none" : "block"}

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { RemoteQuery } from "@sveltejs/kit";
+
   import { deleteBuild, duplicateBuild, getBuilds, getUserBuilds, acquireLock, type BuildResult } from "$lib/api/builds.remote";
   import AppSidebarHeader from "$lib/components/AppSidebarHeader.svelte";
   import EmptyState from "$lib/components/EmptyState.svelte";
@@ -18,7 +20,7 @@
   import Badge from "$lib/components/Badge.svelte";
   import { getAppState } from "$lib/components/app-state.svelte";
   import { goto } from "$app/navigation";
-  import type { RemoteQuery } from "@sveltejs/kit";
+  import { copyToClipboard } from "$lib/utils/clipboard";
 
   const BUILDS_TABS = {
     ALL: "all",
@@ -60,17 +62,8 @@
     }
   }
 
-  async function handleDeletingBuild(build: BuildResult) {
-    const { id } = build;
-
-    try {
-      await deleteBuild({ id });
-      // Refresh both queries to keep them in sync
-      await buildsQuery.refresh();
-      await userBuildsQuery.refresh();
-    } catch (error) {
-      console.error("Failed to delete build:", error);
-    }
+  async function handleShareBuild(build: BuildResult) {
+    await copyToClipboard(`${window.location.origin}/preview/${build.id}`);
   }
 
   async function handleDuplicatingBuild(build: BuildResult) {
@@ -83,6 +76,19 @@
       await userBuildsQuery.refresh();
     } catch (error) {
       console.error("Failed to duplicate build:", error);
+    }
+  }
+
+  async function handleDeletingBuild(build: BuildResult) {
+    const { id } = build;
+
+    try {
+      await deleteBuild({ id });
+      // Refresh both queries to keep them in sync
+      await buildsQuery.refresh();
+      await userBuildsQuery.refresh();
+    } catch (error) {
+      console.error("Failed to delete build:", error);
     }
   }
 
@@ -175,6 +181,14 @@
                 </Icon>
               </Button>
               <Menu anchor={moreButtonRefs[build.id]}>
+                <MenuItem onclick={() => handleShareBuild(build)}>
+                  {#snippet leading()}
+                    <Icon size="16">
+                      <use href="#share" />
+                    </Icon>
+                  {/snippet}
+                  Share
+                </MenuItem>
                 <MenuItem
                   onclick={() => handleDuplicatingBuild(build)}
                   disabled={appState.currentBuildId === build.id || (!!build.locked_by && build.locked_by !== appState.user?.id)}
@@ -267,6 +281,7 @@
     </Dialog>
   {/snippet}
 </AppSidebarHeader>
+
 <ScrollableArea>
   <div class="builds-content">
     <Tabs variant="enclosed" size="sm" fullWidth value={activeBuildsTab}>

@@ -1,64 +1,63 @@
 <script lang="ts">
-	import type { Snippet } from "svelte";
+  import type { Snippet } from "svelte";
+  import type { HTMLButtonAttributes } from "svelte/elements";
 
-	type Variant = "filled" | "outlined" | "ghost" | "link";
-	type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default" | "neutral";
-	type Size = "xs" | "sm" | "md" | "lg" | "xl";
-	type Shape = "default" | "square" | "rounded-square" | "pill" | "circle";
-	type Attached = "none" | "left" | "right" | "both";
-	type IndicatorPosition = "left" | "right" | "overlay";
+  type Variant = "filled" | "outlined" | "ghost" | "link";
+  type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default" | "neutral";
+  type Size = "xs" | "sm" | "md" | "lg" | "xl";
+  type Shape = "default" | "square" | "rounded-square" | "pill" | "circle";
+  type Attached = "none" | "left" | "right" | "both";
+  type IndicatorPosition = "left" | "right" | "overlay";
 
-	type Props = {
-		children?: Snippet,
-		variant?: Variant,
-		size?: Size,
-		color?: Color,
-		shape?: Shape,
-		type?: "button" | "submit" | "reset",
+  type Props = HTMLButtonAttributes & {
+    children?: Snippet,
+    variant?: Variant,
+    size?: Size,
+    color?: Color,
+    shape?: Shape,
+    type?: "button" | "submit" | "reset",
     fullWidth?: boolean,
     ref?: HTMLButtonElement | null,
     attached?: Attached;
-		truncate?: boolean;
-		loading?: boolean;
-		loadingIndicator?: Snippet;
-		indicatorPosition?: IndicatorPosition;
-		onclick?: (event: MouseEvent) => void;
-		"aria-disabled"?: boolean;
-    [key: string]: unknown;
-	}
+    truncate?: boolean;
+    loading?: boolean;
+    loadingIndicator?: Snippet;
+    indicatorPosition?: IndicatorPosition;
+    onclick?: (event: MouseEvent) => void;
+  }
 
-	let {
-		children,
-		variant = "filled",
-		color = "default",
-		size = "md",
-		shape = "default",
-		type = "button",
+  let {
+    children,
+    variant = "filled",
+    color = "default",
+    size = "md",
+    shape = "default",
+    type = "button",
     fullWidth = false,
-		ref = $bindable(),
-		attached = "none",
-		truncate = true,
-		loading = false,
-		loadingIndicator,
-		indicatorPosition = "left",
-		onclick,
-		"aria-disabled": ariaDisabled,
-		...restProps
-	}: Props = $props();
+    ref = $bindable(),
+    attached = "none",
+    truncate = true,
+    loading = false,
+    loadingIndicator,
+    indicatorPosition = "left",
+    onclick,
+    "aria-disabled": ariaDisabled,
+    ...restProps
+  }: Props = $props();
 
-	let effectiveIndicatorPosition = $derived(shape === "circle" || shape === "square" || shape === "rounded-square"
+  let effectiveIndicatorPosition = $derived(shape === "circle" || shape === "square" || shape === "rounded-square"
     ? "overlay"
     : indicatorPosition
-	);
+  );
 
-	function guardedClick(event: MouseEvent) {
-		if (loading) {
-			event.preventDefault();
-			return;
-		}
+  function guardedClick(event: MouseEvent) {
+    if (loading) {
+      event.preventDefault();
+      return;
+    }
 
-		onclick?.(event);
-	}
+    onclick?.(event);
+  }
 </script>
 
 {#snippet defaultSpinner()}
@@ -68,22 +67,22 @@
 {/snippet}
 
 {#snippet indicator(hasOverlay = false)}
-	<span
-		class="wcag-ui-button__indicator"
-		class:wcag-ui-button__indicator--overlay={hasOverlay}
-		aria-hidden="true"
-	>
-		{#if loadingIndicator}
-			{@render loadingIndicator()}
-		{:else}
-			{@render defaultSpinner()}
-		{/if}
-	</span>
+  <span
+    class="wcag-ui-button__indicator"
+    class:wcag-ui-button__indicator--overlay={hasOverlay}
+    aria-hidden="true"
+  >
+    {#if loadingIndicator}
+      {@render loadingIndicator()}
+    {:else}
+      {@render defaultSpinner()}
+    {/if}
+  </span>
 {/snippet}
 
 <button
-	bind:this={ref}
-	class="wcag-ui-button"
+  bind:this={ref}
+  class="wcag-ui-button"
   class:wcag-ui-button--full-width={fullWidth}
   class:wcag-ui-button--shape-square={shape === "square"}
   class:wcag-ui-button--shape-rounded-square={shape === "rounded-square"}
@@ -105,26 +104,26 @@
   class:wcag-ui-button--danger={color === "danger"}
   class:wcag-ui-button--neutral={color === "neutral"}
   class:wcag-ui-button--info={color === "info"}
-	{type}
-	aria-busy={loading || undefined}
-	aria-disabled={loading || ariaDisabled || undefined}
-	data-loading={loading || undefined}
-	onclick={guardedClick}
-	{...restProps}
+  {type}
+  aria-busy={loading || undefined}
+  aria-disabled={loading || ariaDisabled || undefined}
+  data-loading={loading || undefined}
+  onclick={guardedClick}
+  {...restProps}
 >
-	{#if loading && effectiveIndicatorPosition === "left"}
+  {#if loading && effectiveIndicatorPosition === "left"}
     {@render indicator()}
   {/if}
 
-	<span
-		class="wcag-ui-button__content"
-		class:wcag-ui-button__content--truncate={truncate}
-		class:wcag-ui-button__content--hidden={loading && effectiveIndicatorPosition === "overlay"}
-	>
-		{@render children?.()}
-	</span>
+  <span
+    class="wcag-ui-button__content"
+    class:wcag-ui-button__content--truncate={truncate}
+    class:wcag-ui-button__content--hidden={loading && effectiveIndicatorPosition === "overlay"}
+  >
+    {@render children?.()}
+  </span>
 
-	{#if loading && effectiveIndicatorPosition === "right"}
+  {#if loading && effectiveIndicatorPosition === "right"}
     {@render indicator()}
   {/if}
 
@@ -159,7 +158,7 @@
 
     /* Default colors */
     --wcag-ui-button-bg-color: #333335;
-		--wcag-ui-button-outline-shadow-color: rgba(0, 122, 204, 0.25);
+    --wcag-ui-button-outline-shadow-color: rgba(0, 122, 204, 0.25);
 
     /* Hover state */
     --wcag-ui-button-hover-bg-color: #555659;
@@ -176,7 +175,7 @@
     --wcag-ui-button-disabled-font-color: #444547;
     --wcag-ui-button-disabled-font-weight: 400;
     --wcag-ui-button-disabled-border-color: #eeeeef;
-		--wcag-ui-button-aria-disabled-opacity: .85;
+    --wcag-ui-button-aria-disabled-opacity: .85;
 
     /* Animation */
     --wcag-ui-button-transition-duration: 0.2s;
@@ -211,69 +210,69 @@
     touch-action: manipulation;
     user-select: none;
     transition: background-color var(--wcag-ui-button-transition-duration) var(--wcag-ui-button-transition-timing),border-color var(--wcag-ui-button-transition-duration) var(--wcag-ui-button-transition-timing),transform var(--wcag-ui-button-transition-duration) var(--wcag-ui-button-transition-timing);
-	}
+  }
 
-	.wcag-ui-button__content {
-		display: inline-flex;
-		align-items: center;
+  .wcag-ui-button__content {
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
-		gap: var(--wcag-ui-button-gap);
-	}
+    gap: var(--wcag-ui-button-gap);
+  }
 
-	.wcag-ui-button__content--truncate {
-		overflow: hidden;
+  .wcag-ui-button__content--truncate {
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-	}
+  }
 
-	.wcag-ui-button__content--hidden {
-	  opacity: 0;
-		pointer-events: none;
-	  user-select: none;
-	}
+  .wcag-ui-button__content--hidden {
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+  }
 
-	.wcag-ui-button__indicator-icon {
-	  width: 1em;
-	  height: 1em;
-	  fill: currentcolor;
-	  animation: wcag-ui-spin 0.6s linear infinite;
-	}
+  .wcag-ui-button__indicator-icon {
+    width: 1em;
+    height: 1em;
+    fill: currentcolor;
+    animation: wcag-ui-spin 0.6s linear infinite;
+  }
 
-	.wcag-ui-button__indicator--overlay {
-	  position: absolute;
-	  inset: 0;
-	  display: flex;
-	  align-items: center;
-	  justify-content: center;
-	}
+  .wcag-ui-button__indicator--overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 @layer variants {
-	/* Variant styles */
-	.wcag-ui-button--outlined {
+  /* Variant styles */
+  .wcag-ui-button--outlined {
     background-color: transparent;
     --wcag-ui-button-color: #38393b;
-		--wcag-ui-button-border-width: 2px;
-		--wcag-ui-button-outline-offset: -2px;
-		--wcag-ui-button-border-color: #66676a;
-		--wcag-ui-button-hover-bg-color: #eeeeef;
+    --wcag-ui-button-border-width: 2px;
+    --wcag-ui-button-outline-offset: -2px;
+    --wcag-ui-button-border-color: #66676a;
+    --wcag-ui-button-hover-bg-color: #eeeeef;
   }
 
   .wcag-ui-button--ghost {
-    background-color: transparent;
-    border-color: transparent;
-	  --wcag-ui-button-color: #38393b;
-			--wcag-ui-button-hover-bg-color: #eeeeef;
-			--wcag-ui-button-hover-border-color: #eeeeef;
+    --wcag-ui-button-bg-color: transparent;
+    --wcag-ui-button-border-color: transparent;
+    --wcag-ui-button-color: #38393b;
+    --wcag-ui-button-hover-bg-color: #eeeeef;
+    --wcag-ui-button-hover-border-color: #eeeeef;
   }
 
   .wcag-ui-button--link {
     background-color: transparent;
     border-color: transparent;
     text-decoration: underline;
-		--wcag-ui-button-color: #38393b;
-		--wcag-ui-button-hover-bg-color: #eeeeef;
-		--wcag-ui-button-hover-border-color: #eeeeef;
+    --wcag-ui-button-color: #38393b;
+    --wcag-ui-button-hover-bg-color: #eeeeef;
+    --wcag-ui-button-hover-border-color: #eeeeef;
   }
 
   .wcag-ui-button--full-width {
@@ -282,118 +281,118 @@
 }
 
 @layer colors {
-	/* Color variants */
-	.wcag-ui-button--primary {
-		--wcag-ui-button-bg-color: #2a508f;
-		--wcag-ui-button-border-color: #2a508f;
-		--wcag-ui-button-color: #fff;
-		--wcag-ui-button-hover-bg-color: #3f619a;
-		--wcag-ui-button-hover-border-color: #3f619a;
-		--wcag-ui-button-outline-color: #5077b5; /* Added custom focus color for primary */
-	}
+  /* Color variants */
+  .wcag-ui-button--primary {
+    --wcag-ui-button-bg-color: #2a508f;
+    --wcag-ui-button-border-color: #2a508f;
+    --wcag-ui-button-color: #fff;
+    --wcag-ui-button-hover-bg-color: #3f619a;
+    --wcag-ui-button-hover-border-color: #3f619a;
+    --wcag-ui-button-outline-color: #5077b5; /* Added custom focus color for primary */
+  }
 
-	.wcag-ui-button--primary:is(.wcag-ui-button--outlined, .wcag-ui-button--ghost, .wcag-ui-button--link) {
-	  --wcag-ui-button-bg-color: transparent;
-	  --wcag-ui-button-color: #2a508f;
-			--wcag-ui-button-hover-bg-color: #e9edf3;
-	}
+  .wcag-ui-button--primary:is(.wcag-ui-button--outlined, .wcag-ui-button--ghost, .wcag-ui-button--link) {
+    --wcag-ui-button-bg-color: transparent;
+    --wcag-ui-button-color: #2a508f;
+      --wcag-ui-button-hover-bg-color: #e9edf3;
+  }
 
-	.wcag-ui-button--primary:is(.wcag-ui-button--ghost, .wcag-ui-button--link) {
+  .wcag-ui-button--primary:is(.wcag-ui-button--ghost, .wcag-ui-button--link) {
     --wcag-ui-button-border-color: transparent;
     --wcag-ui-button-hover-border-color: #e9edf3;
-	}
+  }
 
-	.wcag-ui-button--secondary {
-		--wcag-ui-button-bg-color: #e5e6e7;
-		--wcag-ui-button-border-color: #e5e6e7;
-		--wcag-ui-button-color: #38393b;
-		--wcag-ui-button-hover-bg-color: #c9c9c9;
-		--wcag-ui-button-hover-border-color: #c9c9c9;
-		--wcag-ui-button-outline-color: #777779;
-	}
+  .wcag-ui-button--secondary {
+    --wcag-ui-button-bg-color: #e5e6e7;
+    --wcag-ui-button-border-color: #e5e6e7;
+    --wcag-ui-button-color: #38393b;
+    --wcag-ui-button-hover-bg-color: #c9c9c9;
+    --wcag-ui-button-hover-border-color: #c9c9c9;
+    --wcag-ui-button-outline-color: #777779;
+  }
 
-	.wcag-ui-button--secondary:is(.wcag-ui-button--outlined, .wcag-ui-button--ghost, .wcag-ui-button--link) {
-		--wcag-ui-button-border-color: #a8a8a8;
-		--wcag-ui-button-hover-bg-color: #f2f2f2;
-	}
+  .wcag-ui-button--secondary:is(.wcag-ui-button--outlined, .wcag-ui-button--ghost, .wcag-ui-button--link) {
+    --wcag-ui-button-border-color: #a8a8a8;
+    --wcag-ui-button-hover-bg-color: #f2f2f2;
+  }
 
-	.wcag-ui-button--secondary:is(.wcag-ui-button--ghost, .wcag-ui-button--link) {
-		--wcag-ui-button-hover-border-color: #f2f2f2;
-	}
+  .wcag-ui-button--secondary:is(.wcag-ui-button--ghost, .wcag-ui-button--link) {
+    --wcag-ui-button-hover-border-color: #f2f2f2;
+  }
 
-	.wcag-ui-button--success {
-		--wcag-ui-button-bg-color: #008a00;
-		--wcag-ui-button-border-color: #008a00;
-		--wcag-ui-button-color: #fff;
-		--wcag-ui-button-hover-bg-color: #076d08;
-		--wcag-ui-button-hover-border-color: #076d08;
-		--wcag-ui-button-outline-color: #00a700;
-	}
+  .wcag-ui-button--success {
+    --wcag-ui-button-bg-color: #008a00;
+    --wcag-ui-button-border-color: #008a00;
+    --wcag-ui-button-color: #fff;
+    --wcag-ui-button-hover-bg-color: #076d08;
+    --wcag-ui-button-hover-border-color: #076d08;
+    --wcag-ui-button-outline-color: #00a700;
+  }
 
-	.wcag-ui-button--success:is(.wcag-ui-button--outlined, .wcag-ui-button--ghost, .wcag-ui-button--link) {
-	  --wcag-ui-button-color: #076d08;
-			--wcag-ui-button-border-color: #008a00;
-			--wcag-ui-button-hover-bg-color: #f4f9f4;
-	}
+  .wcag-ui-button--success:is(.wcag-ui-button--outlined, .wcag-ui-button--ghost, .wcag-ui-button--link) {
+    --wcag-ui-button-color: #076d08;
+      --wcag-ui-button-border-color: #008a00;
+      --wcag-ui-button-hover-bg-color: #f4f9f4;
+  }
 
-	.wcag-ui-button--success:is(.wcag-ui-button--ghost, .wcag-ui-button--link) {
-		--wcag-ui-button-hover-border-color: #f4f9f4;
-	}
+  .wcag-ui-button--success:is(.wcag-ui-button--ghost, .wcag-ui-button--link) {
+    --wcag-ui-button-hover-border-color: #f4f9f4;
+  }
 
-	.wcag-ui-button--warning {
-		--wcag-ui-button-color: #4c2100;
-		--wcag-ui-button-bg-color: #ffb224;
-		--wcag-ui-button-border-color: #ffb224;
-		--wcag-ui-button-hover-bg-color: #ffc96b;
-		--wcag-ui-button-hover-border-color: #ffc96b;
-		--wcag-ui-button-outline-color: #d98c00;
-	}
+  .wcag-ui-button--warning {
+    --wcag-ui-button-color: #4c2100;
+    --wcag-ui-button-bg-color: #ffb224;
+    --wcag-ui-button-border-color: #ffb224;
+    --wcag-ui-button-hover-bg-color: #ffc96b;
+    --wcag-ui-button-hover-border-color: #ffc96b;
+    --wcag-ui-button-outline-color: #d98c00;
+  }
 
-	.wcag-ui-button--warning:is(.wcag-ui-button--outlined, .wcag-ui-button--ghost, .wcag-ui-button--link) {
-		--wcag-ui-button-hover-bg-color: #fff4d6;
-		--wcag-ui-button-color: #a35200;
-		--wcag-ui-button-border-color: #ffb224;
-	}
+  .wcag-ui-button--warning:is(.wcag-ui-button--outlined, .wcag-ui-button--ghost, .wcag-ui-button--link) {
+    --wcag-ui-button-hover-bg-color: #fff4d6;
+    --wcag-ui-button-color: #a35200;
+    --wcag-ui-button-border-color: #ffb224;
+  }
 
-	.wcag-ui-button--warning:is(.wcag-ui-button--ghost, .wcag-ui-button--link) {
-		--wcag-ui-button-hover-border-color: #fff4d6;
-	}
+  .wcag-ui-button--warning:is(.wcag-ui-button--ghost, .wcag-ui-button--link) {
+    --wcag-ui-button-hover-border-color: #fff4d6;
+  }
 
-	.wcag-ui-button--danger {
-		--wcag-ui-button-bg-color: #cb2a2f;
-		--wcag-ui-button-border-color: #cb2a2f;
-		--wcag-ui-button-hover-bg-color: #e5484d;
-		--wcag-ui-button-hover-border-color: #e5484d;
-		--wcag-ui-button-outline-color: #f76469;
-	}
+  .wcag-ui-button--danger {
+    --wcag-ui-button-bg-color: #cb2a2f;
+    --wcag-ui-button-border-color: #cb2a2f;
+    --wcag-ui-button-hover-bg-color: #e5484d;
+    --wcag-ui-button-hover-border-color: #e5484d;
+    --wcag-ui-button-outline-color: #f76469;
+  }
 
-	.wcag-ui-button--danger:is(.wcag-ui-button--outlined, .wcag-ui-button--ghost, .wcag-ui-button--link) {
-		--wcag-ui-button-color: #b22327;
-		--wcag-ui-button-border-color: #cb2a2f;
-		--wcag-ui-button-hover-bg-color: #fff0f0;
-	}
+  .wcag-ui-button--danger:is(.wcag-ui-button--outlined, .wcag-ui-button--ghost, .wcag-ui-button--link) {
+    --wcag-ui-button-color: #b22327;
+    --wcag-ui-button-border-color: #cb2a2f;
+    --wcag-ui-button-hover-bg-color: #fff0f0;
+  }
 
-	.wcag-ui-button--danger:is(.wcag-ui-button--ghost, .wcag-ui-button--link) {
-		--wcag-ui-button-hover-border-color: #fff0f0;
-	}
+  .wcag-ui-button--danger:is(.wcag-ui-button--ghost, .wcag-ui-button--link) {
+    --wcag-ui-button-hover-border-color: #fff0f0;
+  }
 
-	.wcag-ui-button--info {
-		--wcag-ui-button-bg-color: #0062d1;
-		--wcag-ui-button-border-color: #0062d1;
-		--wcag-ui-button-hover-bg-color: #0072f5;
-		--wcag-ui-button-hover-border-color: #0072f5;
-		--wcag-ui-button-outline-color: #4a98ff;
-	}
+  .wcag-ui-button--info {
+    --wcag-ui-button-bg-color: #0062d1;
+    --wcag-ui-button-border-color: #0062d1;
+    --wcag-ui-button-hover-bg-color: #0072f5;
+    --wcag-ui-button-hover-border-color: #0072f5;
+    --wcag-ui-button-outline-color: #4a98ff;
+  }
 
-	.wcag-ui-button--info:is(.wcag-ui-button--outlined, .wcag-ui-button--ghost, .wcag-ui-button--link) {
-		--wcag-ui-button-hover-bg-color: #e0f0ff;
-		--wcag-ui-button-color: #0068d6;
-		--wcag-ui-button-border-color: #0062d1;
-	}
+  .wcag-ui-button--info:is(.wcag-ui-button--outlined, .wcag-ui-button--ghost, .wcag-ui-button--link) {
+    --wcag-ui-button-hover-bg-color: #e0f0ff;
+    --wcag-ui-button-color: #0068d6;
+    --wcag-ui-button-border-color: #0062d1;
+  }
 
-	.wcag-ui-button--info:is(.wcag-ui-button--ghost, .wcag-ui-button--link) {
-		--wcag-ui-button-hover-border-color: #e0f0ff;
-	}
+  .wcag-ui-button--info:is(.wcag-ui-button--ghost, .wcag-ui-button--link) {
+    --wcag-ui-button-hover-border-color: #e0f0ff;
+  }
 
   .wcag-ui-button--neutral {
     --wcag-ui-button-bg-color: #fafafa;
@@ -421,7 +420,7 @@
     cursor: pointer;
   }
 
-  .wcag-ui-button:not(:disabled):active {
+  .wcag-ui-button:not(:disabled, [aria-disabled="true"]):active {
     transform: scale(var(--wcag-ui-button-transform-scale));
   }
 
@@ -431,36 +430,36 @@
     box-shadow: 0 0 0 2px var(--wcag-ui-button-outline-shadow-color);
   }
 
-	.wcag-ui-button[aria-disabled="true"] {
-	opacity: var(--wcag-ui-button-aria-disabled-opacity, 0.5);
-	}
+  .wcag-ui-button[aria-disabled="true"] {
+  opacity: var(--wcag-ui-button-aria-disabled-opacity, 0.5);
+  }
 
-	.wcag-ui-button[aria-disabled="true"]:not([data-loading]) {
-	  cursor: not-allowed;
-	}
+  .wcag-ui-button[aria-disabled="true"]:not([data-loading]) {
+    cursor: not-allowed;
+  }
 
-	.wcag-ui-button[data-loading]:hover {
-	  cursor: wait;
-	}
+  .wcag-ui-button[data-loading]:hover {
+    cursor: wait;
+  }
 }
 
 @layer sizes {
-	.wcag-ui-button--size-xs {
-	--wcag-ui-button-height: 1.5rem;
-	--wcag-ui-button-font-size: 0.75rem;
-	--wcag-ui-button-padding-inline: 0.5rem;
-	--wcag-ui-button-gap: 0.25rem;
+  .wcag-ui-button--size-xs {
+  --wcag-ui-button-height: 1.5rem;
+  --wcag-ui-button-font-size: 0.75rem;
+  --wcag-ui-button-padding-inline: 0.5rem;
+  --wcag-ui-button-gap: 0.25rem;
   }
 
-	.wcag-ui-button--size-xs::before {
-	  content: '';
-	  position: absolute;
-	  top: 50%;
-	  left: 50%;
-	  min-width: 44px;
-	  min-height: 44px;
-	  transform: translate(-50%, -50%);
-	}
+  .wcag-ui-button--size-xs::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 44px;
+    min-height: 44px;
+    transform: translate(-50%, -50%);
+  }
 
   .wcag-ui-button--size-sm {
     --wcag-ui-button-height: 2rem;
@@ -488,8 +487,8 @@
   .wcag-ui-button--shape-rounded-square,
   .wcag-ui-button--shape-square {
     --wcag-ui-button-border-radius: 0;
-		aspect-ratio: 1/1;
-		justify-content: center;
+    aspect-ratio: 1/1;
+    justify-content: center;
     align-items: center;
     width: var(--wcag-ui-button-height);
     padding: 0;
@@ -535,9 +534,9 @@
       transform: none;
     }
 
-		.wcag-ui-button__indicator-icon {
-	    animation: none;
-	  }
+    .wcag-ui-button__indicator-icon {
+      animation: none;
+    }
   }
 
   @media (forced-colors: active) {
@@ -551,6 +550,6 @@
 }
 
 @keyframes wcag-ui-spin {
-	to { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
 }
 </style>

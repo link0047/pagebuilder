@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
+  type Tag = "a" | "div";
   type Variant = "default" | "outlined" | "button";
   type Underline = "always" | "hover" | "none";
   type Color =
@@ -87,9 +88,12 @@
 
     return props.length ? props.join("; ") : undefined;
   })());
+
+  const tag: Tag = $derived(href ? "a" : "div");
 </script>
 
-<a
+<svelte:element
+  this={tag}
   {href}
   target={external ? "_blank" : undefined}
   rel={external ? "noopener noreferrer" : undefined}
@@ -113,7 +117,7 @@
   {...restProps}
 >
   {@render children?.()}
-</a>
+</svelte:element>
 
 <style>
   @layer variables, base, layout, underline, variants, colors, shapes, states;

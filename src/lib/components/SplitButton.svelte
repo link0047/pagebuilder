@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
+	import type { HTMLButtonAttributes } from "svelte/elements";
+
 	import Button from "./Button.svelte";
 	import Icon from "./Icon.svelte";
 	import Menu from "./Menu.svelte";
@@ -8,7 +10,7 @@
 	type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default" | "neutral";
 	type Size = "xs" | "sm" | "md" | "lg" | "xl";
 
-	export type Props = {
+	export type Props = HTMLButtonAttributes & {
     variant?: Variant;
     color?: Color;
     size?: Size;
@@ -25,7 +27,6 @@
     onclick?: (e: MouseEvent) => void;
     onpointerdown?: (e: PointerEvent) => void;
     "aria-label"?: string;
-    "aria-describedby"?: string;
     ref?: HTMLButtonElement | undefined;
   };
 

@@ -35,8 +35,9 @@ export type ComponentName =
   | "Heading"
   | "Text"
   | "OfferCallout"
-  | "Link"
   | "Badge"
+  | "Link"
+  | "CTAButton"
   | "CTAGroup"
   | "EditorialBlock"
   | "EditorialCard"
@@ -421,6 +422,13 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     ]
                   },
                   {
+                    type: "textfield",
+                    label: "Line Height",
+                    property: "props.lineHeight.mobile",
+                    defaultValue: "1.2",
+                    placeholder: "e.g. 1.5"
+                  },
+                  {
                     type: "colorpicker",
                     label: "Color",
                     property: "props.color.mobile",
@@ -429,15 +437,15 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                   {
                     type: "checkbox",
                     label: "Italic",
-                    property: "props.italic",
+                    property: "props.italic.mobile",
                     defaultValue: false
                   },
                   {
                     type: "checkbox",
                     label: "Underline",
-                    property: "props.underline",
+                    property: "props.underline.mobile",
                     defaultValue: false
-                  }
+                  },
                 ]
               },
               {
@@ -484,11 +492,30 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     ]
                   },
                   {
+                    type: "textfield",
+                    label: "Line Height",
+                    property: "props.lineHeight.tablet",
+                    defaultValue: "1.2",
+                    placeholder: "e.g. 1.5"
+                  },
+                  {
                     type: "colorpicker",
                     label: "Color",
                     property: "props.color.tablet",
                     defaultValue: "inherit"
-                  }
+                  },
+                  {
+                    type: "checkbox",
+                    label: "Italic",
+                    property: "props.italic.tablet",
+                    defaultValue: false
+                  },
+                  {
+                    type: "checkbox",
+                    label: "Underline",
+                    property: "props.underline.tablet",
+                    defaultValue: false
+                  },
                 ]
               },
               {
@@ -535,11 +562,30 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     ]
                   },
                   {
+                    type: "textfield",
+                    label: "Line Height",
+                    property: "props.lineHeight.desktop",
+                    defaultValue: "1.2",
+                    placeholder: "e.g. 1.5"
+                  },
+                  {
                     type: "colorpicker",
                     label: "Color",
                     property: "props.color.desktop",
                     defaultValue: "inherit"
-                  }
+                  },
+                  {
+                    type: "checkbox",
+                    label: "Italic",
+                    property: "props.italic.desktop",
+                    defaultValue: false
+                  },
+                  {
+                    type: "checkbox",
+                    label: "Underline",
+                    property: "props.underline.desktop",
+                    defaultValue: false
+                  },
                 ]
               }
             ]
@@ -736,6 +782,106 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
     ]
   },
 
+  CTAButton: {
+    sections: [
+      {
+        title: "Content",
+        icon: "content",
+        controls: [
+          {
+            type: "textfield",
+            label: "Label",
+            property: "props.text",
+            placeholder: "e.g. Shop Now"
+          },
+        ]
+      },
+      {
+        title: "Styling",
+        icon: "styling",
+        controls: [
+          {
+            type: "select",
+            label: "Variant",
+            property: "props.variant",
+            defaultValue: "button",
+            options: [
+              { value: "default", text: "Default" },
+              { value: "outlined", text: "Outlined" },
+              { value: "button", text: "Button" },
+            ]
+          },
+          {
+            type: "select",
+            label: "Shape",
+            property: "props.shape",
+            defaultValue: "pill",
+            options: [
+              { value: "default", text: "Default" },
+              { value: "pill", text: "Pill" },
+            ]
+          },
+          {
+            type: "select",
+            label: "Color",
+            property: "props.color",
+            defaultValue: "default",
+            options: [
+              { value: "default", text: "Default" },
+              { value: "primary", text: "Primary" },
+              { value: "secondary", text: "Secondary" },
+              { value: "success", text: "Success" },
+              { value: "danger", text: "Danger" },
+              { value: "warning", text: "Warning" },
+              { value: "info", text: "Info" },
+              { value: "neutral", text: "Neutral" },
+            ]
+          },
+          {
+            type: "checkbox",
+            label: "Full width",
+            property: "props.fullWidth",
+            defaultValue: false
+          },
+        ]
+      },
+      {
+        title: "Custom Color",
+        controls: [
+          {
+            type: "tabs",
+            tabs: [
+              {
+                label: "Base",
+                controls: [
+                  { type: "colorpicker", label: "Text", property: "props.customColor.base.color" },
+                  { type: "colorpicker", label: "Background", property: "props.customColor.base.bgColor" },
+                  { type: "colorpicker", label: "Border", property: "props.customColor.base.borderColor" },
+                ]
+              },
+              {
+                label: "Hover",
+                controls: [
+                  { type: "colorpicker", label: "Text", property: "props.customColor.hover.color" },
+                  { type: "colorpicker", label: "Background", property: "props.customColor.hover.bgColor" },
+                  { type: "colorpicker", label: "Border", property: "props.customColor.hover.borderColor" },
+                ]
+              },
+              {
+                label: "Focus",
+                controls: [
+                  { type: "colorpicker", label: "Text", property: "props.customColor.focus.color" },
+                  { type: "colorpicker", label: "Background", property: "props.customColor.focus.bgColor" },
+                  { type: "colorpicker", label: "Border", property: "props.customColor.focus.borderColor" },
+                ]
+              },
+            ]
+          },
+        ]
+      }
+    ]
+  },
+
   Link: {
     sections: [
       {
@@ -793,7 +939,6 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             property: "props.color",
             defaultValue: "inherit",
             options: [
-              { value: "inherit", text: "Inherit" },
               { value: "default", text: "Default" },
               { value: "primary", text: "Primary" },
               { value: "secondary", text: "Secondary" },
@@ -821,6 +966,11 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             property: "props.fullWidth",
             defaultValue: false
           },
+        ]
+      },
+      {
+        title: "Custom Color",
+        controls: [
           {
             type: "tabs",
             tabs: [
@@ -851,7 +1001,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             ]
           },
         ]
-      },
+      }
     ]
   },
 
@@ -1369,17 +1519,6 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             property: "props.backgroundColor",
             defaultValue: "#f6f5f1"
           },
-          /* ctas aren't currently supported in v1 */
-          // {
-          //   type: "colorpicker",
-          //   label: "CTA Background Color",
-          //   property: "props.ctaBackgroundColor"
-          // },
-          // {
-          //   type: "colorpicker",
-          //   label: "CTA Text Color",
-          //   property: "props.ctaTextColor"
-          // }
         ]
       },
       {
