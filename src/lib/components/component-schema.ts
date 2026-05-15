@@ -22,6 +22,7 @@ export type ControlSchema = {
 type SectionSchema = {
   title: string;
   icon?: "desktop" | "tablet" | "mobile" | "image" | "video" | "styling" | "content" | "layout" | "text" | "content-positioning";
+  collapsed?: boolean;
   controls: ControlSchema[];
 };
 
@@ -71,7 +72,8 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Image URL 2x",
                     property: "props.config.mobile.image.src2x",
-                    placeholder: "https://example.com/mobile@2x.jpg"
+                    placeholder: "https://example.com/mobile@2x.jpg",
+                    description: "Optional — for retina displays"
                   }
                 ]
               },
@@ -89,7 +91,8 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Image URL 2x",
                     property: "props.config.tablet.image.src2x",
-                    placeholder: "https://example.com/tablet@2x.jpg"
+                    placeholder: "https://example.com/tablet@2x.jpg",
+                    description: "Optional — for retina displays"
                   }
                 ]
               },
@@ -107,7 +110,8 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Image URL 2x",
                     property: "props.config.desktop.image.src2x",
-                    placeholder: "https://example.com/desktop@2x.jpg"
+                    placeholder: "https://example.com/desktop@2x.jpg",
+                    description: "Optional — for retina displays"
                   }
                 ]
               },
@@ -124,17 +128,18 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             label: "Link URL",
             property: "props.href",
             placeholder: "https://example.com",
-            description: "Makes the entire hero image a link"
+            description: "Makes the entire hero a clickable link"
           }
         ]
       },
       {
-        title: "Layout",
-        icon: "layout",
+        title: "Content",
+        icon: "content-positioning",
+        collapsed: true,
         controls: [
           {
             type: "select",
-            label: "Layout Type",
+            label: "Layout",
             property: "props.layout",
             defaultValue: "overlay",
             options: [
@@ -142,13 +147,11 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
               { value: "split-start", text: "Split Left" },
               { value: "split-end", text: "Split Right" },
             ]
-          }
-        ]
-      },
-      {
-        title: "Content Positioning",
-        icon: "content-positioning",
-        controls: [
+          },
+          {
+            type: "hint",
+            description: "Overlay places content on top of the image. Split Left/Right divides the hero into image and content side by side."
+          },
           {
             type: "tabs",
             tabs: [
@@ -157,7 +160,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                 controls: [
                   {
                     type: "select",
-                    label: "Placement",
+                    label: "Content Placement",
                     property: "props.config.mobile.content.placement",
                     defaultValue: "center",
                     options: [
@@ -173,14 +176,22 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     ]
                   },
                   {
-                    type: "textfield",
-                    label: "Padding",
-                    property: "props.config.mobile.content.padding",
-                    defaultValue: "1rem"
+                    type: "segmentedbutton",
+                    label: "Text Alignment",
+                    property: "props.config.mobile.content.textAlign",
+                    defaultValue: "left",
+                    options: ["left", "center", "right"]
                   },
                   {
                     type: "textfield",
-                    label: "Spacing",
+                    label: "Content Padding",
+                    property: "props.config.mobile.content.padding",
+                    defaultValue: "1rem",
+                    description: "Space around the content area"
+                  },
+                  {
+                    type: "textfield",
+                    label: "Content Spacing",
                     property: "props.config.mobile.content.gap",
                     defaultValue: "0.5rem",
                     description: "Space between child elements"
@@ -191,11 +202,16 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                 label: "Tablet",
                 controls: [
                   {
+                    type: "hint",
+                    description: "Only set values you want to change from mobile. Everything else inherits automatically."
+                  },
+                  {
                     type: "select",
-                    label: "Placement",
+                    label: "Content Placement",
                     property: "props.config.tablet.content.placement",
-                    defaultValue: "center",
+                    defaultValue: "",
                     options: [
+                      { value: "", text: "— Inherit —" },
                       { value: "top-left", text: "Top Left" },
                       { value: "top-center", text: "Top Center" },
                       { value: "top-right", text: "Top Right" },
@@ -208,16 +224,21 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     ]
                   },
                   {
-                    type: "textfield",
-                    label: "Padding",
-                    property: "props.config.tablet.content.padding",
-                    defaultValue: "1rem"
+                    type: "segmentedbutton",
+                    label: "Text Alignment",
+                    property: "props.config.tablet.content.textAlign",
+                    options: ["left", "center", "right"]
                   },
                   {
                     type: "textfield",
-                    label: "Spacing",
+                    label: "Content Padding",
+                    property: "props.config.tablet.content.padding",
+                    description: "Space around the content area"
+                  },
+                  {
+                    type: "textfield",
+                    label: "Content Spacing",
                     property: "props.config.tablet.content.gap",
-                    defaultValue: "0.5rem",
                     description: "Space between child elements"
                   },
                 ]
@@ -226,11 +247,16 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                 label: "Desktop",
                 controls: [
                   {
+                    type: "hint",
+                    description: "Only set values you want to change from tablet. Everything else inherits automatically."
+                  },
+                  {
                     type: "select",
-                    label: "Placement",
+                    label: "Content Placement",
                     property: "props.config.desktop.content.placement",
-                    defaultValue: "center",
+                    defaultValue: "",
                     options: [
+                      { value: "", text: "— Inherit —" },
                       { value: "top-left", text: "Top Left" },
                       { value: "top-center", text: "Top Center" },
                       { value: "top-right", text: "Top Right" },
@@ -243,16 +269,21 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     ]
                   },
                   {
-                    type: "textfield",
-                    label: "Padding",
-                    property: "props.config.desktop.content.padding",
-                    defaultValue: "1rem"
+                    type: "segmentedbutton",
+                    label: "Text Alignment",
+                    property: "props.config.desktop.content.textAlign",
+                    options: ["left", "center", "right"]
                   },
                   {
                     type: "textfield",
-                    label: "Spacing",
+                    label: "Content Padding",
+                    property: "props.config.desktop.content.padding",
+                    description: "Space around the content area"
+                  },
+                  {
+                    type: "textfield",
+                    label: "Content Spacing",
                     property: "props.config.desktop.content.gap",
-                    defaultValue: "0.5rem",
                     description: "Space between child elements"
                   },
                 ]
@@ -278,9 +309,10 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
           },
           {
             type: "select",
-            label: "Tag",
+            label: "Heading Level",
             property: "props.tag",
             defaultValue: "h2",
+            description: "Use the correct level for your page structure — H1 should only appear once per page",
             options: [
               { value: "h1", text: "H1" },
               { value: "h2", text: "H2" },
@@ -300,8 +332,9 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         ]
       },
       {
-        title: "Styling",
+        title: "Appearance",
         icon: "styling",
+        collapsed: true,
         controls: [
           {
             type: "select",
@@ -366,15 +399,15 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         ]
       },
       {
-        title: "Styling",
+        title: "Appearance",
         icon: "styling",
+        collapsed: true,
         controls: [
           {
             type: "hint",
-            description: "Mobile values apply to all sizes unless overridden per breakpoint."
+            description: "Mobile values apply to all screen sizes unless overridden per breakpoint."
           },
           {
-
             type: "tabs",
             tabs: [
               {
@@ -426,7 +459,8 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     label: "Line Height",
                     property: "props.lineHeight.mobile",
                     defaultValue: "1.2",
-                    placeholder: "e.g. 1.5"
+                    placeholder: "e.g. 1.5",
+                    description: "Unitless values recommended e.g. 1.5"
                   },
                   {
                     type: "colorpicker",
@@ -451,6 +485,10 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
               {
                 label: "Tablet",
                 controls: [
+                  {
+                    type: "hint",
+                    description: "Only set values you want to change from mobile. Everything else inherits automatically."
+                  },
                   {
                     type: "select",
                     label: "Size",
@@ -482,7 +520,6 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "select",
                     label: "Weight",
                     property: "props.weight.tablet",
-                    defaultValue: "inherit",
                     options: [
                       { value: "inherit", text: "Inherit" },
                       { value: "normal", text: "Normal" },
@@ -495,32 +532,33 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Line Height",
                     property: "props.lineHeight.tablet",
-                    defaultValue: "1.2",
-                    placeholder: "e.g. 1.5"
+                    placeholder: "e.g. 1.5",
+                    description: "Unitless values recommended e.g. 1.5"
                   },
                   {
                     type: "colorpicker",
                     label: "Color",
                     property: "props.color.tablet",
-                    defaultValue: "inherit"
                   },
                   {
                     type: "checkbox",
                     label: "Italic",
                     property: "props.italic.tablet",
-                    defaultValue: false
                   },
                   {
                     type: "checkbox",
                     label: "Underline",
                     property: "props.underline.tablet",
-                    defaultValue: false
                   },
                 ]
               },
               {
                 label: "Desktop",
                 controls: [
+                  {
+                    type: "hint",
+                    description: "Only set values you want to change from tablet. Everything else inherits automatically."
+                  },
                   {
                     type: "select",
                     label: "Size",
@@ -552,7 +590,6 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "select",
                     label: "Weight",
                     property: "props.weight.desktop",
-                    defaultValue: "inherit",
                     options: [
                       { value: "inherit", text: "Inherit" },
                       { value: "normal", text: "Normal" },
@@ -565,26 +602,23 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Line Height",
                     property: "props.lineHeight.desktop",
-                    defaultValue: "1.2",
-                    placeholder: "e.g. 1.5"
+                    placeholder: "e.g. 1.5",
+                    description: "Unitless values recommended e.g. 1.5"
                   },
                   {
                     type: "colorpicker",
                     label: "Color",
                     property: "props.color.desktop",
-                    defaultValue: "inherit"
                   },
                   {
                     type: "checkbox",
                     label: "Italic",
                     property: "props.italic.desktop",
-                    defaultValue: false
                   },
                   {
                     type: "checkbox",
                     label: "Underline",
                     property: "props.underline.desktop",
-                    defaultValue: false
                   },
                 ]
               }
@@ -602,11 +636,15 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         icon: "content",
         controls: [
           {
+            type: "hint",
+            description: "Value is the main offer — shown largest. Heading and Prefix appear above it, Legal Text appears below."
+          },
+          {
             type: "textfield",
             label: "Value",
             property: "props.value",
             placeholder: "e.g. 40%, $15.99, Free",
-            description: "Supports: 40%, 40% off, $15, $15.99, Free, or any text"
+            description: "The primary offer amount or text"
           },
           {
             type: "textfield",
@@ -631,13 +669,14 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             label: "Aria Label",
             property: "props.ariaLabel",
             placeholder: "e.g. Save 40% on selected items",
-            description: "Accessible label — describe the full offer for screen readers"
+            description: "Describes the full offer for screen readers"
           }
         ]
       },
       {
-        title: "Styling",
+        title: "Appearance",
         icon: "styling",
+        collapsed: true,
         controls: [
           {
             type: "select",
@@ -668,6 +707,10 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         icon: "layout",
         controls: [
           {
+            type: "hint",
+            description: "Controls how CTAs are arranged. Columns sets how many appear side by side. Spacing is the gap between them."
+          },
+          {
             type: "tabs",
             tabs: [
               {
@@ -689,13 +732,15 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Spacing",
                     property: "props.config.mobile.spacing",
-                    defaultValue: "0.5rem"
+                    defaultValue: "0.5rem",
+                    description: "Gap between CTAs"
                   },
                   {
                     type: "textfield",
                     label: "Padding",
                     property: "props.config.mobile.padding",
-                    defaultValue: "0"
+                    defaultValue: "0",
+                    description: "Space around the CTA group"
                   },
                   {
                     type: "colorpicker",
@@ -724,13 +769,15 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Spacing",
                     property: "props.config.tablet.spacing",
-                    defaultValue: "0.5rem"
+                    defaultValue: "0.5rem",
+                    description: "Gap between CTAs"
                   },
                   {
                     type: "textfield",
                     label: "Padding",
                     property: "props.config.tablet.padding",
-                    defaultValue: "0"
+                    defaultValue: "0",
+                    description: "Space around the CTA group"
                   },
                   {
                     type: "colorpicker",
@@ -759,13 +806,15 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Spacing",
                     property: "props.config.desktop.spacing",
-                    defaultValue: "0.5rem"
+                    defaultValue: "0.5rem",
+                    description: "Gap between CTAs"
                   },
                   {
                     type: "textfield",
                     label: "Padding",
                     property: "props.config.desktop.padding",
-                    defaultValue: "0"
+                    defaultValue: "0",
+                    description: "Space around the CTA group"
                   },
                   {
                     type: "colorpicker",
@@ -792,13 +841,14 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             type: "textfield",
             label: "Label",
             property: "props.text",
-            placeholder: "e.g. Shop Now"
+            placeholder: "e.g. Shop Now, Learn More"
           },
         ]
       },
       {
-        title: "Styling",
+        title: "Appearance",
         icon: "styling",
+        collapsed: true,
         controls: [
           {
             type: "select",
@@ -847,7 +897,12 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
       },
       {
         title: "Custom Color",
+        collapsed: true,
         controls: [
+          {
+            type: "hint",
+            description: "Overrides the preset color. Leave all fields empty to use the Color setting above."
+          },
           {
             type: "tabs",
             tabs: [
@@ -892,13 +947,14 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             type: "textfield",
             label: "Label",
             property: "props.text",
-            placeholder: "e.g. Shop Now"
+            placeholder: "e.g. Shop Now, Learn More"
           },
           {
             type: "textfield",
             label: "URL",
             property: "props.href",
-            placeholder: "https://example.com"
+            placeholder: "https://example.com",
+            description: "Leave empty to render as a decorative button with no link"
           },
           {
             type: "checkbox",
@@ -909,8 +965,9 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         ]
       },
       {
-        title: "Styling",
+        title: "Appearance",
         icon: "styling",
+        collapsed: true,
         controls: [
           {
             type: "select",
@@ -970,7 +1027,12 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
       },
       {
         title: "Custom Color",
+        collapsed: true,
         controls: [
+          {
+            type: "hint",
+            description: "Overrides the preset color. Leave all fields empty to use the Color setting above."
+          },
           {
             type: "tabs",
             tabs: [
@@ -1022,13 +1084,18 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
       {
         title: "Position",
         icon: "layout",
+        collapsed: true,
         controls: [
+          {
+            type: "hint",
+            description: "Positions the badge absolutely over its parent container. Leave Corner set to None to render the badge inline."
+          },
           {
             type: "select",
             label: "Corner",
             property: "props.position.corner",
             options: [
-              { value: "", text: "None" },
+              { value: "", text: "None — inline" },
               { value: "top-left", text: "Top Left" },
               { value: "top-right", text: "Top Right" },
               { value: "bottom-left", text: "Bottom Left" },
@@ -1037,16 +1104,17 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
           },
           {
             type: "textfield",
-            label: "Gap",
+            label: "Offset",
             property: "props.position.gap",
-            placeholder: "e.g. 0.5rem or 8",
-            description: "Leave empty for flush positioning"
+            placeholder: "e.g. 0.5rem",
+            description: "Distance from the corner — leave empty for flush positioning"
           }
         ]
       },
       {
-        title: "Styling",
+        title: "Appearance",
         icon: "styling",
+        collapsed: true,
         controls: [
           {
             type: "select",
@@ -1105,12 +1173,14 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
     sections: [
       {
         title: "Content",
+        icon: "content",
         controls: [
           {
             type: "textfield",
             label: "Title",
             property: "props.title",
-            placeholder: "Editorial title"
+            placeholder: "e.g. New Arrivals, Shop by Style",
+            description: "Optional — leave empty to hide the title"
           },
           {
             type: "segmentedbutton",
@@ -1122,7 +1192,9 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         ]
       },
       {
-        title: "Styling",
+        title: "Appearance",
+        icon: "styling",
+        collapsed: true,
         controls: [
           {
             type: "colorpicker",
@@ -1138,17 +1210,6 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
   EditorialCard: {
     sections: [
       {
-        title: "Link",
-        controls: [
-          {
-            type: "textfield",
-            label: "Card URL",
-            property: "props.href",
-            placeholder: "https://example.com"
-          }
-        ]
-      },
-      {
         title: "Media",
         icon: "image",
         controls: [
@@ -1162,7 +1223,8 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Image URL",
                     property: "props.images.mobile",
-                    placeholder: "https://example.com/mobile.jpg"
+                    placeholder: "https://example.com/mobile.jpg",
+                    description: "Used below 668px"
                   }
                 ]
               },
@@ -1173,7 +1235,8 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Image URL",
                     property: "props.images.tablet",
-                    placeholder: "https://example.com/tablet.jpg"
+                    placeholder: "https://example.com/tablet.jpg",
+                    description: "Used from 668px"
                   }
                 ]
               },
@@ -1184,7 +1247,8 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Image URL",
                     property: "props.images.desktop",
-                    placeholder: "https://example.com/desktop.jpg"
+                    placeholder: "https://example.com/desktop.jpg",
+                    description: "Used from 1025px"
                   }
                 ]
               }
@@ -1194,14 +1258,64 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             type: "textfield",
             label: "Alt Text",
             property: "props.alt",
-            placeholder: "Describe the image"
+            placeholder: "Describe the image for accessibility"
           }
         ]
       },
       {
-        title: "Layout & Sizing",
-        icon: "layout",
+        title: "Content",
+        icon: "content",
         controls: [
+          {
+            type: "textfield",
+            label: "Card URL",
+            property: "props.href",
+            placeholder: "https://example.com",
+            description: "Makes the entire card a clickable link"
+          },
+          {
+            type: "hint",
+            description: "Headline, Subhead, and Supporting Text appear below the card image. Leave any field empty to hide it."
+          },
+          {
+            type: "textfield",
+            label: "Headline",
+            property: "props.headline",
+            placeholder: "e.g. New Arrivals",
+            description: "Primary text — largest and most prominent"
+          },
+          {
+            type: "textfield",
+            label: "Subhead",
+            property: "props.subhead",
+            placeholder: "e.g. Shop the latest styles",
+            description: "Secondary text — displayed beneath the headline"
+          },
+          {
+            type: "textarea",
+            label: "Supporting Text",
+            property: "props.supportingText",
+            placeholder: "e.g. Free shipping on orders over $50",
+            description: "Additional detail — smaller and less prominent"
+          },
+          {
+            type: "segmentedbutton",
+            label: "Text Alignment",
+            property: "props.textAlignment",
+            options: ["left", "center", "right"],
+            defaultValue: "center"
+          }
+        ]
+      },
+      {
+        title: "Layout",
+        icon: "layout",
+        collapsed: true,
+        controls: [
+          {
+            type: "hint",
+            description: "Cards are arranged in a 12-column grid from left to right. Column Span controls how wide a card is — Span 6 fills half the row, Span 12 fills the full width. Row Span controls how tall a card is relative to others in the same row. Hidden removes the card from view at that screen size without deleting it."
+          },
           {
             type: "tabs",
             tabs: [
@@ -1240,15 +1354,43 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                   },
                   {
                     type: "checkbox",
-                    label: "Hidden on Mobile",
+                    label: "Hidden",
                     property: "props.hidden.mobile",
                     defaultValue: false
+                  },
+                  {
+                    type: "select",
+                    label: "Overlay Placement",
+                    property: "props.overlay.placement.mobile",
+                    defaultValue: "top-left",
+                    options: [
+                      { value: "top-left",      text: "Top Left" },
+                      { value: "top-center",    text: "Top Center" },
+                      { value: "top-right",     text: "Top Right" },
+                      { value: "inline-left",   text: "Center Left" },
+                      { value: "center",        text: "Center" },
+                      { value: "inline-right",  text: "Center Right" },
+                      { value: "bottom-left",   text: "Bottom Left" },
+                      { value: "bottom-center", text: "Bottom Center" },
+                      { value: "bottom-right",  text: "Bottom Right" },
+                    ]
+                  },
+                  {
+                    type: "textfield",
+                    label: "Overlay Padding",
+                    property: "props.overlay.padding.mobile",
+                    placeholder: "0.5rem",
+                    description: "Space inside the overlay area"
                   }
                 ]
               },
               {
                 label: "Tablet",
                 controls: [
+                  {
+                    type: "hint",
+                    description: "Only set values you want to change from mobile. Everything else inherits automatically."
+                  },
                   {
                     type: "select",
                     label: "Column Span",
@@ -1281,15 +1423,44 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                   },
                   {
                     type: "checkbox",
-                    label: "Hidden on Tablet",
+                    label: "Hidden",
                     property: "props.hidden.tablet",
                     defaultValue: false
                   },
+                  {
+                    type: "select",
+                    label: "Overlay Placement",
+                    property: "props.overlay.placement.tablet",
+                    defaultValue: "",
+                    options: [
+                      { value: "",              text: "— Inherit —" },
+                      { value: "top-left",      text: "Top Left" },
+                      { value: "top-center",    text: "Top Center" },
+                      { value: "top-right",     text: "Top Right" },
+                      { value: "inline-left",   text: "Center Left" },
+                      { value: "center",        text: "Center" },
+                      { value: "inline-right",  text: "Center Right" },
+                      { value: "bottom-left",   text: "Bottom Left" },
+                      { value: "bottom-center", text: "Bottom Center" },
+                      { value: "bottom-right",  text: "Bottom Right" },
+                    ]
+                  },
+                  {
+                    type: "textfield",
+                    label: "Overlay Padding",
+                    property: "props.overlay.padding.tablet",
+                    placeholder: "Inherit from mobile",
+                    description: "Space inside the overlay area"
+                  }
                 ]
               },
               {
                 label: "Desktop",
                 controls: [
+                  {
+                    type: "hint",
+                    description: "Only set values you want to change from tablet. Everything else inherits automatically."
+                  },
                   {
                     type: "select",
                     label: "Column Span",
@@ -1322,66 +1493,17 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                   },
                   {
                     type: "checkbox",
-                    label: "Hidden on Desktop",
+                    label: "Hidden",
                     property: "props.hidden.desktop",
                     defaultValue: false
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        title: "Content",
-        controls: [
-          {
-            type: "textfield",
-            label: "Headline",
-            property: "props.headline",
-            placeholder: "Enter headline"
-          },
-          {
-            type: "textfield",
-            label: "Subhead",
-            property: "props.subhead",
-            placeholder: "Enter subhead"
-          },
-          {
-            type: "textarea",
-            label: "Supporting Text",
-            property: "props.supportingText",
-            placeholder: "Enter supporting text"
-          },
-          {
-            type: "segmentedbutton",
-            label: "Text Alignment",
-            property: "props.textAlignment",
-            options: ["left", "center", "right"],
-            defaultValue: "center"
-          }
-        ]
-      },
-      {
-        title: "Overlay",
-        icon: "content-positioning",
-        controls: [
-          {
-            type: "hint",
-            description: "The overlay positions child content over the card image."
-          },
-          {
-            type: "tabs",
-            tabs: [
-              {
-                label: "Mobile",
-                controls: [
+                  },
                   {
                     type: "select",
-                    label: "Placement",
-                    property: "props.overlay.placement.mobile",
-                    defaultValue: "top-left",
+                    label: "Overlay Placement",
+                    property: "props.overlay.placement.desktop",
+                    defaultValue: "",
                     options: [
+                      { value: "",              text: "— Inherit —" },
                       { value: "top-left",      text: "Top Left" },
                       { value: "top-center",    text: "Top Center" },
                       { value: "top-right",     text: "Top Right" },
@@ -1392,67 +1514,25 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                       { value: "bottom-center", text: "Bottom Center" },
                       { value: "bottom-right",  text: "Bottom Right" },
                     ]
-                  }
-                ]
-              },
-              {
-                label: "Tablet",
-                controls: [
+                  },
                   {
-                    type: "select",
-                    label: "Placement",
-                    property: "props.overlay.placement.tablet",
-                    defaultValue: "top-left",
-                    options: [
-                      { value: "top-left", text: "Top Left" },
-                      { value: "top-right", text: "Top Right" },
-                      { value: "center", text: "Center" },
-                      { value: "bottom-left", text: "Bottom Left" },
-                      { value: "bottom-right", text: "Bottom Right" },
-                    ]
-                  }
-                ]
-              },
-              {
-                label: "Desktop",
-                controls: [
-                  {
-                    type: "select",
-                    label: "Placement",
-                    property: "props.overlay.placement.desktop",
-                    defaultValue: "top-left",
-                    options: [
-                      { value: "top-left", text: "Top Left" },
-                      { value: "top-right", text: "Top Right" },
-                      { value: "center", text: "Center" },
-                      { value: "bottom-left", text: "Bottom Left" },
-                      { value: "bottom-right", text: "Bottom Right" },
-                    ]
+                    type: "textfield",
+                    label: "Overlay Padding",
+                    property: "props.overlay.padding.desktop",
+                    placeholder: "Inherit from tablet",
+                    description: "Space inside the overlay area"
                   }
                 ]
               }
             ]
-          },
-          {
-            type: "textfield",
-            label: "Padding",
-            property: "props.overlay.padding",
-            placeholder: "0.5rem",
-            description: "Padding inside the overlay container"
           }
         ]
       },
       {
-        title: "Styling",
+        title: "Appearance",
         icon: "styling",
+        collapsed: true,
         controls: [
-          {
-            type: "segmentedbutton",
-            label: "Text Alignment",
-            property: "props.textAlignment",
-            options: ["left", "center", "right"],
-            defaultValue: "center"
-          },
           {
             type: "colorpicker",
             label: "Background Color",
@@ -1473,25 +1553,26 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
   CollectionBlock: {
     sections: [
       {
-        title: "Heading",
-        icon: "text",
+        title: "Content",
+        icon: "content",
         controls: [
           {
             type: "textfield",
-            label: "Heading",
+            label: "Title",
             property: "props.heading",
-            placeholder: "Enter heading"
+            placeholder: "e.g. Best Sellers, New Arrivals",
+            description: "Optional — leave empty to hide the title"
           },
           {
             type: "segmentedbutton",
-            label: "Alignment",
+            label: "Title Alignment",
             property: "props.headingAlign",
             options: ["left", "center", "right"],
             defaultValue: "center"
           },
           {
             type: "select",
-            label: "Size",
+            label: "Title Size",
             property: "props.headingSize",
             defaultValue: "md",
             options: [
@@ -1503,28 +1584,21 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
           },
           {
             type: "colorpicker",
-            label: "Heading Color",
+            label: "Title Color",
             property: "props.headingColor",
             defaultValue: "#212121"
           }
         ]
       },
       {
-        title: "Styling",
-        icon: "styling",
-        controls: [
-          {
-            type: "colorpicker",
-            label: "Background Color",
-            property: "props.backgroundColor",
-            defaultValue: "#f6f5f1"
-          },
-        ]
-      },
-      {
         title: "Carousel",
         icon: "layout",
+        collapsed: true,
         controls: [
+          {
+            type: "hint",
+            description: "Controls how many product cards are visible at once. Partial slides (e.g. 2.5) hint to users that more cards can be scrolled into view."
+          },
           {
             type: "tabs",
             tabs: [
@@ -1583,6 +1657,19 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             ]
           }
         ]
+      },
+      {
+        title: "Appearance",
+        icon: "styling",
+        collapsed: true,
+        controls: [
+          {
+            type: "colorpicker",
+            label: "Background Color",
+            property: "props.backgroundColor",
+            defaultValue: "#f6f5f1"
+          }
+        ]
       }
     ]
   },
@@ -1590,25 +1677,22 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
   CollectionBlockItem: {
     sections: [
       {
-        title: "Product Info",
+        title: "Product",
+        icon: "content",
         controls: [
           {
             type: "textfield",
             label: "Product Name",
             property: "props.product.name",
-            placeholder: "Product name"
+            placeholder: "e.g. Classic White Sneaker"
           },
           {
             type: "textfield",
             label: "Product URL",
             property: "props.product.href",
-            placeholder: "/product/example"
-          }
-        ]
-      },
-      {
-        title: "Pricing",
-        controls: [
+            placeholder: "/products/example",
+            description: "Relative or absolute URL to the product page"
+          },
           {
             type: "number",
             label: "Original Price",
@@ -1625,6 +1709,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
       },
       {
         title: "Media",
+        icon: "image",
         controls: [
           {
             type: "tabs",
@@ -1636,7 +1721,8 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Image URL",
                     property: "props.product.src.mobile",
-                    placeholder: "https://example.com/image.jpg"
+                    placeholder: "https://example.com/image.jpg",
+                    description: "Used below 668px"
                   }
                 ]
               },
@@ -1647,7 +1733,8 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Image URL",
                     property: "props.product.src.tablet",
-                    placeholder: "https://example.com/image.jpg"
+                    placeholder: "https://example.com/image.jpg",
+                    description: "Used from 668px"
                   }
                 ]
               },
@@ -1658,18 +1745,24 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                     type: "textfield",
                     label: "Image URL",
                     property: "props.product.src.desktop",
-                    placeholder: "https://example.com/image.jpg"
+                    placeholder: "https://example.com/image.jpg",
+                    description: "Used from 1025px"
                   }
                 ]
-              },
-
+              }
             ]
           }
         ]
       },
       {
         title: "Promo Badge",
+        icon: "styling",
+        collapsed: true,
         controls: [
+          {
+            type: "hint",
+            description: "Displays a small label over the product image. Leave Badge Text empty to hide it."
+          },
           {
             type: "textfield",
             label: "Badge Text",
@@ -1728,12 +1821,14 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
     sections: [
       {
         title: "Content",
+        icon: "content",
         controls: [
           {
             type: "textfield",
             label: "Title",
             property: "props.title",
-            placeholder: "Story title"
+            placeholder: "e.g. Shop by Category",
+            description: "Optional — leave empty to hide the title"
           },
           {
             type: "segmentedbutton",
@@ -1746,15 +1841,15 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             type: "select",
             label: "Heading Level",
             property: "props.headingLevel",
-            description: "Choose appropriate heading level for document structure",
             defaultValue: "2",
+            description: "Use the correct level for your page structure — H1 should only appear once per page",
             options: [
-              { value: "1", text: "H1 - Section heading" },
-              { value: "2", text: "H2 - Section heading" },
-              { value: "3", text: "H3 - Section heading" },
-              { value: "4", text: "H4 - Section heading" },
-              { value: "5", text: "H5 - Section heading" },
-              { value: "6", text: "H6 - Section heading" },
+              { value: "1", text: "H1" },
+              { value: "2", text: "H2" },
+              { value: "3", text: "H3" },
+              { value: "4", text: "H4" },
+              { value: "5", text: "H5" },
+              { value: "6", text: "H6" },
             ]
           }
         ]
@@ -1766,23 +1861,26 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
     sections: [
       {
         title: "Content",
+        icon: "content",
         controls: [
           {
             type: "textfield",
-            label: "Category Text",
+            label: "Label",
             property: "props.text",
-            placeholder: "Category Name"
+            placeholder: "e.g. Women, Men, Kids"
           },
           {
             type: "textfield",
             label: "Link URL",
             property: "props.href",
-            placeholder: "https://example.com/category"
+            placeholder: "https://example.com/category",
+            description: "Where the category links to"
           }
         ]
       },
       {
-        title: "Image",
+        title: "Media",
+        icon: "image",
         controls: [
           {
             type: "textfield",
@@ -1794,7 +1892,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             type: "textfield",
             label: "Alt Text",
             property: "props.alt",
-            placeholder: "Describe the image..."
+            placeholder: "Describe the image for accessibility"
           }
         ]
       }
@@ -1805,13 +1903,14 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
     sections: [
       {
         title: "Content",
-        icon: "text",
+        icon: "content",
         controls: [
           {
             type: "textfield",
             label: "Title",
             property: "props.title",
-            placeholder: "e.g. Recommended For You"
+            placeholder: "e.g. Recommended For You",
+            description: "Optional — leave empty to hide the title"
           },
           {
             type: "segmentedbutton",
@@ -1823,8 +1922,9 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         ]
       },
       {
-        title: "Styling",
+        title: "Appearance",
         icon: "styling",
+        collapsed: true,
         controls: [
           {
             type: "colorpicker",
@@ -1834,5 +1934,5 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         ]
       }
     ]
-  }
+  },
 };

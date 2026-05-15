@@ -210,7 +210,7 @@
   <div class="properties-panel__content">
     {#if isOpen && selectedComponent && schema}
       {#each schema.sections as section}
-        <PropertiesPanelSection title={section.title} icon={section.icon}>
+        <PropertiesPanelSection label={section.title} icon={section.icon} collapsed={section.collapsed}>
           {#each section.controls as control}
             {#if ["segmentedbutton", "textfield", "textarea", "select", "colorpicker", "hint", "number", "checkbox"].includes(control.type)}
               {@render renderControls(control)}
@@ -223,7 +223,7 @@
                 </TabList>
                 {#each control.tabs || [] as tab}
                   <TabPanel>
-                    <Group gap="0.5rem">
+                    <Group gap="1rem">
                       {#each tab.controls as tabControl}
                         {@render renderControls(tabControl)}
                       {/each}
@@ -282,6 +282,6 @@
     overflow-y: scroll;
     display: flex;
     flex-flow: column nowrap;
-    gap: 1.5rem;
+    gap: 0.5rem;
   }
 </style>

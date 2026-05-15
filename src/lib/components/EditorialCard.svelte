@@ -14,9 +14,15 @@
     desktop?: OverlayPlacement;
   };
 
+  type ResponsivePadding = {
+    mobile?: string;
+    tablet?: string;
+    desktop?: string;
+  };
+
   type OverlayConfig = {
     placement?: OverlayPlacement | ResponsivePlacement;
-    padding?: string;
+    padding?: string | ResponsivePadding;
   };
 
   type ImageSources = {
@@ -26,7 +32,6 @@
   };
 
   type TextAlignment = "left" | "center" | "right";
-
   type AlignmentResult = { align: string; justify: string };
 
   type Props = {
@@ -72,11 +77,12 @@
   ): Required<ResponsivePlacement> {
     if (!placement) return { mobile: "top-left", tablet: "top-left", desktop: "top-left" };
     if (typeof placement === "string") return { mobile: placement, tablet: placement, desktop: placement };
-    return {
-      mobile: placement.mobile ?? "top-left",
-      tablet: placement.tablet ?? placement.mobile ?? "top-left",
-      desktop: placement.desktop ?? placement.tablet ?? placement.mobile ?? "top-left",
-    };
+
+    const mobile = placement.mobile || "top-left";
+    const tablet = placement.tablet || mobile;
+    const desktop = placement.desktop || tablet;
+
+    return { mobile, tablet, desktop };
   }
 
   function placementToAlign(placement: OverlayPlacement): AlignmentResult {
@@ -96,26 +102,38 @@
 
   const resolvedImages = $derived.by(() => {
     const mobile = images?.mobile ?? "";
-    const tablet = images?.tablet ?? mobile;
-    const desktop = images?.desktop ?? tablet;
+    const tablet = images?.tablet || mobile;
+    const desktop = images?.desktop || tablet;
     return { mobile, tablet, desktop };
   });
 
   const resolvedSpanColumn = $derived.by(() => {
     const mobile = spanColumn?.mobile ?? "span 6";
-    const tablet = spanColumn?.tablet ?? mobile;
-    const desktop = spanColumn?.desktop ?? tablet;
+    const tablet = spanColumn?.tablet || mobile;
+    const desktop = spanColumn?.desktop || tablet;
     return { mobile, tablet, desktop };
   });
 
   const resolvedSpanRow = $derived.by(() => {
     const mobile = spanRow?.mobile ?? "span 1";
-    const tablet = spanRow?.tablet ?? mobile;
-    const desktop = spanRow?.desktop ?? tablet;
+    const tablet = spanRow?.tablet || mobile;
+    const desktop = spanRow?.desktop || tablet;
     return { mobile, tablet, desktop };
   });
 
   const overlayPlacement = $derived(normalizePlacement(overlay?.placement));
+
+  const resolvedOverlayPadding = $derived.by(() => {
+    const p = overlay?.padding;
+    if (!p) return { mobile: "0.5rem", tablet: "0.5rem", desktop: "0.5rem" };
+    if (typeof p === "string") return { mobile: p, tablet: p, desktop: p };
+    const mobile = p.mobile ?? "0.5rem";
+    const tablet = p.tablet || mobile;
+    const desktop = p.desktop || tablet;
+    return { mobile, tablet, desktop };
+  });
+
+  const tag = $derived(href ? "a" : "div");
 </script>
 
 <div
@@ -133,21 +151,21 @@
   style:--spn-ui-editoralcard-display-m={hidden.mobile ? "none" : "block"}
   style:--spn-ui-editoralcard-display-t={hidden.tablet ? "none" : "block"}
   style:--spn-ui-editoralcard-display-d={hidden.desktop ? "none" : "block"}
-  style:--spn-ui-editorialcard-overlay-padding={overlay?.padding ?? "0.5rem"}
+  style:--spn-ui-editorialcard-overlay-align-m={placementToAlign(overlayPlacement.mobile).align}
+  style:--spn-ui-editorialcard-overlay-justify-m={placementToAlign(overlayPlacement.mobile).justify}
+  style:--spn-ui-editorialcard-overlay-align-t={placementToAlign(overlayPlacement.tablet).align}
+  style:--spn-ui-editorialcard-overlay-justify-t={placementToAlign(overlayPlacement.tablet).justify}
+  style:--spn-ui-editorialcard-overlay-align-d={placementToAlign(overlayPlacement.desktop).align}
+  style:--spn-ui-editorialcard-overlay-justify-d={placementToAlign(overlayPlacement.desktop).justify}
+  style:--spn-ui-editorialcard-overlay-padding-m={resolvedOverlayPadding.mobile}
+  style:--spn-ui-editorialcard-overlay-padding-t={resolvedOverlayPadding.tablet}
+  style:--spn-ui-editorialcard-overlay-padding-d={resolvedOverlayPadding.desktop}
   {...restProps}
 >
-  <a class="spn-ui-editorial-card__link" {href}>
+  <svelte:element this={tag} class="spn-ui-editorial-card__link" href={href || undefined}>
     <div class="spn-ui-editorial-card__media-container">
       {#if children}
-        <div
-          class="spn-ui-editorial-card__overlay"
-          style:--spn-ui-editorialcard-overlay-align-m={placementToAlign(overlayPlacement.mobile).align}
-          style:--spn-ui-editorialcard-overlay-justify-m={placementToAlign(overlayPlacement.mobile).justify}
-          style:--spn-ui-editorialcard-overlay-align-t={placementToAlign(overlayPlacement.tablet).align}
-          style:--spn-ui-editorialcard-overlay-justify-t={placementToAlign(overlayPlacement.tablet).justify}
-          style:--spn-ui-editorialcard-overlay-align-d={placementToAlign(overlayPlacement.desktop).align}
-          style:--spn-ui-editorialcard-overlay-justify-d={placementToAlign(overlayPlacement.desktop).justify}
-        >
+        <div class="spn-ui-editorial-card__overlay">
           {@render children()}
         </div>
       {/if}
@@ -183,7 +201,7 @@
         {/if}
       </div>
     {/if}
-  </a>
+  </svelte:element>
 
   {#if editoralcardActions}
     <div class="spn-ui-editorial-card__actions">
@@ -197,7 +215,6 @@
 
   @layer variables {
     .spn-ui-editorial-card {
-      --spn-ui-editorialcard-overlay-padding: 0.5rem;
       --spn-ui-editoralcard-display-m: block;
       --spn-ui-editoralcard-display-t: block;
       --spn-ui-editoralcard-display-d: block;
@@ -219,6 +236,9 @@
       --spn-ui-editorialcard-overlay-justify-t: flex-start;
       --spn-ui-editorialcard-overlay-align-d: flex-start;
       --spn-ui-editorialcard-overlay-justify-d: flex-start;
+      --spn-ui-editorialcard-overlay-padding-m: 0.5rem;
+      --spn-ui-editorialcard-overlay-padding-t: 0.5rem;
+      --spn-ui-editorialcard-overlay-padding-d: 0.5rem;
       --spn-ui-editorialcard-overlay-bg: ;
     }
   }
@@ -235,7 +255,6 @@
       height: fit-content;
       display: var(--spn-ui-editoralcard-display-m);
       text-align: var(--spn-ui-editoralcard-text-alignment);
-      container-type: inline-size;
     }
 
     .spn-ui-editorial-card__media-container {
@@ -252,7 +271,7 @@
       justify-content: var(--spn-ui-editorialcard-overlay-align-m);
       align-items: var(--spn-ui-editorialcard-overlay-justify-m);
       background-color: var(--spn-ui-editorialcard-overlay-bg);
-      padding: var(--spn-ui-editorialcard-overlay-padding);
+      padding: var(--spn-ui-editorialcard-overlay-padding-m);
       box-sizing: border-box;
       pointer-events: none;
     }
@@ -324,7 +343,7 @@
   }
 
   @layer responsive {
-    @container (min-width: 668px) {
+    @media (min-width: 668px) {
       .spn-ui-editorial-card {
         grid-column: var(--spn-ui-editoralcard-column-t);
         grid-row: var(--spn-ui-editoralcard-row-t);
@@ -334,10 +353,11 @@
       .spn-ui-editorial-card__overlay {
         justify-content: var(--spn-ui-editorialcard-overlay-align-t);
         align-items: var(--spn-ui-editorialcard-overlay-justify-t);
+        padding: var(--spn-ui-editorialcard-overlay-padding-t);
       }
     }
 
-    @container (min-width: 1025px) {
+    @media (min-width: 1025px) {
       .spn-ui-editorial-card {
         grid-column: var(--spn-ui-editoralcard-column-d);
         grid-row: var(--spn-ui-editoralcard-row-d);
@@ -347,31 +367,7 @@
       .spn-ui-editorial-card__overlay {
         justify-content: var(--spn-ui-editorialcard-overlay-align-d);
         align-items: var(--spn-ui-editorialcard-overlay-justify-d);
-      }
-    }
-
-    @supports not (container-type: inline-size) {
-      @media (min-width: 668px) {
-        .spn-ui-editorial-card {
-          grid-column: var(--spn-ui-editoralcard-column-t);
-          grid-row: var(--spn-ui-editoralcard-row-t);
-          display: var(--spn-ui-editoralcard-display-t);
-        }
-        .spn-ui-editorial-card__overlay {
-          justify-content: var(--spn-ui-editorialcard-overlay-align-t);
-          align-items: var(--spn-ui-editorialcard-overlay-justify-t);
-        }
-      }
-      @media (min-width: 1025px) {
-        .spn-ui-editorial-card {
-          grid-column: var(--spn-ui-editoralcard-column-d);
-          grid-row: var(--spn-ui-editoralcard-row-d);
-          display: var(--spn-ui-editoralcard-display-d);
-        }
-        .spn-ui-editorial-card__overlay {
-          justify-content: var(--spn-ui-editorialcard-overlay-align-d);
-          align-items: var(--spn-ui-editorialcard-overlay-justify-d);
-        }
+        padding: var(--spn-ui-editorialcard-overlay-padding-d);
       }
     }
   }

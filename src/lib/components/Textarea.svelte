@@ -27,19 +27,19 @@
     errorMessage,
 		resize = "none",
     ref = $bindable(),
-    value = $bindable(), 
+    value = $bindable(),
 		...restProps
   }: Props = $props();
 </script>
 
-<div 
+<div
 	class="uikit-textarea"
 	class:uikit-textarea--error={error}
 >
   {#if label}
     <label id={labelId} class="uikit-textarea__label" for={textareaId}>{label}</label>
   {/if}
-  <textarea 
+  <textarea
     bind:this={ref}
     id={textareaId}
     class="uikit-textarea__native-control"
@@ -56,42 +56,42 @@
 
 <style>
 	@layer variables, base, states, accessibility;
-	
+
 	@layer variables {
 		:root {
 			/* Layout */
 			--uikit-textarea-gap: .5rem;
-			--uikit-textarea-width: calc(100% - 1rem);
+			--uikit-textarea-width: calc(100% - var(--uikit-textarea-margin) * 2 - var(--uikit-textarea-padding-inline) * 2);
 			--uikit-textarea-margin: .5rem;
 			--uikit-textarea-padding-inline: .25rem;
 			--uikit-textarea-padding-block: .25rem;
 			--uikit-textarea-border-radius: .25rem;
-			
+
 			/* Typography */
 			--uikit-textarea-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 			--uikit-textarea-label-font-size: .875rem;
 			--uikit-textarea-label-line-height: 1;
 			--uikit-textarea-message-font-size: .875rem;
 			--uikit-textarea-message-line-height: 1.6;
-			
+
 			/* Colors */
 			--uikit-textarea-text-color: #212121;
 			--uikit-textarea-outline-color: #989898;
 			--uikit-textarea-outline-color-hover: #000;
 			--uikit-textarea-outline-color-focus: #2451b2;
 			--uikit-textarea-error-color: #dc2626;
-			
+
 			/* Border/Outline */
 			--uikit-textarea-outline-width: 2px;
-			--uikit-textarea-outline-offset: .5rem;
+			--uikit-textarea-outline-offset: .25rem;
 			--uikit-textarea-outline-style: solid;
-			
+
 			/* Animation */
 			--uikit-textarea-transition-duration: .15s;
 			--uikit-textarea-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
-		}	
+		}
 	}
-	
+
 	@layer base {
 		.uikit-textarea {
 			position: relative;
@@ -99,12 +99,12 @@
 			gap: var(--uikit-textarea-gap);
 			font-family: var(--uikit-textarea-font-family);
 		}
-	
+
 		.uikit-textarea__label {
 			line-height: var(--uikit-textarea-label-line-height);
 			font-size: var(--uikit-textarea-label-font-size);
 		}
-		
+
 		.uikit-textarea__native-control {
 			box-sizing: border-box;
 			width: var(--uikit-textarea-width);
@@ -119,12 +119,12 @@
 			color: var(--uikit-textarea-text-color);
 			transition: outline-color var(--uikit-textarea-transition-duration) var(--uikit-textarea-transition-timing);
 		}
-		
+
 		.uikit-textarea__message {
 			font-size: var(--uikit-textarea-message-font-size);
 			line-height: var(--uikit-textarea-message-line-height);
 		}
-		
+
 		.uikit-textarea__message--error {
 			color: var(--uikit-textarea-error-color);
 		}
@@ -132,21 +132,21 @@
 		.uikit-textarea__native-control[data-resize="vertical"] {
 			resize: vertical;
 		}
-		
+
 		.uikit-textarea__native-control[data-resize="horizontal"] {
 			resize: horizontal;
 		}
-		
+
 		.uikit-textarea__native-control[data-resize="both"] {
 			resize: both;
 		}
 	}
-	
-	@layer states {		
+
+	@layer states {
 		.uikit-textarea__native-control:hover {
 			outline-color: var(--uikit-textarea-outline-color-hover);
 		}
-		
+
 		.uikit-textarea__native-control:focus-visible {
 			outline-color: var(--uikit-textarea-outline-color-focus);
 		}
@@ -156,11 +156,11 @@
 			color: var(--uikit-textarea-error-color);
 		}
 	}
-	
+
 	@layer accessibility {
 		@media (prefers-reduced-motion: reduce) {
-			.uikit-textarea__native-control { 
-				transition: none; 
+			.uikit-textarea__native-control {
+				transition: none;
 			}
 		}
 	}
