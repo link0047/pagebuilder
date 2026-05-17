@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Snippet, onMount } from "svelte";
+	import { type Snippet, onMount, onDestroy, untrack } from "svelte";
 	import { getTabState } from "./tabs-state.svelte";
 
 	type Props = {
@@ -10,19 +10,20 @@
 
 	let {
 		children,
-		value,
+		value: valueProp,
     ...restProps
 	}: Props = $props();
 
 	let ref: HTMLElement;
-	const tabState = getTabState();
 
-	const id = tabState.addTab();
-	const panelId = $derived(tabState.getPanelIdForTab(id));
-	const { variant, size, color, shape, fullWidth } = tabState.config;
+	const tabState = getTabState();
+	const { id, value } = untrack(() => tabState.addTab(valueProp));
+	const panelId = $derived(tabState.getPanelIdForTab(value));
+	const isSelected = $derived(tabState.isTabSelected(value));
+	const config = $derived(tabState.config);
 
 	function handleClick() {
-		tabState.setSelectedTab(id);
+	  tabState.setSelectedTab(value);
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -50,7 +51,11 @@
 	}
 
 	onMount(() => {
-		tabState.registerTabElement(id, ref);
+		tabState.registerTabElement(value, ref);
+	});
+
+	onDestroy(() => {
+	  tabState.removeTab(value);
 	});
 </script>
 
@@ -59,16 +64,19 @@
 	{id}
 	type="button"
 	role="tab"
-	class="uikit-tabs__tab"
-	class:uikit-tabs__tab--size-sm={size === "sm"}
-	class:uikit-tabs__tab--size-lg={size === "lg"}
-	class:uikit-tabs__tab--underline={variant === "underline"}
-	class:uikit-tabs__tab--enclosed={variant === "enclosed"}
-	class:uikit-tabs__tab--outlined={variant === "outlined"}
-	class:uikit-tabs__tab--filled={variant === "filled"}
-	class:uikit-tabs__tab--fullWidth={fullWidth}
-	tabindex={tabState.isTabSelected(id) ? 0 : -1}
-	aria-selected={tabState.isTabSelected(id)}
+	class="wcag-ui-tabs__tab"
+	class:wcag-ui-tabs__tab--size-sm={config.size === "sm"}
+	class:wcag-ui-tabs__tab--size-lg={config.size === "lg"}
+	class:wcag-ui-tabs__tab--shape-square={config.shape === "square"}
+	class:wcag-ui-tabs__tab--shape-pill={config.shape === "pill"}
+	class:wcag-ui-tabs__tab--color-primary={config.color === "primary"}
+	class:wcag-ui-tabs__tab--underline={config.variant === "underline"}
+	class:wcag-ui-tabs__tab--enclosed={config.variant === "enclosed"}
+	class:wcag-ui-tabs__tab--outlined={config.variant === "outlined"}
+	class:wcag-ui-tabs__tab--filled={config.variant === "filled"}
+	class:wcag-ui-tabs__tab--fullWidth={config.fullWidth}
+	tabindex={isSelected ? 0 : -1}
+	aria-selected={isSelected}
 	aria-controls={panelId}
 	onclick={handleClick}
 	onkeydown={handleKeydown}
@@ -85,7 +93,7 @@
 	}
 
 	@layer base {
-		.uikit-tabs__tab {
+		.wcag-ui-tabs__tab {
 			position: relative;
 			display: inline-flex;
 			box-sizing: border-box;
@@ -106,13 +114,13 @@
 	}
 
 	@layer variants {
-		.uikit-tabs__tab[aria-selected="true"] {
+		.wcag-ui-tabs__tab[aria-selected="true"] {
 			color: #212121;
 			font-weight: 500;
 			background-color: #fff;
 		}
 
-		.uikit-tabs__tab--underline[aria-selected="true"]:before {
+		.wcag-ui-tabs__tab--underline[aria-selected="true"]:before {
 			content: "";
 	    position: absolute;
 			bottom: -1px;
@@ -122,46 +130,62 @@
 			background-color: #18181b;
 		}
 
-		:is(.uikit-tabs__tab--filled,.uikit-tabs__tab--enclosed)[aria-selected="true"] {
+		:is(.wcag-ui-tabs__tab--filled,.wcag-ui-tabs__tab--enclosed)[aria-selected="true"] {
 			box-shadow: 0px 1px 2px color-mix(in srgb, #18181b 10%, transparent),0px 0px 1px color-mix(in srgb, #18181b 20%, transparent);
 		}
 
-		.uikit-tabs__tab--outlined[aria-selected="true"] {
+		.wcag-ui-tabs__tab--outlined[aria-selected="true"] {
 			border: 1px solid #c5c5cb;
 			border-bottom: none;
 			border-bottom-left-radius: 0;
 			border-bottom-right-radius: 0;
 		}
 
-		.uikit-tabs__tab--filled[aria-selected="true"] {
+		.wcag-ui-tabs__tab--filled[aria-selected="true"] {
 			background-color: #f4f4f5;
 		}
 	}
 
 	@layer sizes {
-		.uikit-tabs__tab--size-sm {
+		.wcag-ui-tabs__tab--size-sm {
 			height: 2rem;
 		}
 
-		.uikit-tabs__tab--size-lg {
+		.wcag-ui-tabs__tab--size-lg {
 			height: 3rem;
 		}
 	}
 
 	@layer shapes {
+    .uikit-tabs__tab--shape-square {
+  		border-radius: 0;
+  	}
 
+		.uikit-tabs__tab--shape-pill {
+			border-radius: 9999px;
+		}
+	}
+
+	@layer colors {
+		.uikit-tabs__tab--color-primary[aria-selected="true"] {
+			color: #2563eb;
+		}
+
+		.uikit-tabs__tab--underline.uikit-tabs__tab--color-primary[aria-selected="true"]:before {
+			background-color: #2563eb;
+		}
 	}
 
 	@layer states {
-		.uikit-tabs__tab--fullWidth {
+		.wcag-ui-tabs__tab--fullWidth {
 			flex: 1;
 		}
 
-		.uikit-tabs__tab:not([aria-selected="true"]):hover {
+		.wcag-ui-tabs__tab:not([aria-selected="true"]):hover {
 			background-color: #eee;
 		}
 
-		/*.uikit-tabs__tab:disabled {
+		/*.wcag-ui-tabs__tab:disabled {
 
 		}*/
 	}

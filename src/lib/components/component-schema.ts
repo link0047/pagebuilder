@@ -1183,6 +1183,19 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             description: "Optional — leave empty to hide the title"
           },
           {
+            type: "select",
+            label: "Title Size",
+            property: "props.titleSize",
+            defaultValue: "md",
+            options: [
+              { value: "sm", text: "Small — 1.25rem" },
+              { value: "md", text: "Medium — 1.5rem" },
+              { value: "lg", text: "Large — 1.75rem" },
+              { value: "xl", text: "Extra Large — 2rem" },
+              { value: "2xl", text: "2XL — 2.5rem" },
+            ]
+          },
+          {
             type: "segmentedbutton",
             label: "Title Alignment",
             property: "props.titleAlignment",
@@ -1196,6 +1209,11 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         icon: "styling",
         collapsed: true,
         controls: [
+          {
+            type: "colorpicker",
+            label: "Title Color",
+            property: "props.titleColor",
+          },
           {
             type: "colorpicker",
             label: "Background Color",
@@ -1559,34 +1577,29 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
           {
             type: "textfield",
             label: "Title",
-            property: "props.heading",
+            property: "props.title",
             placeholder: "e.g. Best Sellers, New Arrivals",
             description: "Optional — leave empty to hide the title"
           },
           {
-            type: "segmentedbutton",
-            label: "Title Alignment",
-            property: "props.headingAlign",
-            options: ["left", "center", "right"],
-            defaultValue: "center"
-          },
-          {
             type: "select",
             label: "Title Size",
-            property: "props.headingSize",
+            property: "props.titleSize",
             defaultValue: "md",
             options: [
-              { value: "sm", text: "Small" },
-              { value: "md", text: "Medium" },
-              { value: "lg", text: "Large" },
-              { value: "xl", text: "Extra Large" }
+              { value: "sm", text: "Small — 1.25rem" },
+              { value: "md", text: "Medium — 1.5rem" },
+              { value: "lg", text: "Large — 1.75rem" },
+              { value: "xl", text: "Extra Large — 2rem" },
+              { value: "2xl", text: "2XL — 2.5rem" },
             ]
           },
           {
-            type: "colorpicker",
-            label: "Title Color",
-            property: "props.headingColor",
-            defaultValue: "#212121"
+            type: "segmentedbutton",
+            label: "Title Alignment",
+            property: "props.titleAlignment",
+            options: ["left", "center", "right"],
+            defaultValue: "center"
           }
         ]
       },
@@ -1663,6 +1676,11 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         icon: "styling",
         collapsed: true,
         controls: [
+          {
+            type: "colorpicker",
+            label: "Title Color",
+            property: "props.titleColor",
+          },
           {
             type: "colorpicker",
             label: "Background Color",
@@ -1831,6 +1849,19 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             description: "Optional — leave empty to hide the title"
           },
           {
+            type: "select",
+            label: "Title Size",
+            property: "props.titleSize",
+            defaultValue: "md",
+            options: [
+              { value: "sm", text: "Small — 1.25rem" },
+              { value: "md", text: "Medium — 1.5rem" },
+              { value: "lg", text: "Large — 1.75rem" },
+              { value: "xl", text: "Extra Large — 2rem" },
+              { value: "2xl", text: "2XL — 2.5rem" },
+            ]
+          },
+          {
             type: "segmentedbutton",
             label: "Title Alignment",
             property: "props.titleAlignment",
@@ -1913,6 +1944,19 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             description: "Optional — leave empty to hide the title"
           },
           {
+            type: "select",
+            label: "Title Size",
+            property: "props.titleSize",
+            defaultValue: "md",
+            options: [
+              { value: "sm", text: "Small — 1.25rem" },
+              { value: "md", text: "Medium — 1.5rem" },
+              { value: "lg", text: "Large — 1.75rem" },
+              { value: "xl", text: "Extra Large — 2rem" },
+              { value: "2xl", text: "2XL — 2.5rem" },
+            ]
+          },
+          {
             type: "segmentedbutton",
             label: "Title Alignment",
             property: "props.titleAlignment",
@@ -1926,6 +1970,11 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         icon: "styling",
         collapsed: true,
         controls: [
+          {
+            type: "colorpicker",
+            label: "Title Color",
+            property: "props.titleColor",
+          },
           {
             type: "colorpicker",
             label: "Background Color",

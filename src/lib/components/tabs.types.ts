@@ -8,10 +8,13 @@ export type TabsConfig = {
 	size: TabsSize;
 	color: TabsColor;
 	shape: TabsShape;
-	fullWidth: boolean;
+  fullWidth: boolean;
+  value: string | null;
+	onValueChange: (value: string) => void;
 };
 
 export type Tab = {
-	id: string;
+  id: string;
+	value: string;
 	element: HTMLElement | null;
 };

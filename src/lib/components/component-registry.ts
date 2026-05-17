@@ -104,7 +104,11 @@ export const sectionConfigs: SectionConfig[] = [
   {
     label: "Featured Categories",
     name: "FeaturedCategories",
-    defaultProps: {},
+    defaultProps: {
+      title: "Featured Categories",
+      titleAlignment: "center",
+      titleSize: "md",
+    },
     defaultData: {},
     defaultChildren: [
       {
@@ -119,7 +123,10 @@ export const sectionConfigs: SectionConfig[] = [
   {
     label: "Editorial Block",
     name: "EditorialBlock",
-    defaultProps: { titleAlignment: "center" },
+    defaultProps: {
+      titleAlignment: "left",
+      titleSize: "md",
+    },
     defaultData: {},
     defaultChildren: [
       {
@@ -137,7 +144,11 @@ export const sectionConfigs: SectionConfig[] = [
   {
     label: "Collection Block",
     name: "CollectionBlock",
-    defaultProps: {},
+    defaultProps: {
+      titleAlignment: "center",
+      titleSize: "md",
+      backgroundColor: "#f6f5f1",
+    },
     defaultData: {},
     defaultChildren: [
       {
@@ -171,6 +182,7 @@ export const sectionConfigs: SectionConfig[] = [
     defaultProps: {
       title: "Recommended For You",
       titleAlignment: "center",
+      titleSize: "md",
     },
     defaultData: {},
   },

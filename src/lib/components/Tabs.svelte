@@ -12,7 +12,7 @@
 		fullWidth?: boolean;
 		value?: string;
 	};
-	
+
 	let {
 		children,
 		variant = "outlined",
@@ -23,15 +23,25 @@
 		value = $bindable()
 	}: Props = $props();
 
-	setTabState({ variant, size, color, shape, fullWidth });
+	setTabState(() => ({
+		variant,
+		size,
+		color,
+		shape,
+		fullWidth,
+		value: value ?? null,
+		onValueChange: (v: string) => {
+			value = v;
+		}
+	}));
 </script>
 
-<div class="uikit-tabs">
-	{@render children?.()}	
+<div class="wcag-ui-tabs">
+	{@render children?.()}
 </div>
 
 <style>
-	.uikit-tabs {
+	.wcag-ui-tabs {
 		display: flex;
 		flex-flow: column nowrap;
 		gap: 0;

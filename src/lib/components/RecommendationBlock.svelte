@@ -1,97 +1,81 @@
 <script lang="ts">
-  type Alignment = "left" | "center" | "right";
+  import BlockSection, {
+    type Alignment,
+    type HeadingLevel,
+    type TitleSize,
+  } from "./BlockSection.svelte";
+
   type Props = {
     title?: string;
     titleAlignment?: Alignment;
+    titleSize?: TitleSize;
+    titleColor?: string;
+    titleWeight?: string;
+    headingLevel?: HeadingLevel;
     backgroundColor?: string;
-  }
+  };
 
   let {
     title,
     titleAlignment = "center",
+    titleSize = "md",
+    titleColor,
+    titleWeight,
+    headingLevel = 2,
     backgroundColor,
   }: Props = $props();
 
   const items = Array(6).fill(null);
+
+  const inlineStyle = $derived(
+    [`padding-inline: 1rem`].join("; ")
+  );
 </script>
 
-<section
-  class="spn-ui-rec-block"
-  style:--spn-ui-rec-block-bg={backgroundColor}
-  style:--spn-ui-rec-block-title-alignment={titleAlignment}
+<BlockSection
+  {title}
+  {titleAlignment}
+  {titleSize}
+  {titleColor}
+  {titleWeight}
+  {headingLevel}
+  {backgroundColor}
+  style={inlineStyle}
 >
-  {#if title}
-    <header class="spn-ui-rec-block__header">
-      <h2 class="spn-ui-rec-block__title">{title}</h2>
-    </header>
-  {/if}
-  <div class="spn-ui-rec-block__grid">
+  <div class="rec-block__grid">
     {#each items as _}
-      <div class="spn-ui-rec-block__card">
-        <div class="spn-ui-rec-block__image"></div>
-        <div class="spn-ui-rec-block__line spn-ui-rec-block__line--short"></div>
-        <div class="spn-ui-rec-block__line spn-ui-rec-block__line--long"></div>
-        <div class="spn-ui-rec-block__line spn-ui-rec-block__line--medium"></div>
-        <div class="spn-ui-rec-block__footer">
-          <div class="spn-ui-rec-block__line spn-ui-rec-block__line--price"></div>
-          <div class="spn-ui-rec-block__pill"></div>
+      <div class="rec-block__card">
+        <div class="rec-block__image"></div>
+        <div class="rec-block__line rec-block__line--short"></div>
+        <div class="rec-block__line rec-block__line--long"></div>
+        <div class="rec-block__line rec-block__line--medium"></div>
+        <div class="rec-block__footer">
+          <div class="rec-block__line rec-block__line--price"></div>
+          <div class="rec-block__pill"></div>
         </div>
       </div>
     {/each}
   </div>
-</section>
+</BlockSection>
 
 <style>
-  .spn-ui-rec-block {
-    --spn-ui-rec-block-bg: transparent;
-    --spn-ui-rec-block-title-alignment: center;
-    --spn-ui-rec-block-columns: 2;
-    --spn-ui-rec-block-peek: 0.5;
-    --spn-ui-rec-block-gap: 0.75rem;
+  .rec-block__grid {
+    --rec-block-columns: 2;
+    --rec-block-peek: 0.5;
+    --rec-block-gap: 0.75rem;
 
-    display: flex;
-    flex-flow: column;
-    gap: 0;
-    padding-block-end: 1rem;
-    padding-inline: 1rem;
-    border-radius: 1rem;
-    background-color: var(--spn-ui-rec-block-bg);
-  }
-
-  .spn-ui-rec-block__header {
-    min-height: 3.5rem;
-    display: flex;
-    align-items: center;
-    padding-block: .75rem;
-  }
-
-  .spn-ui-rec-block__title {
-    flex: 1;
-    margin: 0;
-    line-height: 1.2;
-    font-weight: 600;
-    font-size: 1.5rem;
-    color: #000;
-    min-width: 0;
-    overflow-wrap: break-word;
-    word-break: break-word;
-    white-space: normal;
-    text-align: var(--spn-ui-rec-block-title-alignment);
-  }
-
-  .spn-ui-rec-block__grid {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: calc(
-      (100% - (var(--spn-ui-rec-block-columns) + var(--spn-ui-rec-block-peek) - 1) * var(--spn-ui-rec-block-gap))
-      / (var(--spn-ui-rec-block-columns) + var(--spn-ui-rec-block-peek))
+      (100% - (var(--rec-block-columns) + var(--rec-block-peek) - 1) * var(--rec-block-gap))
+      / (var(--rec-block-columns) + var(--rec-block-peek))
     );
-    gap: var(--spn-ui-rec-block-gap);
+    gap: var(--rec-block-gap);
     overflow-x: hidden;
     overflow-y: hidden;
   }
 
-  .spn-ui-rec-block__card {
+  .rec-block__card {
     background: #f5f5f5;
     border-radius: 0.75rem;
     padding: 0.75rem;
@@ -100,47 +84,48 @@
     gap: 0.5rem;
   }
 
-  .spn-ui-rec-block__image {
+  .rec-block__image {
     width: 100%;
     aspect-ratio: 1;
     background: #e8e8e8;
     border-radius: 0.5rem;
   }
 
-  .spn-ui-rec-block__line {
+  .rec-block__line {
     height: 0.625rem;
     background: #e8e8e8;
     border-radius: 0.25rem;
   }
 
-  .spn-ui-rec-block__line--short  { width: 50%; }
-  .spn-ui-rec-block__line--medium { width: 65%; }
-  .spn-ui-rec-block__line--long   { width: 85%; }
-  .spn-ui-rec-block__line--price  { width: 35%; height: 0.875rem; }
+  .rec-block__line--short  { width: 50%; }
+  .rec-block__line--medium { width: 65%; }
+  .rec-block__line--long   { width: 85%; }
+  .rec-block__line--price  { width: 35%; height: 0.875rem; }
 
-  .spn-ui-rec-block__pill {
+  .rec-block__pill {
     height: 1.5rem;
     width: 30%;
     background: #e8e8e8;
     border-radius: 99rem;
   }
 
-  .spn-ui-rec-block__footer {
+  .rec-block__footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
 
   @media (min-width: 668px) {
-    .spn-ui-rec-block {
-      --spn-ui-rec-block-columns: 4;
-      --spn-ui-rec-block-peek: 0;
+    .rec-block__grid {
+      --rec-block-columns: 4;
+      --rec-block-peek: 0;
     }
   }
+
   @media (min-width: 1025px) {
-    .spn-ui-rec-block {
-      --spn-ui-rec-block-columns: 6;
-      --spn-ui-rec-block-peek: 0;
+    .rec-block__grid {
+      --rec-block-columns: 6;
+      --rec-block-peek: 0;
     }
   }
 </style>

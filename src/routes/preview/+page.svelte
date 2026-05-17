@@ -23,7 +23,7 @@
 </script>
 
 {#if tree}
-  <Page>
+  <Page spacing="2rem">
     <Preview pageTree={tree} />
   </Page>
 {/if}

@@ -257,6 +257,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      text-align: var(--hero-content-text-align-mobile);
       padding: var(--hero-content-padding-mobile);
       z-index: 1;
     }
