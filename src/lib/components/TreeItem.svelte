@@ -45,10 +45,10 @@
 	// Calls element.focus() when this item becomes the focused item.
 	// Kept here (not in TreeState) so the state class stays DOM-free.
 	$effect(() => {
-		if (isFocused && ref && document.activeElement !== ref) {
-			ref.focus();
-		}
-	});
+    if (isFocused && ref && document.activeElement !== ref) {
+      ref.focus({ preventScroll: true });
+    }
+  });
 
 	function handleClick(event: MouseEvent): void {
 		if (!ref) return;
