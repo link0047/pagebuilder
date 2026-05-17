@@ -178,7 +178,6 @@ export const sectionConfigs: SectionConfig[] = [
   {
     label: "Recommendation Block",
     name: "RecommendationBlock",
-    // disabled: true,
     defaultProps: {
       title: "Recommended For You",
       titleAlignment: "center",

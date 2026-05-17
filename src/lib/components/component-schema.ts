@@ -1938,6 +1938,12 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         controls: [
           {
             type: "textfield",
+            label: "Block ID",
+            property: "props.blockId",
+            description: "Unique identifier used to inject recommendations"
+          },
+          {
+            type: "textfield",
             label: "Title",
             property: "props.title",
             placeholder: "e.g. Recommended For You",

@@ -1,5 +1,6 @@
 import { getContext, setContext } from "svelte";
 import { PREVIEW_WIDTHS } from "$lib/constants/breakpoints";
+import { generateId } from "$lib/utils/unique-id-generator";
 import type { ComponentNode, RootNode, PageTreeNode, TreePath, PreviewMode } from "./types";
 import type { PartialComponentNode } from "./component-registry";
 import type { User } from "better-auth";
@@ -320,6 +321,12 @@ class AppState {
     return {
       ...component,
       id: component.id ?? crypto.randomUUID(),
+      props: {
+        ...component.props,
+        ...(component.name === "RecommendationBlock" && !component.props.blockId
+          ? { blockId: `spn-ui-recblock-${generateId("recblock")}` }
+          : {}),
+      },
       meta: {
         locked: false,
         hidden: false,

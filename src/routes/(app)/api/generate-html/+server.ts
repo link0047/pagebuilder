@@ -1,12 +1,14 @@
-import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import PreviewComponent from "$lib/components/Preview.svelte";
+import type { RootNode, ComponentNode } from "$lib/components/types";
+
+import previewStylesCSS from "$styles/generated/preview-styles.css?raw";;
+import { error, json } from "@sveltejs/kit";
 import { render } from "svelte/server";
 import { minify } from "html-minifier";
 import { PurgeCSS } from "purgecss";
+import { parse } from "node-html-parser";
 import { attempt } from "$lib/utils/attempt";
-import previewStylesCSS from "$styles/generated/preview-styles.css?raw";;
-import type { RootNode, ComponentNode } from "$lib/components/types";
+import PreviewComponent from "$lib/components/Preview.svelte";
 
 const WEB_COMPONENT_SCRIPTS = [
   "wcag-ui-carousel.js",
@@ -26,7 +28,8 @@ const WEB_COMPONENT_SCRIPTS = [
  */
 function stripSvelteArtifacts(html: string): string {
   return html
-    .replace(/\s*s-[a-zA-Z0-9_-]+/g, "")
+    .replace(/\s*\bsvelte-[a-zA-Z0-9_-]+/g, "")
+    .replace(/\s*\bs-[a-zA-Z0-9_-]+/g, "")
     .replace(/\s*onload="this\.__e=event"\s*/g, " ")
     .replace(/\s*onerror="this\.__e=event"\s*/g, " ")
     .replace(/\s*class=(["'])\1\s*/g, " ")
@@ -54,31 +57,34 @@ function collectComponentNames(node: RootNode | ComponentNode): Set<string> {
 }
 
 function transformRecommendationBlocks(html: string, pageTree: RootNode): string {
-  const recBlocks = pageTree.children.reduce<Array<{ title?: string }>>((acc, n) => {
-    if (n.type === "component" && n.name === "RecommendationBlock") {
-      acc.push({
-        title: n.props.title as string | undefined,
-      });
-    }
-    return acc;
-  }, []);
+  const recBlocks = pageTree.children.filter(
+    (n): n is ComponentNode => n.type === "component" && n.name === "RecommendationBlock"
+  );
 
-  let result = html;
+  if (recBlocks.length === 0) return html;
 
-  for (const [index, block] of recBlocks.entries()) {
-    const id = `rec-block-${index}`;
-    const sectionPattern = new RegExp(
-      `<section\\b[^>]*\\bclass="[^"]*spn-ui-rec-block[^"]*"[^>]*>[\\s\\S]*?<\\/section>`,
-      ""  // no 'g' flag — replace one at a time
-    );
-    const replacement = block.title
-      ? `<section class="spn-ui-rec-block"><header class="spn-ui-rec-block__header"><h2 class="spn-ui-rec-block__title">${block.title}</h2></header><div id="${id}" class="spn-ui-rec-block__container"></div></section>`
-      : `<section class="spn-ui-rec-block"><div id="${id}" class="spn-ui-rec-block__container"></div></section>`;
+  const root = parse(html);
 
-    result = result.replace(sectionPattern, replacement);
+  for (const n of recBlocks) {
+    const blockId = n.props.blockId as string;
+    if (!blockId) continue;
+
+    const section = root.querySelector(`[data-block-id="${blockId}"]`);
+    if (!section) continue;
+
+    // Remove data-component and data-block-id from section
+    section.removeAttribute("data-component");
+    section.removeAttribute("data-block-id");
+
+    // Find the content div, add id and empty it
+    const contentDiv = section.querySelector(".spn-ui-block__content");
+    if (!contentDiv) continue;
+
+    contentDiv.setAttribute("id", blockId);
+    contentDiv.innerHTML = "";
   }
 
-  return result;
+  return root.toString();
 }
 
 export const POST: RequestHandler = async ({ request }) => {

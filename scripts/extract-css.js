@@ -20,6 +20,7 @@ const COMPONENT_FILES = [
   "FeaturedCategories",
   "FeaturedCategory",
   "RecommendationBlock",
+  "BlockSection",
   "Card",
   "ProductCard",
   "Image",

@@ -4,6 +4,7 @@
     type HeadingLevel,
     type TitleSize,
   } from "./BlockSection.svelte";
+  import { generateId } from "$lib/utils/unique-id-generator";
 
   type Props = {
     title?: string;
@@ -13,7 +14,10 @@
     titleWeight?: string;
     headingLevel?: HeadingLevel;
     backgroundColor?: string;
+    blockId?: string;
   };
+
+  let uid = generateId("recblock");
 
   let {
     title,
@@ -23,6 +27,7 @@
     titleWeight,
     headingLevel = 2,
     backgroundColor,
+    blockId = `spn-ui-recblock-${uid}`,
   }: Props = $props();
 
   const items = Array(6).fill(null);
@@ -40,6 +45,8 @@
   {titleWeight}
   {headingLevel}
   {backgroundColor}
+  data-component="RecommendationBlock"
+  data-block-id={blockId}
   style={inlineStyle}
 >
   <div class="rec-block__grid">
