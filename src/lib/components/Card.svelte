@@ -6,9 +6,10 @@
   type Variant = "filled" | "outlined" | "elevated";
   type Shape = "squared" | "rounded" | "curved";
   type Elevation = 0 | 1 | 2 | 3 | 4 | 5;
+  type Layout = "media-top" | "media-bottom" | "horizontal";
   type HeadlineTag = "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "span" | "div"
 
-  type Props = {
+  export type Props = {
     children?: Snippet,
     header?: Snippet,
     media?: Snippet,
@@ -20,6 +21,7 @@
     shape?: Shape,
     variant?: Variant,
     elevation?: Elevation,
+    layout?: Layout,
     tag?: Tag,
     headlineTag?: HeadlineTag,
     href?: string,
@@ -40,6 +42,7 @@
     shape = "rounded",
     variant = "outlined",
     elevation,
+    layout,
     tag = "div",
     headlineTag,
     href,
@@ -72,6 +75,9 @@
   class:wcag-ui-card--elevation-5={computedElevation === 5}
   class:wcag-ui-card--shape-squared={shape === "squared"}
   class:wcag-ui-card--shape-curved={shape === "curved"}
+  class:wcag-ui-card--layout-media-top={layout === "media-top"}
+	class:wcag-ui-card--layout-media-bottom={layout === "media-bottom"}
+	class:wcag-ui-card--layout-horizontal={layout === "horizontal"}
   href={computedTag === "a" ? href : undefined}
   type={computedType}
   aria-pressed={computedTag === "button" ? selected : undefined}

@@ -1,28 +1,13 @@
 <script lang="ts">
-  import ProductCard, { type Props as ProductCardProps } from "./ProductCard.svelte";
+  import type { Snippet } from "svelte";
 
   type Props = {
-    product?: ProductCardProps;
-    [key: string]: unknown;
+    children?: Snippet;
   };
 
-  let { product }: Props = $props();
+  let { children }: Props = $props();
 </script>
 
-{#if product}
-  {@const { href, src = { mobile: "" }, name, price, badge } = product}
-  {@const originalPrice = Number(price?.original) || 0}
-  {@const salePrice = price?.sale !== null && price?.sale !== undefined
-    ? Number(price.sale) || null
-    : null}
-
-  <wcag-ui-carousel-item>
-    <ProductCard
-      href={href}
-      src={src}
-      name={name ?? ""}
-      price={{ original: originalPrice, sale: salePrice }}
-      badge={badge?.text ? badge : undefined}
-    />
-  </wcag-ui-carousel-item>
-{/if}
+<wcag-ui-carousel-item>
+  {@render children?.()}
+</wcag-ui-carousel-item>

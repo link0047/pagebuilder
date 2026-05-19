@@ -18,7 +18,6 @@
   import Group from "./Group.svelte";
   import Hint from "./Hint.svelte";
   import Checkbox from "./Checkbox.svelte";
-  import DOMPurify from "dompurify";
 
   type Props = { title?: string; };
 

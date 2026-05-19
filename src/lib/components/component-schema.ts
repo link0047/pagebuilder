@@ -43,10 +43,11 @@ export type ComponentName =
   | "EditorialBlock"
   | "EditorialCard"
   | "CollectionBlock"
-  | "CollectionBlockItem"
   | "FeaturedCategories"
   | "FeaturedCategory"
-  | "RecommendationBlock";
+  | "RecommendationBlock"
+  | "CollectionBlockProductCard"
+  | "CollectionBlockCard"
 
 export const componentSchemas: Record<ComponentName, ComponentSchema> = {
   Hero: {
@@ -1692,7 +1693,150 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
     ]
   },
 
-  CollectionBlockItem: {
+  CollectionBlockCard: {
+    sections: [
+      {
+        title: "Media",
+        icon: "image",
+        controls: [
+          {
+            type: "tabs",
+            tabs: [
+              {
+                label: "Mobile",
+                controls: [
+                  {
+                    type: "textfield",
+                    label: "Image URL",
+                    property: "props.images.mobile",
+                    placeholder: "https://example.com/image.jpg",
+                    description: "Used below 668px"
+                  }
+                ]
+              },
+              {
+                label: "Tablet",
+                controls: [
+                  {
+                    type: "textfield",
+                    label: "Image URL",
+                    property: "props.images.tablet",
+                    placeholder: "https://example.com/image.jpg",
+                    description: "Used from 668px — inherits mobile if empty"
+                  }
+                ]
+              },
+              {
+                label: "Desktop",
+                controls: [
+                  {
+                    type: "textfield",
+                    label: "Image URL",
+                    property: "props.images.desktop",
+                    placeholder: "https://example.com/image.jpg",
+                    description: "Used from 1025px — inherits tablet if empty"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            type: "textfield",
+            label: "Alt Text",
+            property: "props.alt",
+            placeholder: "Describe the image for accessibility"
+          }
+        ]
+      },
+      {
+        title: "Content",
+        icon: "content",
+        controls: [
+          {
+            type: "textfield",
+            label: "Headline",
+            property: "props.headline",
+            placeholder: "e.g. New Arrivals"
+          },
+          {
+            type: "textfield",
+            label: "Subhead",
+            property: "props.subhead",
+            placeholder: "e.g. Shop the latest styles"
+          },
+          {
+            type: "textarea",
+            label: "Supporting Text",
+            property: "props.supportingText",
+            placeholder: "Additional detail"
+          },
+          {
+            type: "textfield",
+            label: "Link URL",
+            property: "props.href",
+            placeholder: "https://example.com",
+            description: "Makes the card a clickable link"
+          }
+        ]
+      },
+      {
+        title: "Appearance",
+        icon: "styling",
+        collapsed: true,
+        controls: [
+          {
+            type: "select",
+            label: "Variant",
+            property: "props.variant",
+            defaultValue: "outlined",
+            options: [
+              { value: "outlined", text: "Outlined" },
+              { value: "filled", text: "Filled" },
+              { value: "elevated", text: "Elevated" },
+            ]
+          },
+          {
+            type: "select",
+            label: "Shape",
+            property: "props.shape",
+            defaultValue: "rounded",
+            options: [
+              { value: "squared", text: "Squared" },
+              { value: "rounded", text: "Rounded" },
+              { value: "curved", text: "Curved" },
+            ]
+          },
+          {
+            type: "select",
+            label: "Layout",
+            property: "props.layout",
+            defaultValue: "media-top",
+            options: [
+              { value: "media-top", text: "Media Top" },
+              { value: "media-bottom", text: "Media Bottom" },
+              { value: "horizontal", text: "Horizontal" },
+            ]
+          },
+          {
+            type: "select",
+            label: "Elevation",
+            property: "props.elevation",
+            defaultValue: "0",
+            options: [
+              { value: "0", text: "None" },
+              { value: "1", text: "Level 1" },
+              { value: "2", text: "Level 2" },
+              { value: "3", text: "Level 3" },
+              { value: "4", text: "Level 4" },
+              { value: "5", text: "Level 5" },
+            ]
+          }
+        ]
+      }
+    ]
+  },
+
+  CollectionBlockProductCard: {
     sections: [
       {
         title: "Product",
@@ -1701,26 +1845,25 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
           {
             type: "textfield",
             label: "Product Name",
-            property: "props.product.name",
+            property: "props.name",
             placeholder: "e.g. Classic White Sneaker"
           },
           {
             type: "textfield",
             label: "Product URL",
-            property: "props.product.href",
+            property: "props.href",
             placeholder: "/products/example",
             description: "Relative or absolute URL to the product page"
           },
           {
             type: "number",
             label: "Original Price",
-            property: "props.product.price.original",
-            defaultValue: 0
+            property: "props.price.original",
           },
           {
             type: "number",
             label: "Sale Price",
-            property: "props.product.price.sale",
+            property: "props.price.sale",
             description: "Leave empty if not on sale"
           }
         ]
@@ -1738,7 +1881,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                   {
                     type: "textfield",
                     label: "Image URL",
-                    property: "props.product.src.mobile",
+                    property: "props.src.mobile",
                     placeholder: "https://example.com/image.jpg",
                     description: "Used below 668px"
                   }
@@ -1750,7 +1893,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                   {
                     type: "textfield",
                     label: "Image URL",
-                    property: "props.product.src.tablet",
+                    property: "props.src.tablet",
                     placeholder: "https://example.com/image.jpg",
                     description: "Used from 668px"
                   }
@@ -1762,7 +1905,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                   {
                     type: "textfield",
                     label: "Image URL",
-                    property: "props.product.src.desktop",
+                    property: "props.src.desktop",
                     placeholder: "https://example.com/image.jpg",
                     description: "Used from 1025px"
                   }
@@ -1784,13 +1927,13 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
           {
             type: "textfield",
             label: "Badge Text",
-            property: "props.product.badge.text",
+            property: "props.badge.text",
             placeholder: "e.g. Sale, New, 20% Off"
           },
           {
             type: "select",
             label: "Position",
-            property: "props.product.badge.position",
+            property: "props.badge.position",
             defaultValue: "top-left",
             options: [
               { value: "top-left", text: "Top Left" },
@@ -1802,7 +1945,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
           {
             type: "select",
             label: "Size",
-            property: "props.product.badge.size",
+            property: "props.badge.size",
             defaultValue: "sm",
             options: [
               { value: "sm", text: "Small" },
@@ -1813,7 +1956,8 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
           {
             type: "select",
             label: "Shape",
-            property: "props.product.badge.shape",
+            property: "props.badge.shape",
+            defaultValue: "rounded",
             options: [
               { value: "rounded", text: "Rounded" },
               { value: "pill", text: "Pill" },
@@ -1823,11 +1967,11 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
           {
             type: "select",
             label: "Variant",
-            property: "props.product.badge.variant",
+            property: "props.badge.variant",
+            defaultValue: "filled",
             options: [
-              { value: "solid", text: "Solid" },
-              { value: "outline", text: "Outline" },
-              { value: "soft", text: "Soft" }
+              { value: "filled", text: "Filled" },
+              { value: "outlined", text: "Outlined" },
             ]
           }
         ]

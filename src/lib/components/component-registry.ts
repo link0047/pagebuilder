@@ -13,10 +13,10 @@ import CollectionBlock from "./CollectionBlock.svelte";
 import CollectionBlockItem from "./CollectionBlockItem.svelte";
 import FeaturedCategories from "./FeaturedCategories.svelte";
 import FeaturedCategory from "./FeaturedCategory.svelte";
-import Card from "./Card.svelte";
 import Badge from "./Badge.svelte";
-import ProductCard from "./ProductCard.svelte";
 import RecommendationBlock from "./RecommendationBlock.svelte";
+import CollectionBlockProductCard from "./CollectionBlockProductCard.svelte";
+import CollectionBlockCard from "./CollectionBlockCard.svelte";
 
 // ---------------------------------------------------------------------------
 // Component registry
@@ -37,10 +37,10 @@ export const componentRegistry: Record<string, Component<any, any, any>> = {
   CollectionBlockItem,
   FeaturedCategories,
   FeaturedCategory,
-  Card,
   Badge,
-  ProductCard,
   RecommendationBlock,
+  CollectionBlockProductCard,
+  CollectionBlockCard,
 };
 
 // ---------------------------------------------------------------------------
@@ -150,30 +150,7 @@ export const sectionConfigs: SectionConfig[] = [
       backgroundColor: "#f6f5f1",
     },
     defaultData: {},
-    defaultChildren: [
-      {
-        type: "component",
-        name: "CollectionBlockItem",
-        data: {},
-        props: {
-          product: {
-            src: {
-              mobile: "https://placehold.co/460x380",
-              tablet: "https://placehold.co/460x380",
-              desktop: "https://placehold.co/460x380"
-            },
-            href: "",
-            name: "",
-            badge: "",
-            price: {
-              original: 0,
-              sale: null,
-            },
-          },
-        },
-        meta: { label: "Product Card" },
-      },
-    ],
+    defaultChildren: [],
   },
   {
     label: "Recommendation Block",
@@ -348,26 +325,32 @@ export const childConfigs: Record<string, ChildConfig> = {
   },
 
   CollectionBlock: {
-    label: "Add Product Card",
+    label: "Add Item",
     options: [
       {
         label: "Product Card",
-        childName: "CollectionBlockItem",
+        childName: "CollectionBlockProductCard",
         defaultProps: {
-          product: {
-            src: {
-              mobile: "https://placehold.co/460x380",
-            },
-            href: "",
-            name: "",
-            badge: "",
-            price: {
-              original: 0,
-              sale: null,
-            },
-          },
+          src: { mobile: "https://placehold.co/460x380" },
+          href: "",
+          name: "",
+          price: { original: null, sale: null },
         },
         defaultMeta: { label: "Product Card" },
+      },
+      {
+        label: "Card",
+        childName: "CollectionBlockCard",
+        defaultProps: {
+          headline: "",
+          subhead: "",
+          supportingText: "",
+          href: "",
+          variant: "outlined",
+          shape: "rounded",
+          layout: "media-top",
+        },
+        defaultMeta: { label: "Card" },
       },
     ],
   },
