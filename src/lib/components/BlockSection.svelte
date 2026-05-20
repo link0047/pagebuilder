@@ -170,11 +170,10 @@
       border-radius: var(--spn-ui-block-border-radius);
       background-color: var(--spn-ui-block-bg);
       padding-block-end: var(--spn-ui-block-padding-block-end);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
-    .spn-ui-block:has(.spn-ui-block__header) {
+    .spn-ui-block:not(:has(.spn-ui-block__header)) {
       padding-block-start: var(--spn-ui-block-padding-block-end);
     }
 
