@@ -174,6 +174,10 @@
         Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
+    .spn-ui-block:has(.spn-ui-block__header) {
+      padding-block-start: var(--spn-ui-block-padding-block-end);
+    }
+
     .spn-ui-block__header {
       display: flex;
       flex-direction: column;
