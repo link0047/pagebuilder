@@ -56,7 +56,11 @@
         newMode = "mobile";
       }
 
-      if (newMode !== appState.previewMode) {
+      const modeOrder: PreviewMode[] = ["mobile", "tablet", "desktop"];
+      const currentIndex = modeOrder.indexOf(appState.previewMode);
+      const newIndex = modeOrder.indexOf(newMode);
+
+      if (newIndex < currentIndex && newMode !== appState.previewMode) {
         appState.previewMode = newMode;
       }
     }, 150);
