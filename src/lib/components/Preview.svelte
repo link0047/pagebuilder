@@ -6,9 +6,10 @@
 
   type Props = {
     pageTree?: PageTreeNode;
+    path?: number[];
   };
 
-  let { pageTree }: Props = $props();
+  let { pageTree, path = [] }: Props = $props();
 
   const shouldRender = $derived(
     pageTree?.type !== "component" || !pageTree.meta.hidden
@@ -41,17 +42,21 @@
       </p>
     </div>
   {:else}
-    {#each pageTree.children as child}
-      <Self pageTree={child} />
+    {#each pageTree.children as child, index}
+      <Self pageTree={child} path={[...path, index]} />
     {/each}
   {/if}
 {/if}
 
 {#if pageTree?.type === "component" && shouldRender && ResolvedComponent}
-  <ResolvedComponent {...pageTree.props}>
+  <ResolvedComponent
+    {...pageTree.props}
+    data-component-path={path.join(",")}
+    data-component-label={pageTree.meta?.label}
+  >
     {#if pageTree.children}
-      {#each pageTree.children as child}
-        <Self pageTree={child} />
+      {#each pageTree.children as child, index}
+        <Self pageTree={child} path={[...path, index]} />
       {/each}
     {:else if pageTree.props.text}
       {pageTree.props.text}

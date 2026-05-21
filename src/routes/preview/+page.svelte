@@ -14,6 +14,23 @@
       }
     });
 
+    document.addEventListener("pointermove", (e) => {
+       const el = (e.target as Element)?.closest("[data-component-path]") as HTMLElement | null;
+       const path = el?.dataset.componentPath ?? null;
+
+       window.parent.postMessage(
+         { type: "preview-hover", path },
+         window.location.origin
+       );
+     });
+
+     document.addEventListener("pointerleave", () => {
+       window.parent.postMessage(
+         { type: "preview-hover", path: null },
+         window.location.origin
+       );
+     });
+
     document.addEventListener("click", () => {
       window.parent.postMessage({ type: "preview-click" }, window.location.origin);
     });

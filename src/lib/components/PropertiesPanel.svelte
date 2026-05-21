@@ -18,6 +18,8 @@
   import Group from "./Group.svelte";
   import Hint from "./Hint.svelte";
   import Checkbox from "./Checkbox.svelte";
+  import EditableLabel from "./EditableLabel.svelte";
+
 
   type Props = { title?: string; };
 
@@ -201,9 +203,16 @@
         <path d="M15.41 16.58 10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.42Z" />
       </Icon>
     </Button>
-    <span class="properties-panel__title">
-      {title}
-    </span>
+    <EditableLabel
+      size="sm"
+      variant="ghost"
+      value={title}
+      oncommit={(value) => {
+        if (appState.selectedComponentPath) {
+          appState.updateProperty("meta.label", value);
+        }
+      }}
+    />
   </header>
 
   <div class="properties-panel__content">

@@ -9,7 +9,7 @@
   type Attached = "none" | "left" | "right" | "both";
   type IndicatorPosition = "left" | "right" | "overlay";
 
-  type Props = HTMLButtonAttributes & {
+  export type Props = HTMLButtonAttributes & {
     children?: Snippet,
     variant?: Variant,
     size?: Size,

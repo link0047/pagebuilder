@@ -29,6 +29,7 @@
     };
     equalHeight?: boolean;
     itemAspectRatio?: string;
+    [key: string]: unknown;
   };
 
   let {
@@ -50,7 +51,8 @@
     },
     equalHeight = false,
     itemAspectRatio,
-    children
+    children,
+    ...restProps
   }: Props = $props();
 
   onMount(async () => {
@@ -98,6 +100,7 @@
   {image}
   {imagePlacement}
   style={inlineStyle}
+  {...restProps}
 >
   <div
     class="collection-block__content"

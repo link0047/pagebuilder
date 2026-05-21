@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type Snippet } from "svelte";
+  import type { Snippet } from "svelte";
 
   type Props = {
     label?: string;
@@ -15,49 +15,49 @@
 		children
 	}: Props = $props();
 
-	const tag = label ? "fieldset" : "div";
+	const tag = $derived(label ? "fieldset" : "div");
 </script>
 
 <svelte:element
 	this={tag}
-	class="uikit-control-group"
+	class="wcag-ui-control-group"
 	role={label ? undefined : "group"}
-	style:--uikit-control-group-columns={col}
-	style:--uikit-control-group-rows={row}
+	style:--wcag-ui-control-group-columns={col}
+	style:--wcag-ui-control-group-rows={row}
 >
 	{#if label}
-		<legend class="uikit-control-group__label">{label}</legend>
+		<legend class="wcag-ui-control-group__label">{label}</legend>
 	{/if}
-	<div class="uikit-control-group__content">
+	<div class="wcag-ui-control-group__content">
 		{@render children?.()}
 	</div>
 </svelte:element>
 
 <style>
 	:root {
-		--uikit-control-group-columns: auto;
-		--uikit-control-group-rows: auto;
-		--uikit-control-group-gap: 1rem;
+		--wcag-ui-control-group-columns: auto;
+		--wcag-ui-control-group-rows: auto;
+		--wcag-ui-control-group-gap: 1rem;
 	}
-	
-	.uikit-control-group {
+
+	.wcag-ui-control-group {
 		border: none;
 		padding: 0;
 		margin: 0;
 	}
 
-	.uikit-control-group__label {
+	.wcag-ui-control-group__label {
 		color: #111;
 		font-size: 1rem;
-		line-height: 1;	
+		line-height: 1;
 		margin-bottom: .25rem;
 	}
-	
-	.uikit-control-group__content {
+
+	.wcag-ui-control-group__content {
 		display: grid;
 		align-items: center;
-		gap: var(--uikit-control-group-gap);
-		grid-template-columns: repeat(var(--uikit-control-group-columns), 1fr);
-		grid-template-rows: var(--uikit-control-group-rows);
+		gap: var(--wcag-ui-control-group-gap);
+		grid-template-columns: repeat(var(--wcag-ui-control-group-columns), 1fr);
+		grid-template-rows: var(--wcag-ui-control-group-rows);
 	}
 </style>

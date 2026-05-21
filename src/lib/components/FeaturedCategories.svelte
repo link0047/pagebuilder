@@ -16,6 +16,7 @@
     headingLevel?: HeadingLevel;
     maxColumns?: number;
     containerGap?: string;
+    [key: string]: unknown;
   };
 
   let {
@@ -28,6 +29,7 @@
     headingLevel = 2,
     maxColumns = 6,
     containerGap,
+    ...restProps
   }: Props = $props();
 
   const inlineStyle = $derived([
@@ -43,6 +45,7 @@
   {titleWeight}
   {headingLevel}
   style={inlineStyle}
+  {...restProps}
 >
   <nav
     class="featured-categories__container"

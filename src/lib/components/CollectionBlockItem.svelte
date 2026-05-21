@@ -3,11 +3,12 @@
 
   type Props = {
     children?: Snippet;
+    [key: string]: unknown;
   };
 
-  let { children }: Props = $props();
+  let { children, ...restProps }: Props = $props();
 </script>
 
-<wcag-ui-carousel-item>
+<wcag-ui-carousel-item {...restProps}>
   {@render children?.()}
 </wcag-ui-carousel-item>

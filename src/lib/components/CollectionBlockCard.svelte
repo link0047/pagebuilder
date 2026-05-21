@@ -12,13 +12,14 @@
   type Props = CardProps & {
     images?: ImageSources;
     alt?: string;
+    [key: string]: unknown;
   };
 
   let {
     children,
     images,
     alt = "",
-    ...props
+    ...restProps
   }: Props = $props();
 
   const resolvedImages = $derived.by(() => {
@@ -31,7 +32,7 @@
 </script>
 
 <wcag-ui-carousel-item>
-  <Card {...props}>
+  <Card {...restProps}>
     {#snippet media()}
       {#if resolvedImages}
         <picture>

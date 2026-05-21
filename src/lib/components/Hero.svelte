@@ -42,6 +42,7 @@
     loading?: "eager" | "lazy";
     fetchpriority?: "high" | "low" | "auto";
     children?: Snippet;
+    [key: string]: unknown;
   };
 
   const DEFAULT_CONTENT: Required<HeroContent> = {
@@ -77,6 +78,7 @@
     loading = "eager",
     fetchpriority = "auto",
     children,
+    ...restProps
   }: Props = $props();
 
   const resolved = $derived.by(() => {
@@ -174,6 +176,7 @@
   class:hero--overlay={layout === "overlay"}
   class:hero--split-start={layout === "split-start"}
   class:hero--split-end={layout === "split-end"}
+  {...restProps}
 >
   <svelte:element this={tag} class="hero__visual" href={href || undefined}>
     {@render responsiveImage()}

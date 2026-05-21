@@ -1,10 +1,15 @@
 <script lang="ts">
   import ProductCard, { type Props as ProductCardProps } from "./ProductCard.svelte";
 
-  type Props = ProductCardProps;
-  let { ...props }: Props = $props();
+  type Props = ProductCardProps & {
+    [key: string]: unknown;
+  };
+
+  let {
+    ...restProps
+  }: Props = $props();
 </script>
 
 <wcag-ui-carousel-item>
-  <ProductCard {...props} />
+  <ProductCard {...restProps} />
 </wcag-ui-carousel-item>

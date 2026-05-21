@@ -17,7 +17,7 @@
   import { setAppState } from "$lib/components/app-state.svelte";
   import SplitButton from "$lib/components/SplitButton.svelte";
   import Dialog from "$lib/components/Dialog.svelte";
-  import EditLabel from "$lib/components/EditLabel.svelte";
+  import EditableLabelSplit from "$lib/components/EditableLabelSplit.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
 
   import { copyToClipboard } from "$lib/utils/clipboard";
@@ -256,12 +256,12 @@
       </Icon>
       Exit editing
     </Button>
-    <EditLabel size="sm" variant="ghost" value={appState.buildName} bind:editMode={isRenaming} oncommit={handleRename}>
+    <EditableLabelSplit size="sm" variant="ghost" value={appState.buildName} bind:editMode={isRenaming} oncommit={handleRename}>
       {#snippet menuItems()}
         <MenuItem onclick={() => isRenaming = true}>Rename</MenuItem>
         <MenuItem onclick={handleDelete}>Delete</MenuItem>
       {/snippet}
-    </EditLabel>
+    </EditableLabelSplit>
     {#if save.status === "saved"}
       <span class="app-save-status">Saved</span>
     {/if}

@@ -56,6 +56,7 @@
         newMode = "mobile";
       }
 
+      // Only auto-switch down, never up
       const modeOrder: PreviewMode[] = ["mobile", "tablet", "desktop"];
       const currentIndex = modeOrder.indexOf(appState.previewMode);
       const newIndex = modeOrder.indexOf(newMode);

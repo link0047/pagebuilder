@@ -19,6 +19,7 @@
     backgroundColor?: string;
     image?: BlockImage;
     imagePlacement?: ImagePlacement;
+    [key: string]: unknown;
   };
 
   let {
@@ -32,6 +33,7 @@
     backgroundColor,
     image,
     imagePlacement = "below",
+    ...restProps
   }: Props = $props();
 </script>
 
@@ -45,6 +47,7 @@
   backgroundColor={backgroundColor ?? undefined}
   {image}
   {imagePlacement}
+  {...restProps}
 >
   <div class="editorial-block__container">
     {@render children?.()}
