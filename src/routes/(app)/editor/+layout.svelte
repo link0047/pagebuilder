@@ -1,15 +1,21 @@
 <script lang="ts">
+  import type { LayoutProps } from "./$types";
+  import type { PreviewMode } from "$lib/components/types";
+
   import AppSidebar from "$lib/components/AppSidebar.svelte";
   import PropertiesPanel from "$lib/components/PropertiesPanel.svelte";
 	import PreviewPane from "$lib/components/PreviewPane.svelte";
   import { registerMenuClickSource } from "$lib/components/menu-state.svelte";
   import { getAppState } from "$lib/components/app-state.svelte";
   import { onMount } from "svelte";
-  import type { LayoutProps } from "./$types";
+  import { BREAKPOINTS } from "$lib/constants/breakpoints";
+  import debounce from "$lib/utils/debounced";
 
   let { children }: LayoutProps = $props();
   const appState = getAppState();
 
+  let previewPaneRef = $state<HTMLElement | null | undefined>(null);
+  let previewOuterRef = $state<HTMLElement | null | undefined>(null);
   let iframe = $state<HTMLIFrameElement | null>(null);
   let iframeReady = $state(false);
 
@@ -37,7 +43,31 @@
       }
     });
 
-    return unregister;
+    const handleResize = debounce((entries: ResizeObserverEntry[]) => {
+      const { width } = entries[0].contentRect;
+
+      let newMode: PreviewMode;
+      if (width >= BREAKPOINTS.desktop) {
+        newMode = "desktop";
+      } else if (width >= BREAKPOINTS.tablet) {
+        newMode = "tablet";
+      } else {
+        newMode = "mobile";
+      }
+
+      if (newMode !== appState.previewMode) {
+        appState.previewMode = newMode;
+      }
+    }, 150);
+
+    const observer = new ResizeObserver(handleResize);
+    if (previewOuterRef) observer.observe(previewOuterRef);
+
+    return () => {
+      unregister();
+      observer.disconnect();
+      handleResize.cancel();
+    };
   });
 
   $effect(() => {
@@ -52,7 +82,7 @@
   <PropertiesPanel title={appState.selectedComponent?.meta.label} />
 </AppSidebar>
 
-<PreviewPane maxWidth="{appState.previewWidth}px">
+<PreviewPane maxWidth="{appState.previewWidth}px" bind:ref={previewPaneRef} bind:outerRef={previewOuterRef}>
   <iframe
     bind:this={iframe}
     src="/preview"

@@ -1,19 +1,25 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
+  type MaybeElement = HTMLElement | null | undefined;
   type Props = {
     children?: Snippet;
     maxWidth?: string | null;
+    ref?: MaybeElement;
+    outerRef?: MaybeElement;
   };
 
   let {
+    ref = $bindable(),
+    outerRef = $bindable(),
     children,
     maxWidth = "1400px",
   }: Props = $props();
 </script>
 
-<main class="preview-viewport">
+<main class="preview-viewport" bind:this={outerRef}>
   <div
+    bind:this={ref}
     class="preview-content"
     style:--uikit-preview-max-width={maxWidth}
   >

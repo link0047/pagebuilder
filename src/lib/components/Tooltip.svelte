@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy, type Snippet } from "svelte";
+	import { type Snippet, tick } from "svelte";
 	import { generateId } from "$lib/utils/unique-id-generator";
 	import Portal from "$lib/components/Portal.svelte";
 
@@ -8,19 +8,18 @@
 	type Alignment = "start" | "end";
 	type Placement = BasePlacement | `${BasePlacement}-${Alignment}`;
 
-  interface TooltipProps {
-    children?: Snippet,
-		gap?: number,
-		anchor?: HTMLElement | null,
-		placement?: Placement
-  }
-	
+  type Props = {
+    children?: Snippet;
+		gap?: number;
+		anchor?: HTMLElement | null;
+		placement?: Placement;
+  };
+
 	// Constants
 	const VALID_BASE_PLACEMENTS = ["top", "bottom", "left", "right"] as const;
 	const VALID_ALIGNMENTS = ["start", "end"] as const;
   const uid = generateId("tooltip");
-  const id = `aria-uikit-tooltip-${uid}`;
-	const controller = new AbortController();
+  const id = `aria-wcag-ui-tooltip-${uid}`;
 
 	// Props
 	let {
@@ -28,36 +27,31 @@
 		gap = 4,
 		anchor = null,
 		placement: rawPlacement = "bottom-start"
-	}: TooltipProps = $props();
+	}: Props = $props();
 
 	// State
 	let isOpen = $state(false);
 	let tooltipElement: HTMLDivElement;
-	let placement = isValidPlacement(rawPlacement) ? rawPlacement : "bottom-start";
+	const placement = $derived(isValidPlacement(rawPlacement) ? rawPlacement : "bottom-start");
 
-	if (!isValidPlacement(rawPlacement)) {
-	  console.warn(`Invalid tooltip placement: "${rawPlacement}". Falling back to "bottom-start"`);
-	}
-	
 	function isValidPlacement(placement: string): placement is Placement {
 	  const [base, alignment] = placement.split("-");
-	  return VALID_BASE_PLACEMENTS.includes(base as BasePlacement) && 
-	         (!alignment || VALID_ALIGNMENTS.includes(alignment as Alignment));
+	  return VALID_BASE_PLACEMENTS.includes(base as BasePlacement) &&  (!alignment || VALID_ALIGNMENTS.includes(alignment as Alignment));
 	}
-	
+
 	function updatePosition() {
 		if (!anchor || !tooltipElement) return;
-		
+
 		requestAnimationFrame(() => {
 			const anchorRect = anchor.getBoundingClientRect();
 			const tooltipRect = tooltipElement.getBoundingClientRect();
-			
+
 			let left = 0;
 			let top = 0;
-			
+
 			// Split placement into base and alignment
 			const [basePlacement, alignment] = placement.split("-") as [BasePlacement, Alignment?];
-			
+
 			// Calculate base position
 			switch (basePlacement) {
 				case "top":
@@ -77,7 +71,7 @@
 					top = anchorRect.top + (anchorRect.height - tooltipRect.height) / 2;
 					break;
 			}
-			
+
 			// Apply alignment adjustments
 			if (alignment) {
 				switch (basePlacement) {
@@ -99,26 +93,28 @@
 						break;
 				}
 			}
-			
+
 			// Prevent tooltip from going outside viewport
 			const viewport = {
 				width: window.innerWidth,
 				height: window.innerHeight
 			};
-			
+
 			left = Math.max(gap, Math.min(left, viewport.width - tooltipRect.width - gap));
 			top = Math.max(gap, Math.min(top, viewport.height - tooltipRect.height - gap));
-			
+
 			tooltipElement.style.transform = `translate(${left}px, ${top}px)`;
 		});
 	}
-	
-	function handleMouseEnter() {
-		updatePosition();
+
+	function handlePointerEnter({ pointerType }: PointerEvent) {
+		if (pointerType === "touch") return;
 		isOpen = true;
+		updatePosition();
 	}
-	
-	function handleMouseLeave() {
+
+	function handlePointerLeave({ pointerType }: PointerEvent) {
+	  if (pointerType === "touch") return;
 		isOpen = false;
 	}
 
@@ -128,7 +124,7 @@
 			isOpen = true;
 		}
 	}
-	
+
 	function handleBlur() {
 		isOpen = false;
 	}
@@ -138,36 +134,43 @@
 			isOpen = false;
 		}
 	}
-	
+
 	function handleResize() {
 		if (isOpen) {
 			updatePosition();
 		}
 	}
 
+	$effect(() => {
+    if (!isValidPlacement(rawPlacement)) {
+      console.warn(`Invalid tooltip placement: "${rawPlacement}". Falling back to "bottom-start"`);
+    }
+  });
+
 	// Lifecycle
-	onMount(() => {
-		if (anchor instanceof Element) {
-			anchor.setAttribute("aria-describedby", id);
-			anchor.addEventListener("keydown", handleKeyDown, { signal: controller.signal });
-			anchor.addEventListener("mouseenter", handleMouseEnter, { signal: controller.signal });
-			anchor.addEventListener("mouseleave", handleMouseLeave, { signal: controller.signal });
-			anchor.addEventListener("focusin", handleFocus, { signal: controller.signal });
-			anchor.addEventListener("blur", handleBlur, { signal: controller.signal });
-		}
-	});
-	
-	onDestroy(() => {
-		controller.abort();
-	});
+	$effect(() => {
+    if (!(anchor instanceof Element)) return;
+    if (!tooltipElement) return;
+
+    const ac = new AbortController();
+
+    anchor.setAttribute("aria-describedby", id);
+    anchor.addEventListener("keydown", handleKeyDown, { signal: ac.signal });
+    anchor.addEventListener("pointerenter", handlePointerEnter, { signal: ac.signal });
+    anchor.addEventListener("pointerleave", handlePointerLeave, { signal: ac.signal });
+    anchor.addEventListener("focusin", handleFocus, { signal: ac.signal });
+    anchor.addEventListener("blur", handleBlur, { signal: ac.signal });
+
+    return () => ac.abort();
+  });
 </script>
 
 <svelte:window onresize={handleResize} onscroll={handleResize} />
 <Portal>
 	<div
 		{id}
-		class="tooltip"
-		class:tooltip--open={isOpen}
+		class="wcag-ui-tooltip"
+		data-open={isOpen}
 		role="tooltip"
 		bind:this={tooltipElement}
 	>
@@ -177,39 +180,39 @@
 
 <style>
 :root {
-	--uikit-tooltip-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-	--uikit-tooltip-background-color: #3c4043;
-	--uikit-tooltip-font-size: .75rem;
-	--uikit-tooltip-font-color: #fff;
-	--uikit-tooltip-padding: 0 .5rem;
-	--uikit-tooltip-border-radius: 0.1875rem;
-	--uikit-tooltip-transition-duration: .15s;
-	--uikit-tooltip-z-index: 99;
+	--wcag-ui-tooltip-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--wcag-ui-tooltip-background-color: #3c4043;
+	--wcag-ui-tooltip-font-size: .75rem;
+	--wcag-ui-tooltip-font-color: #fff;
+	--wcag-ui-tooltip-padding: 0 .5rem;
+	--wcag-ui-tooltip-border-radius: 0.1875rem;
+	--wcag-ui-tooltip-transition-duration: .15s;
+	--wcag-ui-tooltip-z-index: 219;
 }
 
-.tooltip {
+.wcag-ui-tooltip {
 	position: fixed;
 	top: 0;
 	left: 0;
-	z-index: var(--uikit-tooltip-z-index);
-	border-radius: var(--uikit-tooltip-border-radius);
-	background-color: var(--uikit-tooltip-background-color);
+	z-index: var(--wcag-ui-tooltip-z-index);
+	border-radius: var(--wcag-ui-tooltip-border-radius);
+	background-color: var(--wcag-ui-tooltip-background-color);
 	min-height: 1.5rem;
-	font-family: var(--uikit-tooltip-font-family);
-	font-size: var(--uikit-tooltip-font-size);
-	color: var(--uikit-tooltip-font-color);
+	font-family: var(--wcag-ui-tooltip-font-family);
+	font-size: var(--wcag-ui-tooltip-font-size);
+	color: var(--wcag-ui-tooltip-font-color);
 	display: inline-flex;
 	align-items: center;
-	padding: var(--uikit-tooltip-padding);
+	padding: var(--wcag-ui-tooltip-padding);
 	line-height: 1;
 	pointer-events: none;
 	opacity: 0;
-	transition: opacity var(--uikit-tooltip-transition-duration);
+	transition: opacity var(--wcag-ui-tooltip-transition-duration);
 	will-change: transform;
 }
 
-.tooltip--open {
-	opacity: 1;
-	pointer-events: initial;
+.wcag-ui-tooltip[data-open="true"] {
+  opacity: 1;
+  pointer-events: initial;
 }
 </style>

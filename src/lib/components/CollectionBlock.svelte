@@ -22,7 +22,13 @@
     children?: Snippet;
     ctaBackgroundColor?: string;
     ctaTextColor?: string;
-    breakpoints?: Record<string, { slidesPerView: number; slidesPerGroup?: number }>;
+    breakpoints?: {
+      mobile?: { slidesPerView: number; slidesPerGroup?: number };
+      tablet?: { slidesPerView: number; slidesPerGroup?: number };
+      desktop?: { slidesPerView: number; slidesPerGroup?: number };
+    };
+    equalHeight?: boolean;
+    itemAspectRatio?: string;
   };
 
   let {
@@ -38,10 +44,12 @@
     ctaBackgroundColor,
     ctaTextColor,
     breakpoints = {
-      [BREAKPOINTS.mobile]: { slidesPerView: 2.5, slidesPerGroup: 2.5 },
-      [BREAKPOINTS.tablet]: { slidesPerView: 4, slidesPerGroup: 4 },
-      [BREAKPOINTS.desktop]: { slidesPerView: 5, slidesPerGroup: 5 }
+      mobile: { slidesPerView: 2.5, slidesPerGroup: 2.5 },
+      tablet: { slidesPerView: 4, slidesPerGroup: 4 },
+      desktop: { slidesPerView: 5, slidesPerGroup: 5 },
     },
+    equalHeight = false,
+    itemAspectRatio,
     children
   }: Props = $props();
 
@@ -54,6 +62,29 @@
     ctaBackgroundColor && `--product-card-cta-bg-color: ${ctaBackgroundColor}`,
     ctaTextColor && `--product-card-cta-text-color: ${ctaTextColor}`,
   ].filter(Boolean).join("; "));
+
+  const resolvedBreakpoints = $derived.by(() => {
+    const bp = breakpoints ?? {};
+
+    const mobile = bp.mobile ?? { slidesPerView: 2.5 };
+    const tablet = bp.tablet ?? { slidesPerView: 4 };
+    const desktop = bp.desktop ?? { slidesPerView: 5 };
+
+    return {
+      [BREAKPOINTS.mobile]: {
+        slidesPerView: mobile.slidesPerView,
+        slidesPerGroup: mobile.slidesPerGroup ?? mobile.slidesPerView,
+      },
+      [BREAKPOINTS.tablet]: {
+        slidesPerView: tablet.slidesPerView,
+        slidesPerGroup: tablet.slidesPerGroup ?? tablet.slidesPerView,
+      },
+      [BREAKPOINTS.desktop]: {
+        slidesPerView: desktop.slidesPerView,
+        slidesPerGroup: desktop.slidesPerGroup ?? desktop.slidesPerView,
+      },
+    };
+  });
 </script>
 
 <BlockSection
@@ -68,8 +99,13 @@
   {imagePlacement}
   style={inlineStyle}
 >
-  <div class="collection-block__content">
-    <wcag-ui-carousel breakpoints={JSON.stringify(breakpoints)}>
+  <div
+    class="collection-block__content"
+    style:--wcag-ui-carousel-item-aspect-ratio={itemAspectRatio}
+    style:--wcag-ui-carousel-item-height={equalHeight ? "100%" : undefined}
+    style:--wcag-ui-carousel-item-slot-height={equalHeight ? "100%" : undefined}
+  >
+    <wcag-ui-carousel breakpoints={JSON.stringify(resolvedBreakpoints)}>
       {@render children?.()}
     </wcag-ui-carousel>
   </div>

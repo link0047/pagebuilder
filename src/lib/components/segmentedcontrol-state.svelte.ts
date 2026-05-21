@@ -2,73 +2,92 @@ import { getContext, setContext } from "svelte";
 
 const SEGMENTEDCONTROL_KEY = Symbol("SEGMENTEDCONTROL");
 
+// Stable counter shared across all instances for unique heading IDs.
+let headingCounter = 0;
+
 class SegmentedControlState {
-	static headingId = 0;
-	#selectedIndex = $state(0);
-	#headingId = $state<string | null>(null);
-  #buttons = $state<string[]>([]);
-	#initialValue: string | undefined;
+  // Map from stable registration ID → value. Avoids index-shifting on removal.
+  #buttons = $state(new Map<number, string>());
+  #selectedId = $state<number | null>(null);
+  #nextId = 0;
+  #initialValue: string | undefined;
+  #headingId: string;
 
-	constructor(initialValue: unknown) {
-		this.#initialValue = initialValue?.toString();
-	}
+  constructor(initialValue: unknown) {
+    this.#initialValue = initialValue?.toString();
+    // Generate eagerly in the constructor — no side-effectful getter needed.
+    this.#headingId = `uikit-segmented-control-heading-${headingCounter++}`;
+  }
 
-	get selectedIndex() {
-		return this.#selectedIndex;
-	}
-
-	get selectedValue() {
-		return this.#buttons[this.#selectedIndex];
-	}
-
-	get headingId(): string {
-    // Generate only when first accessed
-    if (!this.#headingId) {
-      this.#headingId = `uikit-segmented-control-heading-${SegmentedControlState.headingId++}`;
-    }
+  get headingId(): string {
     return this.#headingId;
   }
 
-	registerButton(value: string): number {
-    if (typeof value !== "string") {
-		  return -1;
-	  }
+  get selectedValue(): string | undefined {
+    if (this.#selectedId === null) return undefined;
+    return this.#buttons.get(this.#selectedId);
+  }
 
-		const index = this.#buttons.length;
-		this.#buttons.push(value);
+  // Returns the stable ID the button should hold onto.
+  registerButton(value: string): number {
+    const id = this.#nextId++;
+    this.#buttons.set(id, value);
 
-		// If this matches the initial value, select it
-		if (this.#initialValue && value === this.#initialValue) {
-			this.#selectedIndex = index;
-		}
+    if (this.#initialValue !== undefined && value === this.#initialValue) {
+      this.#selectedId = id;
+    }
 
-		return index;
-	}
+    // Select the first registered button by default.
+    if (this.#selectedId === null) {
+      this.#selectedId = id;
+    }
 
-	unregisterButton(index: number) {
-		this.#buttons.splice(index, 1);
+    return id;
+  }
 
-		if (this.#selectedIndex >= this.#buttons.length) {
-			this.#selectedIndex = Math.max(0, this.#buttons.length - 1);
-		}
-	}
+  unregisterButton(id: number) {
+    const wasSelected = this.#selectedId === id;
+    this.#buttons.delete(id);
 
-	selectByValue(value: string) {
-		const index = this.#buttons.indexOf(value);
-		if (index !== -1) {
-			this.#selectedIndex = index;
-		}
-	}
+    if (wasSelected) {
+      // Pick the first remaining button, if any.
+      const first = this.#buttons.keys().next();
+      this.#selectedId = first.done ? null : first.value;
+    }
+  }
 
-	selectButton(index: number) {
-		if (index >= 0 && index < this.#buttons.length) {
-			this.#selectedIndex = index;
-		}
-	}
+  isSelected(id: number): boolean {
+    return this.#selectedId === id;
+  }
 
-	isSelected(index: number): boolean {
-		return this.#selectedIndex === index;
-	}
+  selectById(id: number) {
+    if (this.#buttons.has(id)) {
+      this.#selectedId = id;
+    }
+  }
+
+  selectByValue(value: string) {
+    for (const [id, v] of this.#buttons) {
+      if (v === value) {
+        this.#selectedId = id;
+        return;
+      }
+    }
+  }
+
+  selectNext() {
+    const ids = [...this.#buttons.keys()];
+    if (ids.length === 0) return;
+    const current = ids.indexOf(this.#selectedId!);
+    this.#selectedId = ids[(current + 1) % ids.length];
+  }
+
+  selectPrevious() {
+    const ids = [...this.#buttons.keys()];
+    if (ids.length === 0) return;
+    const current = ids.indexOf(this.#selectedId!);
+    this.#selectedId = ids[(current - 1 + ids.length) % ids.length];
+  }
 }
 
 export function setSegmentedControlState(initialValue: unknown) {

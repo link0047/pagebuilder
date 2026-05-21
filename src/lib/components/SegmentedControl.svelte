@@ -4,7 +4,6 @@
 
 	type Variant = "default" | "filled" | "outlined" | "ghost" | "tabs" | "flush";
 	type Color = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "default";
-	// Aliases removed — canonical sizes only, matching SegmentedButton
 	type Size = "xs" | "sm" | "md" | "lg" | "xl";
 	type Shape = "default" | "square" | "pill";
 	type HeadingTag = "div" | "p" | "span" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
@@ -22,6 +21,7 @@
 		color?: Color;
 		shape?: Shape;
 		children: Snippet;
+		onchange?: (value: string) => void;
 		[key: string]: unknown;
 	};
 
@@ -35,6 +35,7 @@
 		color = "default",
 		shape = "default",
 		children,
+		onchange,
 		...restProps
 	}: Props = $props();
 
@@ -42,14 +43,24 @@
 	const headingId = controlState.headingId;
 
 	// Context is a reactive $state object so child buttons react to prop changes.
-	const styleContext = $state({ variant, size, color, shape });
+	setContext("segmented-variant", () => variant);
+  setContext("segmented-size", () => size);
+  setContext("segmented-color", () => color);
+  setContext("segmented-shape", () => shape);
+  setContext("segmented-onchange", (value: string) => onchange?.(value));
+
+  // ── ARIA labelling ──────────────────────────────────────────────────────────
+	// Prefer aria-labelledby when a visible heading is present; fall back to
+	// aria-label for an invisible label string. Never set both simultaneously.
+	const ariaLabelledBy = $derived(headingLabel ? headingId : undefined);
+	const ariaLabel = $derived(!headingLabel ? label : undefined);
+
+	// Sync external value changes into internal state only
 	$effect(() => {
-		styleContext.variant = variant;
-		styleContext.size = size;
-		styleContext.color = color;
-		styleContext.shape = shape;
-	});
-	setContext("segmented-style", styleContext);
+    if (value !== undefined && value !== controlState.selectedValue) {
+      controlState.selectByValue(value);
+    }
+  });
 
 	// Sync internal selection back to the bindable `value` prop.
 	$effect(() => {
@@ -58,12 +69,6 @@
 			value = selected;
 		}
 	});
-
-	// ── ARIA labelling ──────────────────────────────────────────────────────────
-	// Prefer aria-labelledby when a visible heading is present; fall back to
-	// aria-label for an invisible label string. Never set both simultaneously.
-	const ariaLabelledBy = $derived(headingLabel ? headingId : undefined);
-	const ariaLabel = $derived(!headingLabel ? label : undefined);
 
 	// ── Arrow-key handler lives here so the DOM structure (role=radiogroup) ─────
 	// owns the keyboard contract, not each individual button.
@@ -78,14 +83,14 @@
 	}
 </script>
 
-<div class="uikit-segmented">
+<div class="wcag-ui-segmented">
   {#if headingLabel}
-  	<svelte:element this={headingTag} id={headingId} class="uikit-segmented-control-heading">
+  	<svelte:element this={headingTag} id={headingId} class="wcag-ui-segmented-control-heading">
   		{headingLabel}
   	</svelte:element>
   {/if}
   <div
-  	class="uikit-segmented-control"
+  	class="wcag-ui-segmented-control"
   	role="radiogroup"
   	aria-labelledby={ariaLabelledBy}
   	aria-label={ariaLabel}
@@ -96,18 +101,18 @@
   </div>
 </div>
 <style>
-  .uikit-segmented {
+  .wcag-ui-segmented {
 	  display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
 	}
 
-	.uikit-segmented-control-heading {
+	.wcag-ui-segmented-control-heading {
 		line-height: 1;
 		font-size: 0.875rem;
 	}
 
-	.uikit-segmented-control {
+	.wcag-ui-segmented-control {
 		display: inline-flex;
 		background: #f5f5f5;
 		border-radius: 0.5rem;

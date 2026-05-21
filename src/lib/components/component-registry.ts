@@ -148,6 +148,12 @@ export const sectionConfigs: SectionConfig[] = [
       titleAlignment: "center",
       titleSize: "md",
       backgroundColor: "#f6f5f1",
+      equalHeight: false,
+      breakpoints: {
+        mobile: { slidesPerView: 2.5 },
+        tablet: { slidesPerView: 4 },
+        desktop: { slidesPerView: 5 },
+      }
     },
     defaultData: {},
     defaultChildren: [],

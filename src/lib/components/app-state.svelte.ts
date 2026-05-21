@@ -1,9 +1,10 @@
-import { getContext, setContext } from "svelte";
-import { PREVIEW_WIDTHS } from "$lib/constants/breakpoints";
-import { generateId } from "$lib/utils/unique-id-generator";
 import type { ComponentNode, RootNode, PageTreeNode, TreePath, PreviewMode } from "./types";
 import type { PartialComponentNode } from "./component-registry";
 import type { User } from "better-auth";
+
+import { getContext, setContext } from "svelte";
+import { PREVIEW_WIDTHS } from "$lib/constants/breakpoints";
+import { generateId } from "$lib/utils/unique-id-generator";
 
 const APP_KEY = Symbol("pagetree");
 

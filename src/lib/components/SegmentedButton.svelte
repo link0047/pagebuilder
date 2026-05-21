@@ -14,13 +14,10 @@
 		size?: Size,
 		color?: Color,
 		shape?: Shape,
-		value?: string | number,
+		value?: string,
 		onclick?: (event: MouseEvent) => void,
 		[key: string]: unknown;
 	};
-
-	const controlState = getSegmentedControlState();
-	const styleContext = getContext("segmented-style") || {};
 
 	let {
 		ref = $bindable(),
@@ -34,44 +31,57 @@
 		...restProps
 	}: Props = $props();
 
-	const finalVariant = $derived(variant ?? styleContext.variant);
-	const finalSize = $derived(size ?? styleContext.size);
-	const finalColor = $derived(color ?? styleContext.color);
-	const finalShape = $derived(shape ?? styleContext.shape);
+	const controlState = getSegmentedControlState();
+	const ctxVariant = getContext<() => Variant>("segmented-variant");
+  const ctxSize = getContext<() => Size>("segmented-size");
+  const ctxColor = getContext<() => Color>("segmented-color");
+  const ctxShape = getContext<() => Shape>("segmented-shape");
+  const ctxOnChange = getContext<((value: string) => void) | undefined>("segmented-onchange");
 
-	let buttonIndex = $state(-1);
+  const finalVariant = $derived(variant ?? ctxVariant?.());
+  const finalSize = $derived(size ?? ctxSize?.());
+  const finalColor = $derived(color ?? ctxColor?.());
+  const finalShape = $derived(shape ?? ctxShape?.());
 
-	function handleClick(event: MouseEvent) {
-		controlState.selectButton(buttonIndex);
-		onclick?.(event);
-	}
+  let registrationId = $state<number | null>(null);
 
-	onMount(() => {
-		const buttonValue = value?.toString() || ref?.textContent?.trim() || "";
-		buttonIndex = controlState.registerButton(buttonValue);
-	});
+  function handleClick(event: MouseEvent) {
+    if (registrationId !== null) {
+      controlState.selectById(registrationId);
+    }
+    onclick?.(event);
+    ctxOnChange?.(value ?? "");
+  }
 
-	onDestroy(() => {
-		if (buttonIndex !== -1) {
-			controlState.unregisterButton(buttonIndex);
-		}
-	});
+  onMount(() => {
+    if (import.meta.env.DEV && !value) {
+      console.warn("[SegmentedButton] `value` prop is required. Falling back to empty string.");
+    }
+    registrationId = controlState.registerButton(value ?? "");
+  });
 
-	const isSelected = $derived(controlState.selectedIndex === buttonIndex && buttonIndex !== -1);
+  onDestroy(() => {
+    if (registrationId !== null) {
+      controlState.unregisterButton(registrationId);
+    }
+  });
+
+	const isSelected = $derived(registrationId !== null && controlState.isSelected(registrationId));
 </script>
 
 <button
 	bind:this={ref}
-	class="uikit-segmented-button"
-	class:uikit-segmented-button--selected={isSelected}
-	class:uikit-segmented-button--size-xs={finalSize === "xs"}
-	class:uikit-segmented-button--size-sm={finalSize === "sm"}
-	class:uikit-segmented-button--size-lg={finalSize === "lg"}
-	class:uikit-segmented-button--size-xl={finalSize === "xl"}
+	class="wcag-ui-segmented-button"
+	class:wcag-ui-segmented-button--selected={isSelected}
+	class:wcag-ui-segmented-button--size-xs={finalSize === "xs"}
+	class:wcag-ui-segmented-button--size-sm={finalSize === "sm"}
+	class:wcag-ui-segmented-button--size-lg={finalSize === "lg"}
+	class:wcag-ui-segmented-button--size-xl={finalSize === "xl"}
 	type="button"
-	aria-pressed={isSelected}
-	onclick={handleClick}
-	{...restProps}
+  role="radio"
+  aria-checked={isSelected}
+  onclick={handleClick}
+  {...restProps}
 >
 	{@render children?.()}
 </button>
@@ -81,51 +91,51 @@
 	@layer variables {
 		:root {
 			/* Base dimensions */
-	    --uikit-segmented-button-height: 2.5rem;
-	    --uikit-segmented-button-gap: 1ch;
-	    --uikit-segmented-button-padding-inline: 1rem;
+	    --wcag-ui-segmented-button-height: 2.5rem;
+	    --wcag-ui-segmented-button-gap: 1ch;
+	    --wcag-ui-segmented-button-padding-inline: 1rem;
 
 	    /* Typography */
-	    --uikit-segmented-button-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-			--uikit-segmented-button-font-size: .875rem;
-	    --uikit-segmented-button-font-weight: 500;
-	    --uikit-segmented-button-color: #fff;
-	    --uikit-segmented-button-letter-spacing: .04em;
+	    --wcag-ui-segmented-button-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+			--wcag-ui-segmented-button-font-size: .875rem;
+			--wcag-ui-segmented-button-font-weight: 500;
+			--wcag-ui-segmented-button-color: #fff;
+			--wcag-ui-segmented-button-letter-spacing: .04em;
 
 			/* Border styles */
-	    --uikit-segmented-button-border-width: 1px;
-	    --uikit-segmented-button-border-style: solid;
-	    --uikit-segmented-button-border-color: #333335;
-	    --uikit-segmented-button-border-radius: .5rem;
+	    --wcag-ui-segmented-button-border-width: 1px;
+	    --wcag-ui-segmented-button-border-style: solid;
+	    --wcag-ui-segmented-button-border-color: #333335;
+	    --wcag-ui-segmented-button-border-radius: .5rem;
 
 	    /* Default colors */
-	    --uikit-segmented-button-bg-color: #fff;
+	    --wcag-ui-segmented-button-bg-color: #fff;
 
 	    /* Hover state */
-	    --uikit-segmented-button-hover-bg-color: #555659;
-	    --uikit-segmented-button-hover-border-color: #555659;
+	    --wcag-ui-segmented-button-hover-bg-color: #555659;
+	    --wcag-ui-segmented-button-hover-border-color: #555659;
 
 	    /* Focus state */
-	    --uikit-segmented-button-outline-color: #007acc;
-	    --uikit-segmented-button-outline-style: solid;
-	    --uikit-segmented-button-outline-width: 2px;
-	    --uikit-segmented-button-outline-offset: 0;
+	    --wcag-ui-segmented-button-outline-color: #007acc;
+	    --wcag-ui-segmented-button-outline-style: solid;
+	    --wcag-ui-segmented-button-outline-width: 2px;
+	    --wcag-ui-segmented-button-outline-offset: 0;
 
 	    /* Disabled state */
-	    --uikit-segmented-button-disabled-bg-color: #eeeeef;
-	    --uikit-segmented-button-disabled-font-color: #444547;
-	    --uikit-segmented-button-disabled-font-weight: 400;
-	    --uikit-segmented-button-disabled-border-color: #eeeeef;
+	    --wcag-ui-segmented-button-disabled-bg-color: #eeeeef;
+	    --wcag-ui-segmented-button-disabled-font-color: #444547;
+	    --wcag-ui-segmented-button-disabled-font-weight: 400;
+	    --wcag-ui-segmented-button-disabled-border-color: #eeeeef;
 
 	    /* Animation */
-	    --uikit-segmented-button-transition-duration: 0.2s;
-	    --uikit-segmented-button-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
-	    --uikit-segmented-button-transform-scale: 0.97;
+	    --wcag-ui-segmented-button-transition-duration: 0.2s;
+	    --wcag-ui-segmented-button-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+	    --wcag-ui-segmented-button-transform-scale: 0.97;
 		}
 	}
 
 	@layer base {
-		.uikit-segmented-button {
+		.wcag-ui-segmented-button {
 			flex: 1;
 			min-width: 0;
 			display: inline-flex;
@@ -133,15 +143,15 @@
 			padding-block: 0;
 			align-items: center;
 			justify-content: center;
-			padding-inline: var(--uikit-segmented-button-padding-inline);
-			height: var(--uikit-segmented-button-height);
+			padding-inline: var(--wcag-ui-segmented-button-padding-inline);
+			height: var(--wcag-ui-segmented-button-height);
 	    border: none;
 	    background: transparent;
 	    cursor: pointer;
 	    border-radius: 6px;
-			font-family: var(--uikit-segmented-button-font-family);
-	    font-size: var(--uikit-segmented-button-font-size);
-	    font-weight: var(--uikit-segmented-button-font-weight);
+			font-family: var(--wcag-ui-segmented-button-font-family);
+			font-size: var(--wcag-ui-segmented-button-font-size);
+			font-weight: var(--wcag-ui-segmented-button-font-weight);
 			font-feature-settings: inherit;
 	    font-variation-settings: inherit;
 		}
@@ -150,44 +160,44 @@
 	@layer shapes {}
 
 	@layer states {
-		.uikit-segmented-button--selected {
+		.wcag-ui-segmented-button--selected {
 			background: #fff;
 	    color: #000;
 	    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 		}
 
-		.uikit-segmented-button:not(.uikit-segmented-button--selected):hover {
+		.wcag-ui-segmented-button:not(.wcag-ui-segmented-button--selected):hover {
 			background: #e6e6e6;
 		}
 	}
 
 	@layer sizes {
-	.uikit-segmented-button--size-xs {
-    --uikit-segmented-button-height: 1.5rem;
-    --uikit-segmented-button-font-size: 0.75rem;
-    --uikit-segmented-button-padding-inline: 0.5rem;
-    --uikit-segmented-button-gap: 0.25rem;
+	.wcag-ui-segmented-button--size-xs {
+    --wcag-ui-segmented-button-height: 1.5rem;
+    --wcag-ui-segmented-button-font-size: 0.75rem;
+    --wcag-ui-segmented-button-padding-inline: 0.5rem;
+    --wcag-ui-segmented-button-gap: 0.25rem;
   }
 
-  .uikit-segmented-button--size-sm {
-    --uikit-segmented-button-height: 2rem;
-    --uikit-segmented-button-font-size: 0.8125rem;
-    --uikit-segmented-button-padding-inline: 0.75rem;
-    --uikit-segmented-button-gap: 0.375rem;
+  .wcag-ui-segmented-button--size-sm {
+    --wcag-ui-segmented-button-height: 2rem;
+    --wcag-ui-segmented-button-font-size: 0.8125rem;
+    --wcag-ui-segmented-button-padding-inline: 0.75rem;
+    --wcag-ui-segmented-button-gap: 0.375rem;
   }
 
-  .uikit-segmented-button--size-lg {
-    --uikit-segmented-button-height: 3rem;
-    --uikit-segmented-button-font-size: 1rem;
-    --uikit-segmented-button-padding-inline: 1.5rem;
-    --uikit-segmented-button-gap: 0.625rem;
+  .wcag-ui-segmented-button--size-lg {
+    --wcag-ui-segmented-button-height: 3rem;
+    --wcag-ui-segmented-button-font-size: 1rem;
+    --wcag-ui-segmented-button-padding-inline: 1.5rem;
+    --wcag-ui-segmented-button-gap: 0.625rem;
   }
 
-  .uikit-segmented-button--size-xl {
-    --uikit-segmented-button-height: 3.5rem;
-    --uikit-segmented-button-font-size: 1.125rem;
-    --uikit-segmented-button-padding-inline: 2rem;
-    --uikit-segmented-button-gap: 0.75rem;
+  .wcag-ui-segmented-button--size-xl {
+    --wcag-ui-segmented-button-height: 3.5rem;
+    --wcag-ui-segmented-button-font-size: 1.125rem;
+    --wcag-ui-segmented-button-padding-inline: 2rem;
+    --wcag-ui-segmented-button-gap: 0.75rem;
   }
 }
 

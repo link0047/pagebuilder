@@ -1,5 +1,3 @@
-import { BREAKPOINTS } from "$lib/constants/breakpoints";
-
 export type ControlSchema = {
   type: "textfield" | "textarea" | "number" | "colorpicker" | "checkbox" | "select" | "segmentedbutton" | "group" | "tabs" | "hint";
   property?: string;
@@ -889,6 +887,17 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             ]
           },
           {
+            type: "select",
+            label: "Underline",
+            property: "props.underline",
+            defaultValue: "none",
+            options: [
+              { value: "always", text: "Always" },
+              { value: "hover", text: "On hover" },
+              { value: "none", text: "None" },
+            ]
+          },
+          {
             type: "checkbox",
             label: "Full width",
             property: "props.fullWidth",
@@ -1622,7 +1631,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                   {
                     type: "select",
                     label: "Slides Visible",
-                    property: `props.breakpoints.${BREAKPOINTS.mobile}.slidesPerView`,
+                    property: `props.breakpoints.mobile.slidesPerView`,
                     defaultValue: "2.5",
                     options: [
                       { value: "1", text: "1" },
@@ -1640,7 +1649,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                   {
                     type: "select",
                     label: "Slides Visible",
-                    property: `props.breakpoints.${BREAKPOINTS.tablet}.slidesPerView`,
+                    property: `props.breakpoints.tablet.slidesPerView`,
                     defaultValue: "4",
                     options: [
                       { value: "2", text: "2" },
@@ -1657,7 +1666,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                   {
                     type: "select",
                     label: "Slides Visible",
-                    property: `props.breakpoints.${BREAKPOINTS.desktop}.slidesPerView`,
+                    property: `props.breakpoints.desktop.slidesPerView`,
                     defaultValue: "5",
                     options: [
                       { value: "3", text: "3" },
@@ -1669,7 +1678,21 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
                 ]
               }
             ]
-          }
+          },
+          {
+            type: "checkbox",
+            label: "Equal Height",
+            property: "props.equalHeight",
+            defaultValue: false,
+            description: "Forces all slides to match the tallest card's height"
+          },
+          {
+            type: "textfield",
+            label: "Item Aspect Ratio",
+            property: "props.itemAspectRatio",
+            placeholder: "e.g. 3/4 or 1/1",
+            description: "Forces a consistent aspect ratio on each slide — leave empty for natural height"
+          },
         ]
       },
       {

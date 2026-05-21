@@ -25,11 +25,11 @@ export {};
  *   next()
  *   goTo(index, behavior?)
  */
+
 class WCAGUICarousel extends HTMLElement {
   // ---------------------------------------------------------------------------
   // Static
   // ---------------------------------------------------------------------------
-
   static #counter = 0;
   static #template = document.createElement("template");
   static {
@@ -261,10 +261,10 @@ class WCAGUICarousel extends HTMLElement {
     this.setAttribute("aria-roledescription", "carousel");
 
     if (this.hasAttribute("label")) {
-      this.setAttribute("aria-label", this.getAttribute("label"));
+      this.setAttribute("aria-label", this.getAttribute("label") ?? "");
     }
 
-    this.#track.id = this.#trackId;
+    if (this.#track) this.#track.id = this.#trackId;
     this.#prevButton?.setAttribute("aria-controls", this.#trackId);
     this.#nextButton?.setAttribute("aria-controls", this.#trackId);
 
@@ -308,6 +308,11 @@ class WCAGUICarousel extends HTMLElement {
     this.#teardownBreakpoints();
   }
 
+  /**
+   * @param {string} name
+   * @param {string | null} oldValue
+   * @param {string | null} newValue
+   */
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
 
@@ -374,10 +379,12 @@ class WCAGUICarousel extends HTMLElement {
   /** Move to the next slide group. */
   next() {
     if (this.#isAtEnd) return;
+
     this.#currentSlide = Math.min(
       this.#maxSlideIndex,
       this.#currentSlide + this.#slidesPerGroup
     );
+
     this.#scrollToSlide(this.#currentSlide);
     this.#updateButtonStates();
     this.#updateStatus();
@@ -450,28 +457,35 @@ class WCAGUICarousel extends HTMLElement {
     const items = this.#slideItems();
     this.#totalSlides = items.length;
     items.forEach((item, i) => {
-      if (typeof item.setSlidePosition === "function") {
-        item.setSlidePosition(i + 1, this.#totalSlides);
-      }
+      /** @type {{ setSlidePosition?: (index: number, total: number) => void } & Element} */
+      (item).setSlidePosition?.(i + 1, this.#totalSlides);
     });
     this.#updateButtonStates();
     this.#updateStatus();
   }
 
+  /**
+   * @param {number} slideIndex
+   * @param {ScrollBehavior} [behavior="smooth"]
+   */
   #scrollToSlide(slideIndex, behavior = "smooth") {
     if (!this.#track) return;
-    const slideWidth = this.#track.scrollWidth / this.#totalSlides;
-    const scrollLeft = (slideIndex - 1) * slideWidth;
-    this.#track.scrollTo({ left: scrollLeft, behavior });
+
+    const items = this.#slideItems();
+    const target = /** @type {HTMLElement | undefined} */ (items[slideIndex - 1]);
+
+    if (!target) return;
+
+    this.#track.scrollTo({ left: target.offsetLeft, behavior });
   }
 
   #updateButtonStates() {
-    this.#prevButton.disabled = this.#isAtStart;
-    this.#nextButton.disabled = this.#isAtEnd;
+    /** @type {HTMLButtonElement} */ (this.#prevButton).disabled = this.#isAtStart;
+    /** @type {HTMLButtonElement} */ (this.#nextButton).disabled = this.#isAtEnd;
   }
 
   #updateStatus() {
-    this.#status.textContent = `Slide ${this.#currentSlide} of ${this.#totalSlides}`;
+    /** @type {HTMLElement} */ (this.#status).textContent = `Slide ${this.#currentSlide} of ${this.#totalSlides}`;
   }
 
   #applyTrackCSSVars() {
@@ -557,11 +571,15 @@ class WCAGUICarousel extends HTMLElement {
   }
 
   #onBreakpointChange = () => {
-    const matched = this.#activeBreakpointConfig();
+    const matched = /** @type {{ slidesPerView?: number | string, slidesPerGroup?: number | string, spaceBetween?: string } | null} */ (this.#activeBreakpointConfig());
 
     if (matched) {
-      this.#slidesPerView = matched.slidesPerView ?? this.#defaultSlidesPerView;
-      this.#slidesPerGroup = matched.slidesPerGroup ?? this.#defaultSlidesPerGroup;
+      this.#slidesPerView = typeof matched.slidesPerView === "number"
+        ? matched.slidesPerView
+        : parseFloat(/** @type {string} */ (matched.slidesPerView ?? this.#defaultSlidesPerView));
+      this.#slidesPerGroup = typeof matched.slidesPerGroup === "number"
+        ? matched.slidesPerGroup
+        : parseInt(/** @type {string} */ (matched.slidesPerGroup ?? this.#defaultSlidesPerGroup), 10);
       this.#spaceBetween = matched.spaceBetween ?? this.#defaultSpaceBetween;
     } else {
       this.#slidesPerView = this.#defaultSlidesPerView;
@@ -578,8 +596,10 @@ class WCAGUICarousel extends HTMLElement {
   // ---------------------------------------------------------------------------
 
   #onScrollEnd = () => {
-    const slideWidth = this.#track.scrollWidth / this.#totalSlides;
-    const newSlide = Math.round(this.#track.scrollLeft / slideWidth) + 1;
+    const track = /** @type {HTMLElement} */ (this.#track);
+    const slideWidth = track.scrollWidth / this.#totalSlides;
+    const newSlide = Math.round(track.scrollLeft / slideWidth) + 1;
+
     if (newSlide !== this.#currentSlide) {
       this.#currentSlide = newSlide;
       this.#updateButtonStates();

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { LayoutProps } from "./$types";
-  import type { RootNode } from "$lib/components/types";
+  import type { PreviewMode, RootNode } from "$lib/components/types";
 
   import { page } from "$app/state";
   import AppHeader from "$lib/components/AppHeader.svelte";
@@ -18,12 +18,14 @@
   import SplitButton from "$lib/components/SplitButton.svelte";
   import Dialog from "$lib/components/Dialog.svelte";
   import EditLabel from "$lib/components/EditLabel.svelte";
+  import Tooltip from "$lib/components/Tooltip.svelte";
 
   import { copyToClipboard } from "$lib/utils/clipboard";
   import { attempt } from "$lib/utils/attempt";
   import { getInitials } from "$lib/utils/getInitials";
   import { generateBuildName } from "$lib/utils/buildName";
   import { downloadHTML } from "$lib/utils/fileUtils";
+  import { BREAKPOINTS } from "$lib/constants/breakpoints";
 
   import { signout, getUser } from "$lib/api/auth.remote";
   import { createBuild, updateBuild, deleteBuild, refreshLock, releaseLock } from "$lib/api/builds.remote";
@@ -39,6 +41,9 @@
   let cachedHTML = $state<string | null>(null);
   let cachedTreeHash = $state<string | null>(null);
   let isRenaming = $state(false);
+  let desktopButtonRef = $state<HTMLButtonElement>();
+  let tabletButtonRef = $state<HTMLButtonElement>();
+  let mobileButtonRef = $state<HTMLButtonElement>();
 
   const userQuery = await getUser();
   const userInitials = getInitials(userQuery.name ?? "");
@@ -71,6 +76,12 @@
     copy.status === "error"   ? "Failed"     :
     "Copy Code"
   );
+
+  const disabledModes = $derived({
+    desktop: appState.previewWidth < BREAKPOINTS.desktop,
+    tablet: appState.previewWidth < BREAKPOINTS.tablet,
+    mobile: false,
+  });
 
   function hashTree(tree: RootNode): string {
     return JSON.stringify(tree);
@@ -258,23 +269,50 @@
 {/snippet}
 
 {#snippet headerTrailing()}
-  <SegmentedControl size="sm" bind:value={appState.previewMode}>
-    <SegmentedButton value="desktop">
+  <SegmentedControl
+    size="sm"
+    bind:value={appState.previewMode}
+    onchange={(value) => {
+      if (value !== appState.previewMode) {
+        appState.previewMode = value as PreviewMode;
+      }
+    }}
+  >
+    <SegmentedButton
+      value="desktop"
+      bind:ref={desktopButtonRef}
+      disabled={disabledModes.desktop}
+    >
       <Icon size="1rem">
         <use href="#desktop" />
       </Icon>
     </SegmentedButton>
-    <SegmentedButton value="tablet">
+    <SegmentedButton
+      value="tablet"
+      bind:ref={tabletButtonRef}
+      disabled={disabledModes.tablet}
+    >
       <Icon size="1rem">
         <use href="#tablet" />
       </Icon>
     </SegmentedButton>
-    <SegmentedButton value="mobile">
+    <SegmentedButton
+      value="mobile"
+      bind:ref={mobileButtonRef}
+      disabled={disabledModes.mobile}
+    >
       <Icon size="1rem">
         <use href="#mobile" />
       </Icon>
     </SegmentedButton>
   </SegmentedControl>
+  <Tooltip anchor={desktopButtonRef}>
+    {disabledModes.desktop ? "Expand the preview pane to enable desktop view" : "Desktop"}
+  </Tooltip>
+  <Tooltip anchor={tabletButtonRef}>
+    {disabledModes.tablet ? "Expand the preview pane to enable tablet view" : "Tablet"}
+  </Tooltip>
+  <Tooltip anchor={mobileButtonRef}>Mobile</Tooltip>
   <Button
     color="success"
     disabled={appState.pageTree.children.length === 0 || copy.status === "copying" || copy.status === "error"}

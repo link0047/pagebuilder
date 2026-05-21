@@ -12,10 +12,16 @@ class WCAGUICarouselItem extends HTMLElement {
           scroll-snap-align: start;
           scroll-snap-stop: always;
           transition: border-color .2s ease-in-out;
+          height: var(--wcag-ui-carousel-item-height, auto);
+          aspect-ratio: var(--wcag-ui-carousel-item-aspect-ratio);
 
           @media (prefers-reduced-motion: reduce) {
             transition: none;
           }
+        }
+
+        ::slotted(*) {
+          height: var(--wcag-ui-carousel-item-slot-height, auto);
         }
       </style>
       <slot></slot>
