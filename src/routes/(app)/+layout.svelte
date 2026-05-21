@@ -78,8 +78,8 @@
   );
 
   const disabledModes = $derived({
-    desktop: appState.previewWidth < BREAKPOINTS.desktop,
-    tablet: appState.previewWidth < BREAKPOINTS.tablet,
+    desktop: appState.previewPaneWidth < BREAKPOINTS.desktop,
+    tablet: appState.previewPaneWidth < BREAKPOINTS.tablet,
     mobile: false,
   });
 

@@ -21,6 +21,7 @@ class AppState {
 
   #pageTree = $state<RootNode>(structuredClone(EMPTY_TREE));
   #previewMode = $state<PreviewMode>("desktop");
+  #previewPaneWidth = $state(0);
 
   #currentBuildId = $state<string | null>(null);
   #buildName = $state<string | null>(null);
@@ -59,6 +60,14 @@ class AppState {
 
   get previewWidth(): number {
     return PREVIEW_WIDTHS[this.#previewMode] ?? PREVIEW_WIDTHS.desktop;
+  }
+
+  get previewPaneWidth(): number {
+    return this.#previewPaneWidth;
+  }
+
+  setPreviewPaneWidth(width: number): void {
+    this.#previewPaneWidth = width;
   }
 
   // -------------------------

@@ -45,6 +45,7 @@
 
     const handleResize = debounce((entries: ResizeObserverEntry[]) => {
       const { width } = entries[0].contentRect;
+      appState.setPreviewPaneWidth(width);
 
       let newMode: PreviewMode;
       if (width >= BREAKPOINTS.desktop) {
