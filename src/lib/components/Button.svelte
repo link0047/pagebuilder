@@ -278,6 +278,12 @@
   .wcag-ui-button--full-width {
     width: 100%;
   }
+
+  .wcag-ui-button--ghost[data-surface="dark"] {
+    --wcag-ui-button-color: #fff;
+    --wcag-ui-button-hover-bg-color: rgba(255, 255, 255, 0.15);
+    --wcag-ui-button-hover-border-color: rgba(255, 255, 255, 0.15);
+  }
 }
 
 @layer colors {

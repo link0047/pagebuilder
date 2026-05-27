@@ -65,6 +65,7 @@
 
   async function handleShareBuild(build: BuildResult) {
     await copyToClipboard(`${window.location.origin}/preview/${build.id}`);
+    appState.setStatusMessage("Link copied to clipboard");
   }
 
   async function handleDuplicatingBuild(build: BuildResult) {

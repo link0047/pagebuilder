@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import Banner from "./Banner.svelte";
+  import { getAppState } from "./app-state.svelte";
 
   type MaybeElement = HTMLElement | null | undefined;
   type Props = {
@@ -15,9 +17,25 @@
     children,
     maxWidth = "1400px",
   }: Props = $props();
+
+  let appState = getAppState();
+  let hasBanner = $derived(appState.statusMessage !== null);
 </script>
 
-<main class="preview-viewport" bind:this={outerRef}>
+<main
+  bind:this={outerRef}
+  class="preview-viewport"
+  style:padding-block-start={hasBanner ? "calc(1.5rem + 3rem)" : "1.5rem"}
+>
+  <Banner
+    placement="floating-top"
+    open={appState.statusMessage !== null}
+    closable
+    onclose={() => appState.setStatusMessage(null)}
+    style="--wcag-ui-banner-float-spacing: 0px; border-radius: 0;"
+  >
+    {appState.statusMessage}
+  </Banner>
   <div
     bind:this={ref}
     class="preview-content"
@@ -35,6 +53,7 @@
   */
 
   .preview-viewport {
+    position: relative;
     grid-area: preview;
     padding: 1.5rem;
     display: inline-flex;

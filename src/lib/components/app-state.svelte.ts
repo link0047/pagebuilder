@@ -27,6 +27,7 @@ class AppState {
   #buildName = $state<string | null>(null);
   #user = $state<User | null>(null);
   #lastSavedAt = $state<Date | null>(null);
+  #statusMessage = $state<string | null>(null);
   #isDirty = $state(false);
 
   #isLocked = $state(false);
@@ -66,8 +67,8 @@ class AppState {
     return this.#previewPaneWidth;
   }
 
-  setPreviewPaneWidth(width: number): void {
-    this.#previewPaneWidth = width;
+  get statusMessage(): string | null {
+    return this.#statusMessage;
   }
 
   // -------------------------
@@ -134,6 +135,14 @@ class AppState {
     this.#user = user;
   }
 
+  setPreviewPaneWidth(width: number): void {
+    this.#previewPaneWidth = width;
+  }
+
+  setStatusMessage(message: string | null): void {
+    this.#statusMessage = message;
+  }
+
   // -------------------------
   // Build management
   // -------------------------
@@ -148,6 +157,7 @@ class AppState {
       return;
     }
 
+    this.#statusMessage = null;
     this.#pageTree = structuredClone(buildData);
     this.#currentBuildId = buildId ?? null;
     this.#buildName = buildName ?? null;
@@ -157,6 +167,7 @@ class AppState {
   }
 
   clearBuild(): void {
+    this.#statusMessage = null;
     this.#pageTree = structuredClone(EMPTY_TREE);
     this.#currentBuildId = null;
     this.#buildName = null;
@@ -176,6 +187,7 @@ class AppState {
   }
 
   onSaveSuccess(id: string, name: string): void {
+    this.#statusMessage = null;
     this.#currentBuildId = id;
     this.#buildName = name;
     this.#isDirty = false;
