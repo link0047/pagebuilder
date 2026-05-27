@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { RemoteQuery } from "@sveltejs/kit";
 
-  import { deleteBuild, duplicateBuild, getBuilds, getUserBuilds, acquireLock, type BuildResult } from "$lib/api/builds.remote";
+  import { getBuilds, getUserBuilds, acquireLock, type BuildResult } from "$lib/api/builds.remote";
+  import { duplicateBuildAction, deleteBuildAction } from "$lib/api/builds.actions";
   import AppSidebarHeader from "$lib/components/AppSidebarHeader.svelte";
   import EmptyState from "$lib/components/EmptyState.svelte";
   import Button from "$lib/components/Button.svelte";
@@ -67,29 +68,13 @@
   }
 
   async function handleDuplicatingBuild(build: BuildResult) {
-    const { id } = build;
-
-    try {
-      await duplicateBuild({ id });
-      // Refresh both queries to keep them in sync
-      await buildsQuery.refresh();
-      await userBuildsQuery.refresh();
-    } catch (error) {
-      console.error("Failed to duplicate build:", error);
-    }
+    const queries = [buildsQuery, userBuildsQuery];
+    duplicateBuildAction(build.id, queries);
   }
 
   async function handleDeletingBuild(build: BuildResult) {
-    const { id } = build;
-
-    try {
-      await deleteBuild({ id });
-      // Refresh both queries to keep them in sync
-      await buildsQuery.refresh();
-      await userBuildsQuery.refresh();
-    } catch (error) {
-      console.error("Failed to delete build:", error);
-    }
+    const queries = [buildsQuery, userBuildsQuery];
+    deleteBuildAction(build.id, queries);
   }
 
   // Clean up refs when builds change

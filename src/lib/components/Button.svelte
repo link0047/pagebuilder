@@ -431,7 +431,7 @@
   }
 
   .wcag-ui-button[aria-disabled="true"] {
-  opacity: var(--wcag-ui-button-aria-disabled-opacity, 0.5);
+    opacity: var(--wcag-ui-button-aria-disabled-opacity, 0.5);
   }
 
   .wcag-ui-button[aria-disabled="true"]:not([data-loading]) {
@@ -445,10 +445,10 @@
 
 @layer sizes {
   .wcag-ui-button--size-xs {
-  --wcag-ui-button-height: 1.5rem;
-  --wcag-ui-button-font-size: 0.75rem;
-  --wcag-ui-button-padding-inline: 0.5rem;
-  --wcag-ui-button-gap: 0.25rem;
+    --wcag-ui-button-height: 1.5rem;
+    --wcag-ui-button-font-size: 0.75rem;
+    --wcag-ui-button-padding-inline: 0.5rem;
+    --wcag-ui-button-gap: 0.25rem;
   }
 
   .wcag-ui-button--size-xs::before {

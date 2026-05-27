@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getAppState } from "./app-state.svelte";
+  import type { PartialComponentNode } from "./component-registry";
   import { componentSchemas, type ComponentName, type ControlSchema } from "./component-schema";
   import PropertiesPanelSection from "./PropertiesPanelSection.svelte";
   import Icon from "./Icon.svelte";
@@ -19,6 +20,8 @@
   import Hint from "./Hint.svelte";
   import Checkbox from "./Checkbox.svelte";
   import EditableLabel from "./EditableLabel.svelte";
+  import Menu from "$lib/components/Menu.svelte";
+  import MenuItem from "$lib/components/MenuItem.svelte";
 
 
   type Props = { title?: string; };
@@ -26,6 +29,8 @@
   let { title }: Props = $props();
 
   let appState = getAppState();
+  let optionsButtonRef = $state<HTMLButtonElement>();
+  let editMode = $state(false);
 
   const DANGEROUS_PROTOCOLS = /^(javascript|data|vbscript):/i;
   const isOpen = $derived(appState.isPropertiesPanelOpen);
@@ -74,6 +79,20 @@
 
   function resolveOptionLabel(option: string | { value: string; text: string }): string {
     return typeof option === "string" ? option : option.text;
+  }
+
+  function handleDelete() {
+    if (appState.selectedComponentPath) {
+      appState.removeComponent(appState.selectedComponentPath);
+      appState.deselectComponent();
+    }
+  }
+
+  function handleDuplicate() {
+    if (appState.selectedComponent && appState.selectedComponentPath) {
+      const { id, ...rest } = structuredClone($state.snapshot(appState.selectedComponent));
+      appState.insertComponent(rest as PartialComponentNode, appState.selectedComponentPath.slice(0, -1));
+    }
   }
 </script>
 
@@ -192,29 +211,46 @@
   aria-hidden={!isOpen}
 >
   <header class="properties-panel__header">
-    <Button
-      size="sm"
-      variant="ghost"
-      shape="rounded-square"
-      onclick={() => appState.deselectComponent()}
-      aria-label="Close properties panel"
-    >
-      <Icon>
-        <path d="M15.41 16.58 10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.42Z" />
-      </Icon>
-    </Button>
-    <EditableLabel
-      size="sm"
-      variant="ghost"
-      value={title}
-      oncommit={(value) => {
-        if (appState.selectedComponentPath) {
-          appState.updateProperty("meta.label", value);
-        }
-      }}
-    />
+    <div class="properties-panel__back-button">
+      <Button
+        size="sm"
+        variant="ghost"
+        shape="rounded-square"
+        onclick={() => appState.deselectComponent()}
+        aria-label="Close properties panel"
+      >
+        <Icon>
+          <use href="#chevron-left" />
+        </Icon>
+      </Button>
+    </div>
+    <div class="properties-panel__label">
+      <EditableLabel
+        size="sm"
+        variant="ghost"
+        value={title}
+        truncate
+        bind:editMode
+        oncommit={(value) => {
+          if (appState.selectedComponentPath) {
+            appState.updateProperty("meta.label", value);
+          }
+        }}
+      />
+    </div>
+    <div class="properties-panel__options-button">
+      <Button
+        size="sm"
+        variant="ghost"
+        shape="rounded-square"
+        bind:ref={optionsButtonRef}
+      >
+        <Icon>
+          <use href="#dots-horizontal" />
+        </Icon>
+      </Button>
+    </div>
   </header>
-
   <div class="properties-panel__content">
     {#if isOpen && selectedComponent && schema}
       {#each schema.sections as section}
@@ -254,6 +290,33 @@
   </div>
 </div>
 
+<Menu anchor={optionsButtonRef}>
+  <MenuItem onclick={() => editMode = true}>
+    {#snippet leading()}
+      <Icon size="16">
+        <use href="#pencil-outline" />
+      </Icon>
+    {/snippet}
+    Rename
+  </MenuItem>
+  <MenuItem onclick={handleDuplicate}>
+    {#snippet leading()}
+      <Icon size="16">
+        <use href="#duplicate" />
+      </Icon>
+    {/snippet}
+    Duplicate
+  </MenuItem>
+  <MenuItem onclick={handleDelete}>
+    {#snippet leading()}
+      <Icon size="16">
+        <use href="#delete" />
+      </Icon>
+    {/snippet}
+    Delete
+  </MenuItem>
+</Menu>
+
 <style>
   .properties-panel {
     position: absolute;
@@ -279,9 +342,29 @@
     border-bottom: 0.0625rem solid #ebebeb;
     display: grid;
     gap: 0.5rem;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "back label options";
     align-items: center;
     padding-inline: 0.5rem;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .properties-panel__back-button {
+    grid-area: back;
+  }
+
+  .properties-panel__label {
+    grid-area: label;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: .25rem;
+  }
+
+  .properties-panel__options-button {
+    grid-area: options;
   }
 
   .properties-panel__content {
