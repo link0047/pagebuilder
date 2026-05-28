@@ -207,11 +207,12 @@
 		updatePosition(false);
 	}
 }} />
+
 <Portal>
 	<div
 		bind:this={ref}
-		class="uikit-menu"
-		class:uikit-menu--open={open}
+		class="wcag-ui-menu"
+		class:wcag-ui-menu--open={open}
 		role="menu"
 		tabindex="-1"
 		aria-labelledby={menuState.disclosureId}
@@ -222,9 +223,8 @@
 	</div>
 </Portal>
 
-
 <style>
-	.uikit-menu {
+	.wcag-ui-menu {
 		position: fixed;
 		top: 0;
 		left: 0;
@@ -244,7 +244,7 @@
 	  word-break: keep-all;
 	}
 
-	.uikit-menu--open {
+	.wcag-ui-menu--open {
 		opacity: 1;
 		pointer-events: initial;
 	}

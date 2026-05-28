@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { type Snippet } from "svelte";
+	import type { Snippet } from "svelte";
 	import { getMenuState } from "./menu-state.svelte";
 
 	type MenuKind = "menuitem" | "menuitemcheckbox" | "menuitemradio";
 	type Size = "xs" | "sm" | "md" | "lg" | "xl";
 	type ElementType = "button" | "a";
-	type ButtonType = "button" | "submit" | "reset"; 
+	type ButtonType = "button" | "submit" | "reset";
 
 	type Props = {
 		children?: Snippet;
@@ -56,42 +56,42 @@
 	}
 </script>
 
-<svelte:element 
+<svelte:element
 	this={as}
-	role={type} 
+	role={type}
 	type={as === "button" ? type : undefined}
 	aria-checked={kind !== "menuitem" ? checked : undefined}
 	aria-disabled={disabled}
-	class="uikit-menuitem"
-	class:uikit-menuitem--radio={kind === "menuitemradio"}
-	class:uikit-menuitem--checkbox={kind === "menuitemcheckbox"}
-	class:uikit-menuitem--size-xs={size === "xs"}
-	class:uikit-menuitem--size-sm={size === "sm"}
-	class:uikit-menuitem--size-lg={size === "lg"}
-	class:uikit-menuitem--size-xl={size === "xl"}
+	class="wcag-ui-menuitem"
+	class:wcag-ui-menuitem--radio={kind === "menuitemradio"}
+	class:wcag-ui-menuitem--checkbox={kind === "menuitemcheckbox"}
+	class:wcag-ui-menuitem--size-xs={size === "xs"}
+	class:wcag-ui-menuitem--size-sm={size === "sm"}
+	class:wcag-ui-menuitem--size-lg={size === "lg"}
+	class:wcag-ui-menuitem--size-xl={size === "xl"}
 	tabindex={disabled ? undefined : -1}
 	disabled={as === "button" ? disabled : undefined}
 	onclick={handleClick}
 	{...restProps}
 >
 	{#if leading}
-		<span class="uikit-menu-item__leading">
+		<span class="wcag-ui-menu-item__leading">
 			{@render leading()}
 		</span>
 	{/if}
-	
-	<span class="uikit-menu-item__content">
+
+	<span class="wcag-ui-menu-item__content">
 		{@render children?.()}
 	</span>
-	
+
 	{#if shortcut}
-		<span class="uikit-menu-item__shortcut">
+		<span class="wcag-ui-menu-item__shortcut">
 			{shortcut}
 		</span>
 	{/if}
-	
+
 	{#if trailing}
-		<span class="uikit-menu-item__trailing">
+		<span class="wcag-ui-menu-item__trailing">
 			{@render trailing()}
 		</span>
 	{/if}
@@ -102,67 +102,67 @@
 
 	@layer {
 		:root {
-			--uikit-menuitem-disabled-opacity: 0.5;
-			--uikit-menuitem-disabled-cursor: not-allowed;
-			--uikit-menuitem-height: 2rem;
-			--uikit-menuitem-padding-inline: 1rem;
-			--uikit-menuitem-font-size: 1rem;
+			--wcag-ui-menuitem-disabled-opacity: 0.5;
+			--wcag-ui-menuitem-disabled-cursor: not-allowed;
+			--wcag-ui-menuitem-height: 2rem;
+			--wcag-ui-menuitem-padding-inline: 1rem;
+			--wcag-ui-menuitem-font-size: 1rem;
 		}
 	}
-	
+
 	@layer base {
-		.uikit-menuitem {
+		.wcag-ui-menuitem {
 			width: 100%;
 			white-space: normal;
 			word-break: break-word;
 			display: flex;
-			font-size: var(--uikit-menuitem-font-size);
-			height: var(--uikit-menuitem-height);
+			font-size: var(--wcag-ui-menuitem-font-size);
+			height: var(--wcag-ui-menuitem-height);
 			align-items: center;
 			appearance: none;
 			border: none;
-			padding-inline: var(--uikit-menuitem-padding-inline);
+			padding-inline: var(--wcag-ui-menuitem-padding-inline);
 			background-color: #fff;
 			user-select: none;
 			cursor: pointer;
 			gap: 1ch;
 		}
 
-		.uikit-menuitem:hover {
+		.wcag-ui-menuitem:hover {
 			background-color: #f2f2f2;
 		}
 	}
 
 	@layer sizes {
-		.uikit-menuitem--size-xs {
-			--uikit-menuitem-height: 1.5rem;
-			--uikit-menuitem-padding-inline: .5rem;
-			--uikit-menuitem-font-size: .75rem;
+		.wcag-ui-menuitem--size-xs {
+		--wcag-ui-menuitem-height: 1.5rem;
+		--wcag-ui-menuitem-padding-inline: .5rem;
+		--wcag-ui-menuitem-font-size: .75rem;
 		}
 
-		.uikit-menuitem--size-sm {
-			--uikit-menuitem-height: 1.75rem;
-			--uikit-menuitem-padding-inline: .75rem;
-			--uikit-menuitem-font-size: .875rem;
+		.wcag-ui-menuitem--size-sm {
+			--wcag-ui-menuitem-height: 1.75rem;
+			--wcag-ui-menuitem-padding-inline: .75rem;
+			--wcag-ui-menuitem-font-size: .875rem;
 		}
 
-		.uikit-menuitem--size-lg {
-			--uikit-menuitem-height: 2.5rem;
-			--uikit-menuitem-padding-inline: 1.25rem;
-			--uikit-menuitem-font-size: 1.125rem;
+		.wcag-ui-menuitem--size-lg {
+			--wcag-ui-menuitem-height: 2.5rem;
+			--wcag-ui-menuitem-padding-inline: 1.25rem;
+			--wcag-ui-menuitem-font-size: 1.125rem;
 		}
 
-		.uikit-menuitem--size-xl {
-			--uikit-menuitem-height: 3rem;
-			--uikit-menuitem-padding-inline: 1.5rem;
-			--uikit-menuitem-font-size: 1.25rem;
+		.wcag-ui-menuitem--size-xl {
+			--wcag-ui-menuitem-height: 3rem;
+			--wcag-ui-menuitem-padding-inline: 1.5rem;
+			--wcag-ui-menuitem-font-size: 1.25rem;
 		}
 	}
 
 	@layer states {
-		.uikit-menuitem:disabled {
-			opacity: var(--uikit-menuitem-disabled-opacity);
-			cursor: var(--uikit-menuitem-disabled-cursor);
+		.wcag-ui-menuitem:disabled {
+		opacity: var(--wcag-ui-menuitem-disabled-opacity);
+		cursor: var(--wcag-ui-menuitem-disabled-cursor);
 		}
 	}
 

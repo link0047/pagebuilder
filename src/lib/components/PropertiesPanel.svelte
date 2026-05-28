@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { getAppState } from "./app-state.svelte";
   import type { PartialComponentNode } from "./component-registry";
+
+  import { getAppState } from "./app-state.svelte";
   import { componentSchemas, type ComponentName, type ControlSchema } from "./component-schema";
   import PropertiesPanelSection from "./PropertiesPanelSection.svelte";
   import Icon from "./Icon.svelte";
@@ -22,7 +23,6 @@
   import EditableLabel from "./EditableLabel.svelte";
   import Menu from "$lib/components/Menu.svelte";
   import MenuItem from "$lib/components/MenuItem.svelte";
-
 
   type Props = { title?: string; };
 
@@ -329,7 +329,6 @@
     top: 0;
     left: 0;
     transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --uikit-button-border-radius: 0.5rem;
   }
 
   .properties-panel[aria-hidden="true"] {

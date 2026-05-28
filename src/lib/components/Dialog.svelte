@@ -86,8 +86,8 @@
     <Backdrop {open} />
   {/if}
   <div
-    class="uikit-dialog-wrapper"
-    class:uikit-dialog-wrapper--open={open}
+    class="wcag-ui-dialog-wrapper"
+    class:wcag-ui-dialog-wrapper--open={open}
   >
     <div
       bind:this={ref}
@@ -96,18 +96,18 @@
       aria-labelledby={title || header ? dialogState.titleId : undefined}
       aria-describedby={dialogState.contentId}
       role="dialog"
-      class="uikit-dialog"
-      class:uikit-dialog--open={open}
-      class:uikit-dialog--fullscreen={variant === "fullscreen"}
-      class:uikit-dialog--lightbox={variant === "lightbox"}
-      class:uikit-dialog--size-sm={size === "sm"}
-      class:uikit-dialog--size-lg={size === "lg"}
-      class:uikit-dialog--size-xl={size === "xl"}
+      class="wcag-ui-dialog"
+      class:wcag-ui-dialog--open={open}
+      class:wcag-ui-dialog--fullscreen={variant === "fullscreen"}
+      class:wcag-ui-dialog--lightbox={variant === "lightbox"}
+      class:wcag-ui-dialog--size-sm={size === "sm"}
+      class:wcag-ui-dialog--size-lg={size === "lg"}
+      class:wcag-ui-dialog--size-xl={size === "xl"}
       tabindex="-1"
       {...restProps}
     >
       {#if controls || hasCloseButton}
-        <div class="uikit-dialog__controls">
+        <div class="wcag-ui-dialog__controls">
           {@render controls?.()}
           {#if hasCloseButton}
             <Button shape="circle" variant="ghost" onclick={() => dialogState.close()}>
@@ -119,18 +119,18 @@
         </div>
       {/if}
       {#if header || title}
-        <header class="uikit-dialog__header">
+        <header class="wcag-ui-dialog__header">
           {@render header?.()}
           {#if title}
-            <span class="uikit-dialog__title" id={dialogState.titleId}>{title}</span>
+            <span class="wcag-ui-dialog__title" id={dialogState.titleId}>{title}</span>
           {/if}
         </header>
       {/if}
-      <div class="uikit-dialog__content" id={dialogState.contentId}>
+      <div class="wcag-ui-dialog__content" id={dialogState.contentId}>
         {@render children?.()}
       </div>
       {#if footer}
-        <footer class="uikit-dialog__footer">
+        <footer class="wcag-ui-dialog__footer">
           {@render footer()}
         </footer>
       {/if}
@@ -139,7 +139,7 @@
 </Portal>
 
 <style>
-  .uikit-dialog-wrapper {
+  .wcag-ui-dialog-wrapper {
     position: fixed;
     inset: 0;
     z-index: 519;
@@ -152,13 +152,13 @@
     transition: visibility 0s linear .25s;
   }
 
-  .uikit-dialog-wrapper--open {
+  .wcag-ui-dialog-wrapper--open {
     visibility: visible;
     pointer-events: initial;
     transition: visibility 0s linear 0s;
   }
 
-  .uikit-dialog {
+  .wcag-ui-dialog {
     position: relative;
     box-sizing: border-box;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -182,7 +182,7 @@
       "footer footer footer";
   }
 
-  .uikit-dialog__controls {
+  .wcag-ui-dialog__controls {
     display: flex;
     flex-flow: row nowrap;
     gap: .5rem;
@@ -193,7 +193,7 @@
     justify-self: end;
   }
 
-  .uikit-dialog__header {
+  .wcag-ui-dialog__header {
     grid-area: header;
     height: 4rem;
     display: flex;
@@ -202,7 +202,7 @@
     border-bottom: 1px solid #d1d1d1;
   }
 
-  .uikit-dialog__title {
+  .wcag-ui-dialog__title {
     font-size: 1.25rem;
     font-weight: 500;
     color: #212121;
@@ -210,39 +210,39 @@
     line-height: 1;
   }
 
-  .uikit-dialog__content,
-  .uikit-dialog__footer {
+  .wcag-ui-dialog__content,
+  .wcag-ui-dialog__footer {
     padding-inline: 1.5rem;
     padding-block: 1rem;
   }
 
-  .uikit-dialog__content {
+  .wcag-ui-dialog__content {
     grid-area: content;
   }
 
-  .uikit-dialog__footer {
+  .wcag-ui-dialog__footer {
     grid-area: footer;
     border-top: 1px solid #d1d1d1;
   }
 
-  .uikit-dialog--open {
+  .wcag-ui-dialog--open {
     opacity: 1;
     transform: scale(1);
   }
 
-  .uikit-dialog--size-sm {
+  .wcag-ui-dialog--size-sm {
     max-width: 280px;
   }
 
-  .uikit-dialog--size-lg {
+  .wcag-ui-dialog--size-lg {
     max-width: 840px;
   }
 
-  .uikit-dialog--size-xl {
+  .wcag-ui-dialog--size-xl {
     max-width: 1120px;
   }
 
-  .uikit-dialog--fullscreen {
+  .wcag-ui-dialog--fullscreen {
     width: 100vw;
     height: 100vh;
     max-width: 100vw;
@@ -251,7 +251,7 @@
     border-radius: 0;
   }
 
-  .uikit-dialog--lightbox {
+  .wcag-ui-dialog--lightbox {
     width: calc(100vw - 1rem);
     max-width: 1400px;
     min-height: 400px;

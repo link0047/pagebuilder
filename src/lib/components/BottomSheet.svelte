@@ -13,10 +13,12 @@
     children?: Snippet;
     title?: string;
     disclosure: HTMLElement | undefined;
+    trigger?: boolean;
     open?: boolean;
     hasBackdrop?: boolean;
     hasCloseButton?: boolean;
     closeOnEsc?: boolean;
+    closeOnOutsideClick?: boolean;
     ref?: HTMLElement,
     [key: string]: unknown;
   }
@@ -28,6 +30,7 @@
     children,
     title,
     disclosure,
+    trigger = true,
     open = $bindable(false),
     hasBackdrop = true,
     hasCloseButton = true,
@@ -38,9 +41,11 @@
   }: Props = $props();
 
   const dialogState = setDialogState(
-		() => open,
-		(value) => open = value
-	);
+    () => open,
+    (value) => open = value,
+    () => ({ closeOnEsc, closeOnOutsideClick }),
+    () => trigger
+  );
   const id = dialogState.id;
 
   onMount(() => {
@@ -67,8 +72,8 @@
 <Portal>
   <Backdrop {open} />
   <div
-    class="uikit-bottom-sheet-wrapper"
-    class:uikit-bottom-sheet-wrapper--open={open}
+    class="wcag-ui-bottom-sheet-wrapper"
+    class:wcag-ui-bottom-sheet-wrapper--open={open}
   >
     <div
       bind:this={ref}
@@ -77,13 +82,13 @@
       aria-labelledby={title || header ? dialogState.titleId : undefined}
       aria-describedby={dialogState.contentId}
       role="dialog"
-      class="uikit-bottom-sheet"
-      class:uikit-bottom-sheet--open={open}
+      class="wcag-ui-bottom-sheet"
+      class:wcag-ui-bottom-sheet--open={open}
       tabindex="-1"
       {...restProps}
     >
       {#if controls || hasCloseButton}
-        <div class="uikit-bottom-sheet__controls">
+        <div class="wcag-ui-bottom-sheet__controls">
           {@render controls?.()}
           {#if hasCloseButton}
             <Button shape="circle" variant="ghost" onclick={() => dialogState.close()}>
@@ -95,18 +100,18 @@
         </div>
       {/if}
       {#if header || title}
-        <header class="uikit-bottom-sheet__header">
+        <header class="wcag-ui-bottom-sheet__header">
           {@render header?.()}
           {#if title}
-            <span class="uikit-bottom-sheet__title" id={dialogState.titleId}>{title}</span>
+            <span class="wcag-ui-bottom-sheet__title" id={dialogState.titleId}>{title}</span>
           {/if}
         </header>
       {/if}
-      <div class="uikit-bottom-sheet__content" id={dialogState.contentId}>
+      <div class="wcag-ui-bottom-sheet__content" id={dialogState.contentId}>
         {@render children?.()}
       </div>
 			{#if footer}
-				<footer class="uikit-bottom-sheet__footer">
+				<footer class="wcag-ui-bottom-sheet__footer">
 					{@render footer()}
 				</footer>
 			{/if}
@@ -115,7 +120,7 @@
 </Portal>
 
 <style>
-  .uikit-bottom-sheet-wrapper {
+  .wcag-ui-bottom-sheet-wrapper {
 		position: fixed;
 		inset: 0;
 		z-index: 519;
@@ -128,13 +133,13 @@
     transition: visibility 0s linear .25s;
 	}
 
-  .uikit-bottom-sheet-wrapper--open {
+  .wcag-ui-bottom-sheet-wrapper--open {
     visibility: visible;
     pointer-events: initial;
     transition: visibility 0s linear 0s;
   }
 
-	.uikit-bottom-sheet {
+	.wcag-ui-bottom-sheet {
     position: relative;
     box-sizing: border-box;
 		font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -159,7 +164,7 @@
       "footer footer footer";
 	}
 
-  .uikit-bottom-sheet__controls {
+  .wcag-ui-bottom-sheet__controls {
     display: flex;
     flex-flow: row nowrap;
     gap: .5rem;
@@ -171,7 +176,7 @@
     justify-self: end;
   }
 
-  .uikit-bottom-sheet__header {
+  .wcag-ui-bottom-sheet__header {
 		box-sizing: border-box;
     grid-area: header;
     height: 3.5rem;
@@ -181,7 +186,7 @@
 		align-items: center;
   }
 
-  .uikit-bottom-sheet__title {
+  .wcag-ui-bottom-sheet__title {
     font-size: 1.25rem;
     font-weight: 500;
 		color: #212121;
@@ -189,18 +194,18 @@
 		line-height: 1;
 	}
 
-  .uikit-bottom-sheet__content {
+  .wcag-ui-bottom-sheet__content {
     grid-area: content;
 		padding-inline: 1.5rem;
 		padding-block: 0;
   }
 
-	.uikit-bottom-sheet__footer {
+	.wcag-ui-bottom-sheet__footer {
     grid-area: footer;
     border-top: 1px solid #d1d1d1;
   }
 
-  .uikit-bottom-sheet--open {
+  .wcag-ui-bottom-sheet--open {
     /*opacity: 1;*/
     transform: translate3d(0, 0, 0);
   }

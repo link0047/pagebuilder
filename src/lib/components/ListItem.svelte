@@ -17,28 +17,26 @@
 </script>
 
 <li
-  class="uikit-list__item"
-  data-testid="list-item"
-  data-uikit-list-item
+  class="wcag-ui-list__item"
   {...restProps}
 >
   {#if leading}
-    <div class="uikit-list__leading">
+    <div class="wcag-ui-list__leading">
       {@render leading()}
     </div>
   {/if}
-  <div class="uikit-list__content">
+  <div class="wcag-ui-list__content">
     {@render children?.()}
   </div>
   {#if trailing}
-    <div class="uikit-list__trailing">
+    <div class="wcag-ui-list__trailing">
       {@render trailing()}
     </div>
   {/if}
 </li>
 
 <style>
-  .uikit-list__item {
+  .wcag-ui-list__item {
     min-height: 2.5rem;
     display: grid;
     grid-template-columns: auto 1fr auto;
@@ -49,15 +47,15 @@
     row-gap: 0.5rem;
   }
 
-  .uikit-list__leading {
+  .wcag-ui-list__leading {
     grid-area: leading;
   }
 
-  .uikit-list__content {
+  .wcag-ui-list__content {
     grid-area: content;
   }
 
-  .uikit-list__trailing {
+  .wcag-ui-list__trailing {
     grid-area: trailing;
   }
 </style>

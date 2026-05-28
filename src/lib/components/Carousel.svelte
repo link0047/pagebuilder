@@ -45,19 +45,19 @@
 
 <section
 	{id}
-	class="uikit-carousel"
-	style:--uikit-carousel-slide-per-view={carouselState.slidesPerView}
-	style:--uikit-carousel-space-between={carouselState.spaceBetween}
+	class="wcag-ui-carousel"
+	style:--wcag-ui-carousel-slide-per-view={carouselState.slidesPerView}
+	style:--wcag-ui-carousel-space-between={carouselState.spaceBetween}
 	aria-roledescription="carousel"
 	aria-label={label}
 >
-	<div class="uikit-carousel__status" role="status" aria-live="polite" aria-atomic="true">
+	<div class="wcag-ui-carousel__status" role="status" aria-live="polite" aria-atomic="true">
 		Slide {carouselState.currentSlide} of {carouselState.totalSlides}
 	</div>
-	<div class="uikit-carousel__controls">
+	<div class="wcag-ui-carousel__controls">
 		<button
 			type="button"
-			class="uikit-carousel__button uikit-carousel__button--prev"
+			class="wcag-ui-carousel__button wcag-ui-carousel__button--prev"
 			aria-label="Previous Slide"
 			aria-controls={trackId}
 			disabled={carouselState.isAtStart}
@@ -69,7 +69,7 @@
 		</button>
 		<button
 			type="button"
-			class="uikit-carousel__button uikit-carousel__button--next"
+			class="wcag-ui-carousel__button wcag-ui-carousel__button--next"
 			aria-label="Next Slide"
 			aria-controls={trackId}
 			disabled={carouselState.isAtEnd}
@@ -80,20 +80,20 @@
 			</Icon>
 		</button>
 	</div>
-	<div class="uikit-carousel__viewport">
-		<div class="uikit-carousel__track" id={trackId} bind:this={trackRef}>
+	<div class="wcag-ui-carousel__viewport">
+		<div class="wcag-ui-carousel__track" id={trackId} bind:this={trackRef}>
 			{@render children?.()}
 		</div>
 	</div>
 </section>
 
 <style>
-	.uikit-carousel {
-		--uikit-carousel-z-default: 999;
-		--uikit-carousel-button-width: 2rem;
-		--uikit-carousel-controls-gap: .25rem;
-		--uikit-carousel-slide-per-view: 2;
-		--uikit-carousel-space-between: 1rem;
+	.wcag-ui-carousel {
+	--wcag-ui-carousel-z-default: 999;
+	--wcag-ui-carousel-button-width: 2rem;
+	--wcag-ui-carousel-controls-gap: .25rem;
+	--wcag-ui-carousel-slide-per-view: 2;
+	--wcag-ui-carousel-space-between: 1rem;
 
 		position: relative;
 		box-sizing: border-box;
@@ -101,7 +101,7 @@
 	  -webkit-user-drag: none;
 	}
 
-	.uikit-carousel__status {
+	.wcag-ui-carousel__status {
 		position: absolute;
 		width: 1px;
 		height: 1px;
@@ -113,13 +113,13 @@
 		border-width: 0;
 	}
 
-	.uikit-carousel__viewport {
+	.wcag-ui-carousel__viewport {
 		position: relative;
-		anchor-name: --uikit-carousel-track;
-		padding-inline: calc(var(--uikit-carousel-button-width) + var(--uikit-carousel-controls-gap));
+		anchor-name: --wcag-ui-carousel-track;
+		padding-inline: calc(var(--wcag-ui-carousel-button-width) + var(--wcag-ui-carousel-controls-gap));
 	}
 
-	.uikit-carousel__track {
+	.wcag-ui-carousel__track {
 		box-sizing: border-box;
 		display: grid;
 		grid-auto-flow: column;
@@ -130,17 +130,17 @@
 		scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
-		grid-auto-columns: calc((100% - (var(--uikit-carousel-slide-per-view) - 1) * var(--uikit-carousel-space-between)) / var(--uikit-carousel-slide-per-view));
+		grid-auto-columns: calc((100% - (var(--wcag-ui-carousel-slide-per-view) - 1) * var(--wcag-ui-carousel-space-between)) / var(--wcag-ui-carousel-slide-per-view));
 		grid-template-rows: repeat(1, max-content);
-		column-gap: var(--uikit-carousel-space-between);
+		column-gap: var(--wcag-ui-carousel-space-between);
 		row-gap: 0;
 	}
 
-	.uikit-carousel__track::-webkit-scrollbar {
+	.wcag-ui-carousel__track::-webkit-scrollbar {
 		display: none;
 	}
 
-	.uikit-carousel__button {
+	.wcag-ui-carousel__button {
 		border: 1px solid transparent;
 		border-radius: .25rem;
 		appearance: none;
@@ -148,11 +148,11 @@
 		color: #212121;
 		align-items: center;
 		justify-content: center;
-		width: var(--uikit-carousel-button-width);
-		height: calc(var(--uikit-carousel-button-width) * 2);
+		width: var(--wcag-ui-carousel-button-width);
+		height: calc(var(--wcag-ui-carousel-button-width) * 2);
 		position: absolute;
 		top: 50%;
-		z-index: var(--uikit-carousel-z-default);
+		z-index: var(--wcag-ui-carousel-z-default);
 	  transform: translateY(-50%);
 		background-color: transparent;
 		cursor: pointer;
@@ -161,29 +161,29 @@
 		pointer-events: none;
 
 	  @supports (top: anchor(--name center)) {
-			position-anchor: --uikit-carousel-track;
-	    top: anchor(--uikit-carousel-track center, 50%);
+			position-anchor: --wcag-ui-carousel-track;
+	    top: anchor(--wcag-ui-carousel-track center, 50%);
 	  }
 	}
 
-	.uikit-carousel:hover .uikit-carousel__button {
+	.wcag-ui-carousel:hover .wcag-ui-carousel__button {
 		opacity: 1;
 		pointer-events: auto;
 	}
 
-	.uikit-carousel__button:not(:disabled):hover {
+	.wcag-ui-carousel__button:not(:disabled):hover {
 		background-color: color-mix(in srgb, transparent 0%, rgba(0, 0, 0, 0.15));
 	}
 
-	.uikit-carousel__button:disabled {
+	.wcag-ui-carousel__button:disabled {
 		display: none;
 	}
 
-	.uikit-carousel__button--prev {
+	.wcag-ui-carousel__button--prev {
 		left: 0;
 	}
 
-	.uikit-carousel__button--next {
+	.wcag-ui-carousel__button--next {
 		right: 0;
 	}
 </style>

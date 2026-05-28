@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Snippet } from "svelte";
+	import type { Snippet } from "svelte";
 
 	type Props = {
 		children: Snippet;
@@ -7,24 +7,24 @@
 	};
 
 	let {
-		children, 
+		children,
 		end
 	}: Props = $props();
 </script>
 
-<div class="uikit-navigation-rail">
-  <nav class="uikit-navigation-rail__content">
-		<section class="uikit-navigation-rail__start">
+<div class="wcag-ui-navigation-rail">
+  <nav class="wcag-ui-navigation-rail__content">
+		<section class="wcag-ui-navigation-rail__start">
 			{@render children?.()}
 		</section>
-		<section class="uikit-navigation-rail__end">
+		<section class="wcag-ui-navigation-rail__end">
 			{@render end?.()}
 		</section>
   </nav>
 </div>
 
 <style>
-	.uikit-navigation-rail {
+	.wcag-ui-navigation-rail {
 		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
@@ -37,7 +37,7 @@
 		padding-inline: .25rem;
 	}
 
-	.uikit-navigation-rail__content {
+	.wcag-ui-navigation-rail__content {
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
@@ -46,8 +46,8 @@
 		gap: .5rem;
 	}
 
-	.uikit-navigation-rail__start,
-	.uikit-navigation-rail__end {
+	.wcag-ui-navigation-rail__start,
+	.wcag-ui-navigation-rail__end {
 		display: flex;
 		flex-direction: column;
 		align-items: center;

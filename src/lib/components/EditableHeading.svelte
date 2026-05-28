@@ -19,7 +19,6 @@
   function makeEditable() {
     if (!ref) return;
 
-		console.log("edit mode");
     originalText = ref.textContent || "";
 
     if (ref.textContent === NBSP) {
@@ -40,10 +39,10 @@
 
   function checkAndHandleEmptyState() {
     if (!ref) return;
-    
+
     const content = ref.textContent || "";
     const isEmpty = content.trim() === "" || content === NBSP;
-    
+
     if (isEmpty && content !== NBSP) {
       ref.textContent = NBSP;
     }
@@ -51,16 +50,16 @@
 
   function handleBlur() {
     if (!ref) return;
-    
+
     const currentText = ref.textContent || "";
     const trimmedText = currentText.trim();
-    
+
     if (trimmedText === "" || currentText === NBSP) {
       ref.textContent = originalText;
     } else {
       ref.textContent = trimmedText; // Clean up whitespace
     }
-    
+
     ref.contentEditable = "false";
     isEditing = false;
   }
@@ -84,7 +83,7 @@
 			event.preventDefault();
 
 			if (originalText === ref?.textContent) return;
-			
+
 			const selection = window.getSelection();
 	    if (selection && selection.rangeCount > 0) {
 	      const range = selection.getRangeAt(0);
@@ -100,8 +99,8 @@
 
 <button
   bind:this={ref}
-	class="uikit-editable-heading"
-  class:uikit-editable-heading--editing={isEditing}
+	class="wcag-ui-editable-heading"
+	class:wcag-ui-editable-heading--editing={isEditing}
 	onclick={makeEditable}
 	onkeydown={handleKeyDown}
   onblur={handleBlur}
@@ -116,60 +115,60 @@
 
   @layer variables {
     :root {
-			--uikit-editable-heading-width: 100%;
-			--uikit-editable-heading-height: 2.5rem;
-			--uikit-editable-heading-padding-inline: .5rem;
-			
-      --uikit-editable-heading-font-size: 1rem;
-      --uikit-editable-heading-font-weight: 500;
-      --uikit-editable-heading-color: #212121;
-      --uikit-editable-heading-letter-spacing: 0;
-      --uikit-editable-heading-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+			--wcag-ui-editable-heading-width: 100%;
+			--wcag-ui-editable-heading-height: 2.5rem;
+			--wcag-ui-editable-heading-padding-inline: .5rem;
 
-			--uikit-editable-heading-border-radius: .5rem;
-			--uikit-editable-heading-border-width: 1px;
-			--uikit-editable-heading-border-style: solid;
-			--uikit-editable-heading-border-color: transparent;
+			--wcag-ui-editable-heading-font-size: 1rem;
+			--wcag-ui-editable-heading-font-weight: 500;
+			--wcag-ui-editable-heading-color: #212121;
+			--wcag-ui-editable-heading-letter-spacing: 0;
+			--wcag-ui-editable-heading-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
-			--uikit-editable-heading-bg-color: transparent;
-			--uikit-editable-heading-hover-bg-color: transparent;
-	    --uikit-editable-heading-hover-border-color: #adadad;
+			--wcag-ui-editable-heading-border-radius: .5rem;
+			--wcag-ui-editable-heading-border-width: 1px;
+			--wcag-ui-editable-heading-border-style: solid;
+			--wcag-ui-editable-heading-border-color: transparent;
 
-			--uikit-editable-heading-outline-color: #007acc;
-	    --uikit-editable-heading-outline-style: solid;
-	    --uikit-editable-heading-outline-width: 2px;
-	    --uikit-editable-heading-outline-offset: 0;
+			--wcag-ui-editable-heading-bg-color: transparent;
+			--wcag-ui-editable-heading-hover-bg-color: transparent;
+			--wcag-ui-editable-heading-hover-border-color: #adadad;
 
-			--uikit-editable-heading-transition-duration: 0.2s;
-	    --uikit-editable-heading-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+			--wcag-ui-editable-heading-outline-color: #007acc;
+			--wcag-ui-editable-heading-outline-style: solid;
+			--wcag-ui-editable-heading-outline-width: 2px;
+			--wcag-ui-editable-heading-outline-offset: 0;
+
+			--wcag-ui-editable-heading-transition-duration: 0.2s;
+			--wcag-ui-editable-heading-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
 
   @layer base {
-    .uikit-editable-heading {
+    .wcag-ui-editable-heading {
 			box-sizing: border-box;
 			position: relative;
       display: inline-flex;
 			align-items: center;
 			justify-content: baseline;
-			padding-inline: var(--uikit-editable-heading-padding-inline);
+			padding-inline: var(--wcag-ui-editable-heading-padding-inline);
 			appearance: none;
 			line-height: 1;
-			background-color: var(--uikit-editable-heading-bg-color);
+			background-color: var(--wcag-ui-editable-heading-bg-color);
 	    touch-action: manipulation;
-			width: var(--uikit-editable-heading-width);
-			height: var(--uikit-editable-heading-height);
-			font-family: var(--uikit-editable-heading-font-family);
-			font-size: var(--uikit-editable-heading-font-size);
-			font-weight: var(--uikit-editable-heading-font-weight);
+			width: var(--wcag-ui-editable-heading-width);
+			height: var(--wcag-ui-editable-heading-height);
+			font-family: var(--wcag-ui-editable-heading-font-family);
+			font-size: var(--wcag-ui-editable-heading-font-size);
+			font-weight: var(--wcag-ui-editable-heading-font-weight);
 			font-feature-settings: inherit;
 	    font-variation-settings: inherit;
-			letter-spacing: var(--uikit-editable-heading-letter-spacing);
+			letter-spacing: var(--wcag-ui-editable-heading-letter-spacing);
 			white-space: nowrap;
-			color: var(--uikit-editable-heading-color);
-			border: var(--uikit-editable-heading-border-width) var(--uikit-editable-heading-border-style) var(--uikit-editable-heading-border-color);
-			border-radius: var(--uikit-editable-heading-border-radius);
-			transition: background-color var(--uikit-editable-heading-transition-duration) var(--uikit-editable-heading-transition-timing), border-color var(--uikit-editable-heading-transition-duration) var(--uikit-editable-heading-transition-timing);
+			color: var(--wcag-ui-editable-heading-color);
+			border: var(--wcag-ui-editable-heading-border-width) var(--wcag-ui-editable-heading-border-style) var(--wcag-ui-editable-heading-border-color);
+			border-radius: var(--wcag-ui-editable-heading-border-radius);
+			transition: background-color var(--wcag-ui-editable-heading-transition-duration) var(--wcag-ui-editable-heading-transition-timing), border-color var(--wcag-ui-editable-heading-transition-duration) var(--wcag-ui-editable-heading-transition-timing);
     }
   }
 
@@ -178,22 +177,22 @@
   }
 
   @layer states {
-    .uikit-editable-heading:disabled {
+    .wcag-ui-editable-heading:disabled {
       cursor: not-allowed;
     }
 
-    .uikit-editable-heading:not(:disabled):hover {
-			background-color: var(--uikit-editable-heading-hover-bg-color);
-			border-color: var(--uikit-editable-heading-hover-border-color);
+    .wcag-ui-editable-heading:not(:disabled):hover {
+			background-color: var(--wcag-ui-editable-heading-hover-bg-color);
+			border-color: var(--wcag-ui-editable-heading-hover-border-color);
 			cursor: pointer;
     }
 
-    .uikit-editable-heading:focus-visible {
-      outline-offset: var(--uikit-editable-heading-outline-offset);
-	    outline: var(--uikit-editable-heading-outline-width) var(--uikit-editable-heading-outline-style) var(--uikit-editable-heading-outline-color);
+    .wcag-ui-editable-heading:focus-visible {
+      outline-offset: var(--wcag-ui-editable-heading-outline-offset);
+	    outline: var(--wcag-ui-editable-heading-outline-width) var(--wcag-ui-editable-heading-outline-style) var(--wcag-ui-editable-heading-outline-color);
     }
 
-    .uikit-editable-heading--editing {
+    .wcag-ui-editable-heading--editing {
       white-space: pre;
       cursor: text;
     }

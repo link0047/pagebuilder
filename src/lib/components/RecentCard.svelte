@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { type Snippet } from "svelte";
 	import Card from "./Card.svelte";
 	import Badge from "./Badge.svelte";
   import Icon from "./Icon.svelte";
@@ -42,7 +41,7 @@
   .recent-content {
     display: grid;
     grid-template-columns: auto 1fr;
-    grid-template-areas: 
+    grid-template-areas:
       "thumbnail name name"
       "thumbnail badge meta";
     column-gap: .5rem;
@@ -77,7 +76,7 @@
 		color: #454545;
     gap: .5ch;
   }
-  
+
   .recent-content__meta-label {
     line-height: 1;
   }

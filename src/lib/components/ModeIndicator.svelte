@@ -20,21 +20,21 @@
 </script>
 
 <span
-  class="uikit-mode-indicator"
+  class="wcag-ui-mode-indicator"
   role="status"
   aria-live="polite"
   aria-label="Current mode: {config.label}"
-  style="--uikit-mode-indicator-color:{config.color}"
+  style="--wcag-ui-mode-indicator-color:{config.color}"
 >
   <span class="visually-hidden">{config.label}</span>
 </span>
 
 <style>
-  .uikit-mode-indicator {
+  .wcag-ui-mode-indicator {
     width: .5rem;
     height: .5rem;
     border-radius: 50%;
-    background-color: var(--uikit-mode-indicator-color);
+    background-color: var(--wcag-ui-mode-indicator-color);
     animation: pulse 2s infinite;
   }
 

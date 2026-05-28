@@ -81,7 +81,7 @@
 </script>
 
 <ul
-	class="uikit-tree"
+	class="wcag-ui-tree"
 	role="tree"
 	aria-multiselectable={multiselect}
 	aria-label={label}
@@ -93,7 +93,7 @@
 </ul>
 
 <style>
-	.uikit-tree {
+	.wcag-ui-tree {
 		margin: 0;
 		padding: 0;
 		list-style: none;

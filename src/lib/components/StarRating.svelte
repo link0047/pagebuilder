@@ -12,7 +12,7 @@
   }: Props = $props();
 
 	const uid = generateId("star-rating");
-	const id = `uikit-starrating-${uid}`;
+	const id = `wcag-ui-starrating-${uid}`;
 	const titleId = `${id}-title`;
 	const descId = `${id}-desc`;
 	const gradientId = `${id}-partial`;
@@ -60,7 +60,7 @@
 </script>
 
 <svg
-	class="uikit-starrating"
+	class="wcag-ui-starrating"
 	role="img"
 	viewBox="0 0 {viewBoxWidth} 24"
 	aria-labelledby="{titleId} {descId}"
@@ -94,17 +94,17 @@
 
 <style>
 	:root {
-		--uikit-starrating-size: 1.5rem;
-		--uikit-starrating-fill-color: gold;
-		--uikit-starrating-stroke-color: #ccc;
+		--wcag-ui-starrating-size: 1.5rem;
+		--wcag-ui-starrating-fill-color: gold;
+		--wcag-ui-starrating-stroke-color: #ccc;
 	}
 
-	.uikit-starrating {
-		height: var(--uikit-starrating-size);
-		color: var(--uikit-starrating-fill-color);
+	.wcag-ui-starrating {
+		height: var(--wcag-ui-starrating-size);
+		color: var(--wcag-ui-starrating-fill-color);
 	}
 
-	.uikit-starrating .star-outline {
-		fill: var(--uikit-starrating-stroke-color);
+	.wcag-ui-starrating .star-outline {
+		fill: var(--wcag-ui-starrating-stroke-color);
 	}
 </style>

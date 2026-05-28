@@ -98,30 +98,30 @@
 <svelte:element
 	this={tag}
 	bind:this={ref}
-	class="uikit-treeitem"
-	class:uikit-treeitem--focused={isFocused}
+	class="wcag-ui-treeitem"
+	class:wcag-ui-treeitem--focused={isFocused}
 	role="treeitem"
 	aria-level={currentLevel}
 	aria-selected={isSelected}
 	aria-expanded={hasChildren ? isExpanded : undefined}
 	{tabindex}
-	style="--uikit-treeitem-depth:{parentLevel}"
+	style="--wcag-ui-treeitem-depth:{parentLevel}"
 	{...restProps}
 >
 	<div
-		class="uikit-treeitem__content"
+		class="wcag-ui-treeitem__content"
 		onclick={handleClick}
 		role="none"
 	>
 		{#if hasChildren}
 			<button
-				class="uikit-treeitem__expand-btn"
+				class="wcag-ui-treeitem__expand-btn"
 				tabindex="-1"
 				aria-label={isExpanded ? "Collapse" : "Expand"}
 				onclick={handleExpandClick}
 			>
 				<svg
-					class="uikit-treeitem__expand-icon"
+					class="wcag-ui-treeitem__expand-icon"
 					focusable="false"
 					aria-hidden="true"
 					viewBox="0 0 24 24"
@@ -130,16 +130,16 @@
 				</svg>
 			</button>
 		{:else}
-			<span class="uikit-treeitem__expand-spacer" aria-hidden="true"></span>
+			<span class="wcag-ui-treeitem__expand-spacer" aria-hidden="true"></span>
 		{/if}
-		<span class="uikit-treeitem__text">
+		<span class="wcag-ui-treeitem__text">
 			{@render text?.()}
 		</span>
 	</div>
 	{#if hasChildren}
 		<ul
 			role="group"
-			class="uikit-treeitem__group"
+			class="wcag-ui-treeitem__group"
 			hidden={!isExpanded}
 		>
 			{@render children?.()}
@@ -148,7 +148,7 @@
 </svelte:element>
 
 <style>
-	.uikit-treeitem {
+	.wcag-ui-treeitem {
 		position: relative;
 		box-sizing: border-box;
 		display: flex;
@@ -157,24 +157,24 @@
 		background-color: transparent;
 		cursor: pointer;
 		border-radius: 0.25rem;
-		--uikit-treeitem-indentation-size: 1.5rem;
+		--wcag-ui-treeitem-indentation-size: 1.5rem;
 	}
 
-	.uikit-treeitem:focus {
+	.wcag-ui-treeitem:focus {
 		outline: none;
 	}
 
-	.uikit-treeitem:focus-visible {
+	.wcag-ui-treeitem:focus-visible {
 		outline: 2px solid currentColor;
 		outline-offset: 1px;
 	}
 
-	.uikit-treeitem__expand-btn {
+	.wcag-ui-treeitem__expand-btn {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: var(--uikit-treeitem-indentation-size);
-		height: var(--uikit-treeitem-indentation-size);
+		width: var(--wcag-ui-treeitem-indentation-size);
+		height: var(--wcag-ui-treeitem-indentation-size);
 		padding: 0;
 		margin: 0;
 		border: none;
@@ -185,26 +185,26 @@
 		flex-shrink: 0;
 	}
 
-	.uikit-treeitem__expand-btn:focus-visible {
+	.wcag-ui-treeitem__expand-btn:focus-visible {
 		outline: 2px solid currentColor;
 		outline-offset: 1px;
 	}
 
-	.uikit-treeitem__expand-spacer {
+	.wcag-ui-treeitem__expand-spacer {
 		display: inline-block;
-		width: var(--uikit-treeitem-indentation-size);
-		height: var(--uikit-treeitem-indentation-size);
+		width: var(--wcag-ui-treeitem-indentation-size);
+		height: var(--wcag-ui-treeitem-indentation-size);
 		flex-shrink: 0;
 	}
 
-	.uikit-treeitem__expand-icon {
-		width: var(--uikit-treeitem-indentation-size);
-		height: var(--uikit-treeitem-indentation-size);
+	.wcag-ui-treeitem__expand-icon {
+		width: var(--wcag-ui-treeitem-indentation-size);
+		height: var(--wcag-ui-treeitem-indentation-size);
 		fill: currentcolor;
 		transition: transform 150ms ease;
 	}
 
-	.uikit-treeitem__content {
+	.wcag-ui-treeitem__content {
 		display: flex;
 		gap: 0.5rem;
 		align-items: center;
@@ -212,41 +212,41 @@
 		border-radius: 0.25rem;
 		user-select: none;
 		padding-inline-start: calc(
-			0.5rem + var(--uikit-treeitem-indentation-size) * var(--uikit-treeitem-depth)
+			0.5rem + var(--wcag-ui-treeitem-indentation-size) * var(--wcag-ui-treeitem-depth)
 		);
 	}
 
-	.uikit-treeitem__text {
+	.wcag-ui-treeitem__text {
 		width: 100%;
 	}
 
-	.uikit-treeitem__group {
+	.wcag-ui-treeitem__group {
 		list-style: none;
 		margin: 0;
 		padding: 0;
 	}
 
-	.uikit-treeitem__group[hidden]:not([hidden="until-found"]) {
+	.wcag-ui-treeitem__group[hidden]:not([hidden="until-found"]) {
 		display: none !important;
 	}
 
-	.uikit-treeitem[aria-selected="true"] > .uikit-treeitem__content {
+	.wcag-ui-treeitem[aria-selected="true"] > .wcag-ui-treeitem__content {
 		background-color: #d2e3f6;
 	}
 
-	.uikit-treeitem[aria-selected="true"] {
+	.wcag-ui-treeitem[aria-selected="true"] {
 		background-color: #eef3fc;
 	}
 
-	.uikit-treeitem--focused > .uikit-treeitem__content,
-	.uikit-treeitem__content:hover {
+	.wcag-ui-treeitem--focused > .wcag-ui-treeitem__content,
+	.wcag-ui-treeitem__content:hover {
 		background-color: hsla(220, 20%, 65%, 0.08);
 	}
 
-	.uikit-treeitem[aria-expanded="true"]
-		> .uikit-treeitem__content
-		> .uikit-treeitem__expand-btn
-		> .uikit-treeitem__expand-icon {
+	.wcag-ui-treeitem[aria-expanded="true"]
+		> .wcag-ui-treeitem__content
+		> .wcag-ui-treeitem__expand-btn
+		> .wcag-ui-treeitem__expand-icon {
 		transform: rotate(90deg);
 	}
 </style>

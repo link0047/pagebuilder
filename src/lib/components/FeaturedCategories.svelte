@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { type Snippet } from "svelte";
+  import type { Snippet } from "svelte";
+
   import BlockSection, {
     type Alignment,
     type HeadingLevel,

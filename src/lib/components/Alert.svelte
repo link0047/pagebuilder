@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+
   import Button from "./Button.svelte";
   import Icon from "./Icon.svelte";
 
@@ -38,7 +39,7 @@
 
   let dismissed = $state(false);
   let paused = $state(false);
-  let remaining = $state(dismissAfter ? dismissAfter * 1000 : 0);
+  let remaining = $derived(dismissAfter ? dismissAfter * 1000 : 0);
   let startTime: number | null = null;
   let autoDismissTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -183,11 +184,11 @@
   }
 
   .wcag-alert__icon,
-  .wcag-alert__actions {
+  .wcag-alert__controls {
     flex-shrink: 0;
   }
 
-  .wcag-alert__actions {
+  .wcag-alert__controls {
     display: flex;
     gap: .5rem;
     align-items: center;

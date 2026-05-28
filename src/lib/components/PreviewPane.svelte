@@ -1,9 +1,10 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import type { MaybeElement } from "./types";
+
   import Banner from "./Banner.svelte";
   import { getAppState } from "./app-state.svelte";
 
-  type MaybeElement = HTMLElement | null | undefined;
   type Props = {
     children?: Snippet;
     maxWidth?: string | null;

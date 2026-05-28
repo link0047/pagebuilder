@@ -13,19 +13,19 @@
 
 <div
   aria-hidden="true"
-  class="uikit-backdrop"
-  class:uikit-backdrop--open={open}
+  class="wcag-ui-backdrop"
+  class:wcag-ui-backdrop--open={open}
   {...restProps}
 ></div>
 
 <style>
   :root {
-    --uikit-backdrop-z-index: 518;
+    --wcag-ui-backdrop-z-index: 518;
   }
 
-  .uikit-backdrop {
+  .wcag-ui-backdrop {
     position: fixed;
-    z-index: var(--uikit-backdrop-z-index, 1);
+    z-index: var(--wcag-ui-backdrop-z-index, 1);
     inset: 0;
     display: block;
     background-color: rgba(0, 0, 0, 0.7);
@@ -39,7 +39,7 @@
     transition: opacity .25s ease-in-out, visibility 0s linear .25s;
   }
 
-  .uikit-backdrop--open {
+  .wcag-ui-backdrop--open {
     opacity: 1;
     visibility: visible;
     pointer-events: initial;

@@ -1,8 +1,9 @@
 <script lang="ts">
+  import type { Variant, Color, Size, Shape } from "./Badge.svelte";
+
   import Image from "./Image.svelte";
   import Badge from "./Badge.svelte";
   import { BREAKPOINTS } from "$lib/constants/breakpoints";
-  import type { Variant, Color, Size, Shape } from "./Badge.svelte";
 
   type BadgePosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
 

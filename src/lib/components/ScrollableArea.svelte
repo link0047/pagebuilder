@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type Snippet } from "svelte";
+  import type { Snippet } from "svelte";
 
   type Props = {
     children: Snippet;
@@ -15,15 +15,16 @@
 </script>
 
 <div
-  class="uikit-scrollable-area"
-  style:--uikit-scrollable-area-grow={growValue}
+  class="wcag-ui-scrollable-area"
+  style:--wcag-ui-scrollable-area-grow={growValue}
   >
   {@render children?.()}
 </div>
 
 <style>
-  .uikit-scrollable-area {
-    flex-grow: var(--uikit-scrollable-area-grow, 1);
+  .wcag-ui-scrollable-area {
+    --wcag-ui-scrollable-area-grow: ;
+    flex-grow: var(--wcag-ui-scrollable-area-grow, 1);
     overflow-y: auto;
     scroll-behavior: smooth;
     scrollbar-width: thin;
@@ -31,16 +32,16 @@
   }
 
   /* Webkit Fallback */
-  .uikit-scrollable-area::-webkit-scrollbar {
+  .wcag-ui-scrollable-area::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
 
-  .uikit-scrollable-area::-webkit-scrollbar-track {
+  .wcag-ui-scrollable-area::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .uikit-scrollable-area::-webkit-scrollbar-thumb {
+  .wcag-ui-scrollable-area::-webkit-scrollbar-thumb {
     background-color: hsla(30, 3.3%, 11.8%, 0.35);
     border-radius: 4px;
   }

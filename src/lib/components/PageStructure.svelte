@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { PageTreeNode } from "./types";
+
   import PageStructure from "./PageStructure.svelte";
   import Button from "./Button.svelte";
   import Tree from "./Tree.svelte";
@@ -8,7 +10,6 @@
   import MenuItem from "./MenuItem.svelte";
   import { getAppState } from "./app-state.svelte";
   import { childConfigs, componentRegistry, type ChildOption } from "./component-registry";
-  import type { PageTreeNode } from "./types";
 
   type Props = {
     pageTree?: PageTreeNode;
