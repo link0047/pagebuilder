@@ -89,13 +89,15 @@
 </AppSidebar>
 
 <PreviewPane maxWidth="{appState.previewWidth}px" bind:ref={previewPaneRef} bind:outerRef={previewOuterRef}>
-  <iframe
-    bind:this={iframe}
-    src="/preview"
-    title="Page preview"
-    class="preview-frame"
-    sandbox="allow-scripts allow-same-origin allow-forms"
-  ></iframe>
+  {#if appState.userResolved && appState.user}
+    <iframe
+      bind:this={iframe}
+      src="/preview"
+      title="Page preview"
+      class="preview-frame"
+      sandbox="allow-scripts allow-same-origin allow-forms"
+    ></iframe>
+  {/if}
 </PreviewPane>
 
 <style>

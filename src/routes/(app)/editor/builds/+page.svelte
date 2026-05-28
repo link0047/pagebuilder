@@ -118,6 +118,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Builds - Page Builder</title>
+</svelte:head>
+
 {#snippet BuildsList(query: RemoteQuery<BuildResult[]>, emptyDescription: string, moreButtonRefs: Record<string, HTMLButtonElement>)}
   {#if query.loading && showSkeleton}
     <BuildCardSkeleton />

@@ -3,6 +3,7 @@
   import type { PreviewMode, RootNode } from "$lib/components/types";
 
   import { page } from "$app/state";
+  import { tick } from "svelte";
   import AppHeader from "$lib/components/AppHeader.svelte";
   import NavigationRail from "$lib/components/NavigationRail.svelte";
   import NavigationRailItem from "$lib/components/NavigationRailItem.svelte";
@@ -164,11 +165,6 @@
     }
   }
 
-  async function handleSignout(event: Event) {
-    // event.preventDefault();
-    console.log("signed out");
-  }
-
   async function handleRename(name: string) {
     if (!appState.currentBuildId || !name.trim()) return;
 
@@ -216,6 +212,12 @@
     if (!appState.currentBuildId) return;
     navigator.sendBeacon(`/api/builds/${appState.currentBuildId}/release-lock`);
   }
+
+  const handleEnhance = signout.enhance(async ({ submit }) => {
+    appState.setUser(null);
+    await submit();
+    window.location.href = "/login";
+  });
 
   const activeRoute = $derived.by(() => {
     const path = page.url.pathname;
@@ -350,7 +352,7 @@
   <Avatar bind:ref={avatarRef} text={userInitials} shape="circle" tag="button" />
   {#if avatarRef}
     <Menu anchor={avatarRef} placement="right-end">
-      <form {...signout} onsubmit={handleSignout}>
+      <form {...handleEnhance}>
         <MenuItem type="submit">
           {#snippet leading()}
             <Icon>

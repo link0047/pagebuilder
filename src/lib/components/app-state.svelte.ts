@@ -26,6 +26,7 @@ class AppState {
   #currentBuildId = $state<string | null>(null);
   #buildName = $state<string | null>(null);
   #user = $state<User | null>(null);
+  #userResolved = $state(false);
   #lastSavedAt = $state<Date | null>(null);
   #statusMessage = $state<string | null>(null);
   #isDirty = $state(false);
@@ -127,12 +128,17 @@ class AppState {
     return this.#hoveredComponentPath;
   }
 
+  get userResolved(): boolean {
+    return this.#userResolved;
+  }
+
   get user() {
     return this.#user;
   }
 
-  setUser(user: User): void {
+  setUser(user: User | null): void {
     this.#user = user;
+    this.#userResolved = true;
   }
 
   setPreviewPaneWidth(width: number): void {

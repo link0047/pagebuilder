@@ -37,7 +37,7 @@ export const signout = form(async () => {
 		return {
 			error: error instanceof APIError ? error.body?.message : "Failed to sign out"
 		};
-	}
+  }
 });
 
 export const resetPassword = form(resetPasswordSchema , async (data) => {

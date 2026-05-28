@@ -34,6 +34,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Editor - Page Builder</title>
+</svelte:head>
+
 <AppSidebarHeader title="Page Structure">
   <Select label="type" labelPosition="notched" size="sm">
     <option value="Homepage">Homepage</option>

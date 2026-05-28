@@ -24,6 +24,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Templates - Page Builder</title>
+</svelte:head>
+
 <AppSidebarHeader title="Templates"></AppSidebarHeader>
 <ScrollableArea>
   {#if templatesQuery.loading && showSkeleton}
