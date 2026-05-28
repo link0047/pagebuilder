@@ -1,7 +1,7 @@
-import adapter from '@sveltejs/adapter-auto';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import adapter from "@sveltejs/adapter-auto";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
-/** @type {import('@sveltejs/kit').Config} */
+/** @type {import("@sveltejs/kit").Config} */
 const config = {
 	// Consult https://svelte.dev/docs/kit/integrations
 	// for more information about preprocessors
@@ -9,8 +9,8 @@ const config = {
 
 	kit: {
 		alias: {
-    	$lib: 'src/lib',
-    	$styles: 'src/styles'
+    	$lib: "src/lib",
+    	$styles: "src/styles"
   	},
 		// adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
 		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
@@ -18,7 +18,24 @@ const config = {
 		adapter: adapter(),
 		experimental: {
 			remoteFunctions: true
-		},
+    },
+    csp: {
+      directives: {
+        "frame-ancestors": ["self"],
+      },
+      reportOnly: {
+        "default-src": ["self"],
+        "script-src": ["self"],
+        "style-src": ["self", "unsafe-inline"],
+        "img-src": ["self", "data:"],
+        "font-src": ["self"],
+        "connect-src": ["self"],
+        "frame-ancestors": ["none"],
+        "base-uri": ["self"],
+        "form-action": ["self"],
+        "report-uri": ["/csp-report"],
+      },
+    },
 	},
 	compilerOptions: {
 		experimental: {

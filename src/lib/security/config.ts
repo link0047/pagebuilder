@@ -12,7 +12,7 @@ export type SecurityConfig = {
 
 const base: SecurityHeader[] = [
   { name: "X-Content-Type-Options", value: "nosniff" },
-  { name: "X-Frame-Options", value: "DENY" },
+  { name: "X-Frame-Options", value: "SAMEORIGIN" },
   { name: "X-XSS-Protection", value: "0" },
   { name: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { name: "Permissions-Policy", value: "geolocation=(), camera=(), microphone=()" },
