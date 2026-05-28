@@ -22,15 +22,16 @@ const config = {
     csp: {
       directives: {
         "frame-ancestors": ["self"],
+        "img-src": ["self", "data:", "https:"],
       },
       reportOnly: {
         "default-src": ["self"],
         "script-src": ["self"],
         "style-src": ["self", "unsafe-inline"],
-        "img-src": ["self", "data:"],
+        "img-src": ["self", "data:", "https:"],
         "font-src": ["self"],
         "connect-src": ["self"],
-        "frame-ancestors": ["none"],
+        "frame-ancestors": ["self"],
         "base-uri": ["self"],
         "form-action": ["self"],
         "report-uri": ["/csp-report"],
