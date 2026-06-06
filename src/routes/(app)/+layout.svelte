@@ -3,7 +3,6 @@
   import type { PreviewMode, RootNode } from "$lib/components/types";
 
   import { page } from "$app/state";
-  import { tick } from "svelte";
   import AppHeader from "$lib/components/AppHeader.svelte";
   import NavigationRail from "$lib/components/NavigationRail.svelte";
   import NavigationRailItem from "$lib/components/NavigationRailItem.svelte";
@@ -245,7 +244,7 @@
 <svelte:window onbeforeunload={handleBeforeUnload} />
 
 {#snippet headerLeading()}
-  <a href="/" class="app-title">
+  <a href="/" class="app-title" aria-label="Page Builder home">
     <Icon viewBox="0 0 100 100" size="3rem">
       <use href="#logo" />
     </Icon>
@@ -281,27 +280,30 @@
     }}
   >
     <SegmentedButton
-      value="desktop"
       bind:ref={desktopButtonRef}
+      value="desktop"
       disabled={disabledModes.desktop}
+      aria-label="Desktop view"
     >
       <Icon size="1rem">
         <use href="#desktop" />
       </Icon>
     </SegmentedButton>
     <SegmentedButton
-      value="tablet"
       bind:ref={tabletButtonRef}
+      value="tablet"
       disabled={disabledModes.tablet}
+      aria-label="Tablet view"
     >
       <Icon size="1rem">
         <use href="#tablet" />
       </Icon>
     </SegmentedButton>
     <SegmentedButton
-      value="mobile"
       bind:ref={mobileButtonRef}
+      value="mobile"
       disabled={disabledModes.mobile}
+      aria-label="Mobile view"
     >
       <Icon size="1rem">
         <use href="#mobile" />

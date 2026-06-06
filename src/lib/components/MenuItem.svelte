@@ -58,7 +58,7 @@
 
 <svelte:element
 	this={as}
-	role={type}
+	role={kind}
 	type={as === "button" ? type : undefined}
 	aria-checked={kind !== "menuitem" ? checked : undefined}
 	aria-disabled={disabled}

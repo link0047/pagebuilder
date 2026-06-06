@@ -1,0 +1,4 @@
+allowBuilds:
+  svelte-preprocess: true
+blockExoticSubdeps: true
+trustPolicy: no-downgrade

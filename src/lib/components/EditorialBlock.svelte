@@ -59,7 +59,6 @@
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     gap: 1rem;
-    padding-inline: 1rem;
     container-type: inline-size;
   }
 </style>

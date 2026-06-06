@@ -30,18 +30,17 @@
 
 <AppSidebarHeader title="Templates"></AppSidebarHeader>
 <ScrollableArea>
-  {#if templatesQuery.loading && showSkeleton}
-    <BuildCardSkeleton />
-  {:else if templatesQuery.current}
-    {@const templates = templatesQuery.current}
-    {#if templates.length === 0}
-      <EmptyState title="No Templates Yet" description="Templates are reusable starting points for new builds" />
-    {:else}
-      {#each templates as template}
-        {template}
-      {/each}
+  {#if templatesQuery.loading}
+    {#if showSkeleton}
+      <BuildCardSkeleton />
     {/if}
   {:else if templatesQuery.error}
     <EmptyState title="Error" description="Failed to load templates" />
+  {:else if templatesQuery.current && templatesQuery.current.length === 0}
+    <EmptyState title="No Templates Yet" description="Templates are reusable starting points for new builds" />
+  {:else if templatesQuery.current}
+    {#each templatesQuery.current as template (template.id)}
+      {template.name}
+    {/each}
   {/if}
 </ScrollableArea>

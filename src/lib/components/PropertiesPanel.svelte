@@ -31,6 +31,7 @@
   let appState = getAppState();
   let optionsButtonRef = $state<HTMLButtonElement>();
   let editMode = $state(false);
+  let ref = $state<HTMLDivElement | undefined>();
 
   const DANGEROUS_PROTOCOLS = /^(javascript|data|vbscript):/i;
   const isOpen = $derived(appState.isPropertiesPanelOpen);
@@ -94,6 +95,16 @@
       appState.insertComponent(rest as PartialComponentNode, appState.selectedComponentPath.slice(0, -1));
     }
   }
+
+  $effect(() => {
+    if (ref) {
+      if (isOpen) {
+        ref.inert = false;
+      } else {
+        ref.inert = true;
+      }
+    }
+  });
 </script>
 
 {#snippet renderControls(control: ControlSchema)}
@@ -205,6 +216,7 @@
   that trap focus and block the rest of the UI.
 -->
 <div
+  bind:this={ref}
   class="properties-panel"
   role="complementary"
   aria-label={title}

@@ -1,18 +1,30 @@
 import * as v from "valibot"
 
+const ALLOWED_DOMAINS = ["spirithalloween.com", "spencergifts.com"] as const;
+
+const allowedEmailDomain = v.check(
+  (input: string) => ALLOWED_DOMAINS.includes(input.split("@")[1]?.toLowerCase() as (typeof ALLOWED_DOMAINS)[number]),
+  "Please enter a valid email address"
+);
+
+const allowedEmail = v.pipe(
+  v.string("Email must be a string"),
+  v.trim(),
+  v.toLowerCase(),
+  v.email("Please enter a valid email address"),
+  allowedEmailDomain
+);
+
 export const signupSchema = v.object({
 	name: v.pipe(
-		v.string("Name must be a string"), 
+		v.string("Name must be a string"),
 		v.trim(),
 		v.minLength(4, "Name must be at least 4 characters"),
 		v.maxLength(100, "Full name is too long")
 	),
-	email: v.pipe(
-		v.string("Email must be a string"), 
-		v.email("Please enter a valid email address")
-	),
+	email: allowedEmail,
 	password: v.pipe(
-		v.string("Password must be a string"), 
+		v.string("Password must be a string"),
 		v.minLength(8, "Password must be at least 8 characters"),
 		// Check for at least one letter (case-insensitive)
 		v.regex(/[a-zA-Z]/, "Password must contain at least one letter"),
@@ -23,18 +35,18 @@ export const signupSchema = v.object({
 
 export const loginSchema = v.object({
 	email: v.pipe(
-		v.string("Email must be a string"), 
+		v.string("Email must be a string"),
 		v.email("Please enter a valid email address")
 	),
 	password: v.pipe(
-		v.string("Password is required"), 
+		v.string("Password is required"),
 		v.minLength(1, "Please enter your password")
 	),
 });
 
 export const forgotPasswordSchema = v.object({
 	email: v.pipe(
-		v.string("Email must be a string"), 
+		v.string("Email must be a string"),
 		v.email("Invalid email address")
 	)
 });

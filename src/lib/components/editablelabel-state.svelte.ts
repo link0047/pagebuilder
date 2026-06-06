@@ -1,4 +1,4 @@
-import { tick } from "svelte";
+import { tick, untrack } from "svelte";
 
 type EditableLabelStateOptions = {
   getValue: () => string | undefined | null;
@@ -29,9 +29,15 @@ export class EditableLabelState {
     this.#opts = opts;
 
     $effect(() => {
-      if (opts.getEditMode()) {
-        this.startEditing();
-      }
+      // Only react to the editMode prop edge.
+      const editMode = opts.getEditMode();
+      // Everything that startEditing touches must be untracked so this effect
+      // does not re-run (and re-select the input) on every keystroke.
+      untrack(() => {
+        if (editMode && !this.isEditing) {
+          this.startEditing();
+        }
+      });
     });
   }
 
@@ -58,6 +64,8 @@ export class EditableLabelState {
   };
 
   handlePointerdown = (event: PointerEvent) => {
+    if (this.isEditing) return;
+
     if (event.pointerType !== "") {
       event.preventDefault();
       this.startEditing();
@@ -70,7 +78,9 @@ export class EditableLabelState {
     }
   };
 
-  async startEditing() {
+  startEditing = async () => {
+    if (this.isEditing) return;
+
     this.#snapshot = this.#opts.getValue() ?? "";
     this.#cancelling = false;
     this.isEditing = true;

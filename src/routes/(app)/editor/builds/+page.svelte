@@ -1,12 +1,17 @@
 <script lang="ts">
-  import type { RemoteQuery } from "@sveltejs/kit";
-
-  import { getBuilds, getUserBuilds, acquireLock, type BuildResult } from "$lib/api/builds.remote";
+  import {
+    getBuilds,
+    getUserBuilds,
+    type BuildListItem
+  } from "$lib/api/builds.remote";
   import { duplicateBuildAction, deleteBuildAction } from "$lib/api/builds.actions";
+  import { BuildsPage } from "$lib/utils/builds-page.svelte";
+  import { openBuild } from "$lib/utils/openBuild";
+  import { onMount } from "svelte";
   import AppSidebarHeader from "$lib/components/AppSidebarHeader.svelte";
   import EmptyState from "$lib/components/EmptyState.svelte";
   import Button from "$lib/components/Button.svelte";
-	import Icon from "$lib/components/Icon.svelte";
+  import Icon from "$lib/components/Icon.svelte";
   import Tabs from "$lib/components/Tabs.svelte";
   import TabList from "$lib/components/TabList.svelte";
   import Tab from "$lib/components/Tab.svelte";
@@ -16,11 +21,9 @@
   import ScrollableArea from "$lib/components/ScrollableArea.svelte";
   import Menu from "$lib/components/Menu.svelte";
   import MenuItem from "$lib/components/MenuItem.svelte";
-  import Dialog from "$lib/components/Dialog.svelte";
-  import RecentCard from "$lib/components/RecentCard.svelte";
   import Badge from "$lib/components/Badge.svelte";
+  import NewBuildDialog from "$lib/components/NewBuildDialog.svelte";
   import { getAppState } from "$lib/components/app-state.svelte";
-  import { goto } from "$app/navigation";
   import { copyToClipboard } from "$lib/utils/clipboard";
 
   const BUILDS_TABS = {
@@ -30,8 +33,8 @@
 
   type BuildsTab = typeof BUILDS_TABS[keyof typeof BUILDS_TABS];
 
-  let isDialogOpen = $state(false);
   let newBuildButtonRef = $state<HTMLButtonElement>();
+  let isNewBuildOpen = $state(false);
   let allBuildMoreButtonRefs = $state<Record<string, HTMLButtonElement>>({});
   let myBuildMoreButtonRefs = $state<Record<string, HTMLButtonElement>>({});
   let activeBuildsTab = $state<BuildsTab>(BUILDS_TABS.ALL);
@@ -39,73 +42,58 @@
   let skeletonTimer: ReturnType<typeof setTimeout>;
 
   const appState = getAppState();
-  const templates = ["Blank", "Spencer's Homepage", "Spirit Homepage"];
-  const buildsQuery = getBuilds();
-  const userBuildsQuery = getUserBuilds();
 
-  let recentBuilds = $derived.by(() => {
-    return buildsQuery.current?.slice(0, 5) ?? [];
+  const allBuilds = new BuildsPage((args) => getBuilds(args));
+  const myBuilds = new BuildsPage((args) => getUserBuilds(args));
+
+  onMount(() => {
+    allBuilds.loadFirst();
+    myBuilds.loadFirst();
   });
 
-  let currentBuildsQuery = $derived.by(() => {
-    return activeBuildsTab === BUILDS_TABS.MY_BUILDS ? userBuildsQuery : buildsQuery;
-  });
+  let currentPage = $derived(activeBuildsTab === BUILDS_TABS.MY_BUILDS ? myBuilds : allBuilds);
 
-  async function editBuild(build: BuildResult) {
-    try {
-      await acquireLock({ id: build.id });
-      appState.loadBuild(build.content, build.id, build.name);
-      appState.acquireLock(appState.user?.id ?? ""); // sync local state
-      goto("/editor");
-    } catch (error) {
-      // 423 means locked by someone else
-      console.error(`This build is currently being edited by ${build.locked_by_name ?? "another user"}`);
-    }
+  async function editBuild(build: BuildListItem) {
+    await openBuild(appState, build);
+    // On failure openBuild shows the message and returns { ok: false };
+    // either way nothing else to do here — success navigates away, failure stays on the list.
   }
 
-  async function handleShareBuild(build: BuildResult) {
+  async function handleShareBuild(build: BuildListItem) {
     await copyToClipboard(`${window.location.origin}/preview/${build.id}`);
     appState.setStatusMessage("Link copied to clipboard");
   }
 
-  async function handleDuplicatingBuild(build: BuildResult) {
-    const queries = [buildsQuery, userBuildsQuery];
-    duplicateBuildAction(build.id, queries);
+  async function handleDuplicatingBuild(build: BuildListItem) {
+    await duplicateBuildAction(build.id, []);
+    await allBuilds.reset();
+    await myBuilds.reset();
   }
 
-  async function handleDeletingBuild(build: BuildResult) {
-    const queries = [buildsQuery, userBuildsQuery];
-    deleteBuildAction(build.id, queries);
+  async function handleDeletingBuild(build: BuildListItem) {
+    await deleteBuildAction(build.id, []);
+    allBuilds.remove(build.id);
+    myBuilds.remove(build.id);
+    delete allBuildMoreButtonRefs[build.id];
+    delete myBuildMoreButtonRefs[build.id];
   }
 
-  // Clean up refs when builds change
   $effect(() => {
-    const allBuilds = buildsQuery.current ?? [];
-    const allBuildIds = new Set(allBuilds.map(b => b.id));
-
-    // Remove refs for builds that no longer exist in all builds
-    Object.keys(allBuildMoreButtonRefs).forEach(id => {
-      if (!allBuildIds.has(id)) {
-        delete allBuildMoreButtonRefs[id];
-      }
-    });
-  });
-
-  // Clean up refs when user builds change
-  $effect(() => {
-    const myBuilds = userBuildsQuery.current ?? [];
-    const myBuildIds = new Set(myBuilds.map(b => b.id));
-
-    // Remove refs for builds that no longer exist in my builds
-    Object.keys(myBuildMoreButtonRefs).forEach(id => {
-      if (!myBuildIds.has(id)) {
-        delete myBuildMoreButtonRefs[id];
-      }
+    const ids = new Set(allBuilds.items.map((b) => b.id));
+    Object.keys(allBuildMoreButtonRefs).forEach((id) => {
+      if (!ids.has(id)) delete allBuildMoreButtonRefs[id];
     });
   });
 
   $effect(() => {
-    if (buildsQuery.loading || userBuildsQuery.loading) {
+    const ids = new Set(myBuilds.items.map((b) => b.id));
+    Object.keys(myBuildMoreButtonRefs).forEach((id) => {
+      if (!ids.has(id)) delete myBuildMoreButtonRefs[id];
+    });
+  });
+
+  $effect(() => {
+    if (currentPage.loading) {
       skeletonTimer = setTimeout(() => {
         showSkeleton = true;
       }, 250);
@@ -113,7 +101,6 @@
       clearTimeout(skeletonTimer);
       showSkeleton = false;
     }
-
     return () => clearTimeout(skeletonTimer);
   });
 </script>
@@ -122,219 +109,104 @@
   <title>Builds - Page Builder</title>
 </svelte:head>
 
-{#snippet BuildsList(query: RemoteQuery<BuildResult[]>, emptyDescription: string, moreButtonRefs: Record<string, HTMLButtonElement>)}
-  {#if query.loading && showSkeleton}
-    <BuildCardSkeleton />
-  {:else if query.current}
-    {@const builds = query.current}
-    {#if builds.length === 0}
-      <EmptyState title="No Builds Yet" description={emptyDescription} />
-    {:else}
-      <div class="builds-container">
-        {#each builds as build (build.id)}
-          <BuildCard {build}>
-            {#snippet actions()}
-              {#if build.locked_by && build.locked_by !== appState.user?.id}
-                <Badge color="warning">
-                  {#snippet icon()}
-                    <Icon size="16">
-                      <use href="#lock-alert-outline" />
-                    </Icon>
-                  {/snippet}
-                  Editing by {build.locked_by_name ?? "another user"}
-                </Badge>
-              {:else if appState.currentBuildId === build.id}
-                <Badge color="info">
-                  {#snippet icon()}
-                    <Icon size="16">
-                      <use href="#pencil-outline" />
-                    </Icon>
-                  {/snippet}
-                  Editing
-                </Badge>
-              {:else}
-                <Button color="secondary" variant="outlined" size="sm" onclick={() => editBuild(build)}>
-                  <Icon size="16">
-                    <use href="#edit" />
-                  </Icon>
-                  Edit
-                </Button>
-              {/if}
-              <Button
-                variant="ghost"
-                size="sm"
-                shape="circle"
-                bind:ref={moreButtonRefs[build.id]}
-              >
-                <Icon size="16">
-                  <use href="#dots-vertical" />
-                </Icon>
+{#snippet BuildsList(page: BuildsPage, emptyDescription: string, moreButtonRefs: Record<string, HTMLButtonElement>)}
+  {#if page.loading}
+    {#if showSkeleton}
+      <BuildCardSkeleton />
+    {/if}
+  {:else if page.error}
+    <EmptyState title="Error" description="Failed to load builds" />
+  {:else if page.items.length === 0}
+    <EmptyState title="No Builds Yet" description={emptyDescription} />
+  {:else}
+    <div class="builds-container">
+      {#each page.items as build (build.id)}
+        <BuildCard {build}>
+          {#snippet actions()}
+            {#if build.locked_by && build.locked_by !== appState.user?.id}
+              <Badge color="warning">
+                {#snippet icon()}<Icon size="16"><use href="#lock-alert-outline" /></Icon>{/snippet}
+                Editing by {build.locked_by_name ?? "another user"}
+              </Badge>
+            {:else if appState.currentBuildId === build.id}
+              <Badge color="info">
+                {#snippet icon()}<Icon size="16"><use href="#pencil-outline" /></Icon>{/snippet}
+                Editing
+              </Badge>
+            {:else}
+              <Button color="secondary" variant="outlined" size="sm" onclick={() => editBuild(build)}>
+                <Icon size="16"><use href="#edit" /></Icon>
+                Edit
               </Button>
-              <Menu anchor={moreButtonRefs[build.id]}>
-                <MenuItem onclick={() => handleShareBuild(build)}>
-                  {#snippet leading()}
-                    <Icon size="16">
-                      <use href="#share" />
-                    </Icon>
-                  {/snippet}
-                  Share
-                </MenuItem>
-                <MenuItem
-                  onclick={() => handleDuplicatingBuild(build)}
-                  disabled={appState.currentBuildId === build.id || (!!build.locked_by && build.locked_by !== appState.user?.id)}
-                >
-                  {#snippet leading()}
-                    <Icon size="16">
-                      <use href="#duplicate" />
-                    </Icon>
-                  {/snippet}
-                  Duplicate
-                </MenuItem>
-                <MenuItem
-                  onclick={() => handleDeletingBuild(build)}
-                  disabled={appState.currentBuildId === build.id || (!!build.locked_by && build.locked_by !== appState.user?.id)}
-                >
-                  {#snippet leading()}
-                    <Icon size="16">
-                      <use href="#delete" />
-                    </Icon>
-                  {/snippet}
-                  Delete
-                </MenuItem>
-              </Menu>
-            {/snippet}
-          </BuildCard>
-        {/each}
+            {/if}
+            <Button variant="ghost" size="sm" shape="circle" bind:ref={moreButtonRefs[build.id]}>
+              <Icon size="16"><use href="#dots-vertical" /></Icon>
+            </Button>
+            <Menu anchor={moreButtonRefs[build.id]}>
+              <MenuItem onclick={() => handleShareBuild(build)}>
+                {#snippet leading()}<Icon size="16"><use href="#share" /></Icon>{/snippet}
+                Share
+              </MenuItem>
+              <MenuItem
+                onclick={() => handleDuplicatingBuild(build)}
+                disabled={appState.currentBuildId === build.id}
+              >
+                {#snippet leading()}<Icon size="16"><use href="#duplicate" /></Icon>{/snippet}
+                Duplicate
+              </MenuItem>
+              <MenuItem
+                onclick={() => handleDeletingBuild(build)}
+                disabled={appState.currentBuildId === build.id || (!!build.locked_by && build.locked_by !== appState.user?.id)}
+              >
+                {#snippet leading()}<Icon size="16"><use href="#delete" /></Icon>{/snippet}
+                Delete
+              </MenuItem>
+            </Menu>
+          {/snippet}
+        </BuildCard>
+      {/each}
+    </div>
+
+    {#if !page.done}
+      <div class="load-more">
+        <Button variant="outlined" onclick={() => page.loadMore()} disabled={page.loadingMore}>
+          {page.loadingMore ? "Loading…" : "Load more"}
+        </Button>
       </div>
     {/if}
-  {:else if query.error}
-    <EmptyState title="Error" description="Failed to load builds" />
   {/if}
 {/snippet}
 
 <AppSidebarHeader title="Builds">
   {#snippet action()}
-    <Button color="primary" bind:ref={newBuildButtonRef}>
+    <Button color="primary" bind:ref={newBuildButtonRef} onclick={() => (isNewBuildOpen = true)}>
       <Icon>
         <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
       </Icon>
       New
     </Button>
-    <Dialog
-      title="Create New Build"
-      disclosure={newBuildButtonRef}
-      size="lg"
-      bind:open={isDialogOpen}
-    >
-      <div class="builds-dialog-content">
-        <section class="build-section build-section--templates" aria-labelledby="templates-heading">
-          <h3 class="build-section__heading" id="templates-heading">Templates</h3>
-          <div class="build-section__wrapper">
-            {#each templates as template}
-              <div class="build-card">
-                <div class="build-card__screenshot"></div>
-                <span class="build-card__label">{template}</span>
-              </div>
-            {/each}
-          </div>
-        </section>
-
-        <section class="build-section build-section--recent" aria-labelledby="start-from-recent-heading">
-          <h3 class="build-section__heading" id="start-from-recent-heading">Start From Recent</h3>
-          <div class="build-section__wrapper">
-            {#await recentBuilds}
-              <p class="loading-text">Loading recent builds...</p>
-            {:then builds}
-              {#if builds.length === 0}
-                <p class="empty-text">No recent builds yet</p>
-              {:else}
-                {#each builds as build}
-                  <RecentCard data={build} />
-                {/each}
-              {/if}
-            {:catch error}
-              <p class="error-text">Failed to load recent builds</p>
-            {/await}
-          </div>
-        </section>
-      </div>
-      {#snippet footer()}
-        <div class="builds-dialog-actions">
-          <Button variant="ghost" onclick={() => isDialogOpen = false}>
-            Cancel
-          </Button>
-          <Button color="success">
-            Create
-          </Button>
-        </div>
-      {/snippet}
-    </Dialog>
+    <NewBuildDialog bind:open={isNewBuildOpen} disclosure={newBuildButtonRef} />
   {/snippet}
 </AppSidebarHeader>
 
 <ScrollableArea>
   <div class="builds-content">
-    <Tabs variant="enclosed" size="sm" fullWidth value={activeBuildsTab}>
+    <Tabs variant="enclosed" size="sm" fullWidth bind:value={activeBuildsTab}>
       <TabList>
         <Tab value={BUILDS_TABS.ALL}>All Builds</Tab>
         <Tab value={BUILDS_TABS.MY_BUILDS}>My Builds</Tab>
       </TabList>
       <TabPanel>
-        {@render BuildsList(buildsQuery, `Click "+ New" above to create the first one.`, allBuildMoreButtonRefs)}
+        {@render BuildsList(allBuilds, `Click "+ New" above to create the first one.`, allBuildMoreButtonRefs)}
       </TabPanel>
       <TabPanel>
-        {@render BuildsList(userBuildsQuery, `Click "+ New" above to create your first build`, myBuildMoreButtonRefs)}
+        {@render BuildsList(myBuilds, `Click "+ New" above to create your first build`, myBuildMoreButtonRefs)}
       </TabPanel>
     </Tabs>
   </div>
 </ScrollableArea>
 
 <style>
-  .build-section {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.build-section__heading {
-		font-size: 1rem;
-		margin: 0;
-		line-height: 1;
-		color: #4f4f4f;
-	}
-
-	.build-section__wrapper {
-		display: flex;
-		flex-direction: row;
-		gap: 1rem;
-	}
-
-  .build-section--recent .build-section__wrapper {
-    flex-direction: column;
-    gap: .5rem;
-  }
-
-	.build-card {
-		display: flex;
-		flex-direction: column;
-		gap: .25rem;
-		align-items: center;
-	}
-
-	.build-card__screenshot {
-		display: flex;
-		width: 120px;
-		aspect-ratio: 1 / 1.25;
-		border: 2px solid #b0b0b0;
-		border-radius: .5rem;
-	}
-
-	.build-card__label {
-		text-align: center;
-		font-size: .875rem;
-		color: #454545;
-	}
-
   .builds-container {
     display: flex;
     flex-direction: column;
@@ -344,18 +216,13 @@
   .builds-content {
     display: flex;
     flex-direction: column;
-    gap: .5rem;
-    padding: .5rem;
+    gap: 0.5rem;
+    padding: 0.5rem;
   }
 
-  .builds-dialog-content {
+  .load-more {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .builds-dialog-actions {
-    width: fit-content;
-    margin-inline-start: auto;
+    justify-content: center;
+    padding: 1rem 0;
   }
 </style>

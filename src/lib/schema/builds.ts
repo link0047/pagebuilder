@@ -2,6 +2,31 @@ import * as v from "valibot";
 
 const buildTypeEnum = v.picklist(["homepage", "category", "landing_page", "custom"]);
 
+// Keyset cursor: the (created_at, id) of the last row from the previous page.
+const cursorSchema = v.object({
+  created_at: v.string(),
+  id: v.pipe(v.string(), v.uuid())
+});
+
+export const listBuildsSchema = v.optional(
+  v.object({
+    cursor: v.optional(cursorSchema),
+    limit: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(100)))
+  }),
+  {}
+);
+
+export const getBuildSchema = v.object({
+  id: v.pipe(v.string(), v.uuid())
+});
+
+export const recentBuildsSchema = v.optional(
+  v.object({
+    limit: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(50)), 5)
+  }),
+  { limit: 5 }
+);
+
 export const createBuildSchema = v.object({
   name: v.pipe(v.string(), v.minLength(1, "Name is required"), v.maxLength(255)),
   buildType: buildTypeEnum,
@@ -10,29 +35,29 @@ export const createBuildSchema = v.object({
 });
 
 export const updateBuildSchema = v.object({
-	id: v.pipe(v.string(), v.uuid()),
-	name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
-	buildType: v.optional(buildTypeEnum),
-	content: v.optional(v.record(v.string(), v.unknown())),
-	thumbnailUrl: v.optional(v.pipe(v.string(), v.url()))
-})
+  id: v.pipe(v.string(), v.uuid()),
+  name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
+  buildType: v.optional(buildTypeEnum),
+  content: v.optional(v.record(v.string(), v.unknown())),
+  thumbnailUrl: v.optional(v.pipe(v.string(), v.url()))
+});
 
 export const createTemplateSchema = v.object({
-	name: v.pipe(v.string(), v.minLength(1, "Name is required"), v.maxLength(255)),
-	description: v.optional(v.pipe(v.string(), v.maxLength(500))),
-	buildType: buildTypeEnum,
-	content: v.record(v.string(), v.unknown()),
-	thumbnailUrl: v.pipe(v.string(), v.url("Must be a valid URL"))
-})
+  name: v.pipe(v.string(), v.minLength(1, "Name is required"), v.maxLength(255)),
+  description: v.optional(v.pipe(v.string(), v.maxLength(500))),
+  buildType: buildTypeEnum,
+  content: v.record(v.string(), v.unknown()),
+  thumbnailUrl: v.pipe(v.string(), v.url("Must be a valid URL"))
+});
 
 export const updateTemplateSchema = v.object({
-	id: v.pipe(v.string(), v.uuid()),
-	name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
-	description: v.optional(v.pipe(v.string(), v.maxLength(500))),
-	buildType: v.optional(buildTypeEnum),
-	content: v.optional(v.record(v.string(), v.unknown())),
-	thumbnailUrl: v.optional(v.pipe(v.string(), v.url()))
-})
+  id: v.pipe(v.string(), v.uuid()),
+  name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
+  description: v.optional(v.pipe(v.string(), v.maxLength(500))),
+  buildType: v.optional(buildTypeEnum),
+  content: v.optional(v.record(v.string(), v.unknown())),
+  thumbnailUrl: v.optional(v.pipe(v.string(), v.url()))
+});
 
 export const deleteBuildSchema = v.object({
   id: v.pipe(v.string(), v.uuid())

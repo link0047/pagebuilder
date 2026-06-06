@@ -201,7 +201,10 @@ class AppState {
   }
 
   renameBuild(name: string): void {
+    if (this.#buildName === name) return;
+
     this.#buildName = name;
+    this.#isDirty = true;
   }
 
   // -------------------------

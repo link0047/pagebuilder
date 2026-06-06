@@ -28,9 +28,15 @@ class DialogState {
   #trigger: Getter<boolean>;
   #controller = new AbortController();
   #disclosureController: AbortController | undefined;
+  #getInitialFocus: Getter<MaybeElement>;
 
-
-  constructor(getValue: Getter<boolean>, setValue: Setter<boolean>, getOptions: Getter<DialogOptions>, getTrigger: Getter<boolean>) {
+  constructor(
+    getValue: Getter<boolean>,
+    setValue: Setter<boolean>,
+    getOptions: Getter<DialogOptions>,
+    getTrigger: Getter<boolean>,
+    getInitialFocus: Getter<MaybeElement>
+  ) {
     this.#dialogId = `uikit-dialog-${DialogState.#id++}`;
     this.#dialogDisclosureId = `${this.#dialogId}-disclosure`;
     this.#dialogTitleId = `${this.#dialogId}-title`;
@@ -39,12 +45,15 @@ class DialogState {
     this.#setValue = setValue;
     this.#options = getOptions;
     this.#trigger = getTrigger;
+    this.#getInitialFocus = getInitialFocus;
 
     $effect(() => {
       if (this.#getValue()) {
         scrollLock.lock();
         this.#applyInert(true);
-        tick().then(() => this.#focusFirstElement());
+        tick().then(() => {
+          requestAnimationFrame(() => this.#focusInitialElement());
+        });
       } else {
         scrollLock.unlock();
         this.#applyInert(false);
@@ -192,8 +201,13 @@ class DialogState {
     return elements;
   }
 
-  // tick() already waits for DOM updates; no need for an extra rAF frame.
-  #focusFirstElement() {
+  #focusInitialElement() {
+    const requested = this.#getInitialFocus();
+    if (requested && this.#isFocusable(requested as HTMLElement)) {
+      requested.focus();
+      return;
+    }
+
     const focusableElements = this.#collectFocusableElements();
     if (focusableElements.length > 0) {
       focusableElements[0].focus();
@@ -275,8 +289,14 @@ class DialogState {
   }
 }
 
-export function setDialogState(getValue: Getter<boolean>, setValue: Setter<boolean>, getOptions: Getter<DialogOptions>, getTrigger: Getter<boolean>) {
-  return setContext(DIALOG_KEY, new DialogState(getValue, setValue, getOptions, getTrigger));
+export function setDialogState(
+  getValue: Getter<boolean>,
+  setValue: Setter<boolean>,
+  getOptions: Getter<DialogOptions>,
+  getTrigger: Getter<boolean>,
+  getInitialFocus: Getter<MaybeElement>
+) {
+  return setContext(DIALOG_KEY, new DialogState(getValue, setValue, getOptions, getTrigger, getInitialFocus));
 }
 
 export function getDialogState(): DialogState {

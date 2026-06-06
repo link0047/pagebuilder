@@ -20,6 +20,7 @@
     title?: string;
     disclosure: HTMLElement | undefined;
     trigger?: boolean;
+    initialFocus?: HTMLElement;
     open?: boolean;
     hasBackdrop?: boolean;
     hasCloseButton?: boolean;
@@ -38,6 +39,7 @@
     title,
     disclosure,
     trigger = true,
+    initialFocus,
     open = $bindable(false),
     hasBackdrop = true,
     hasCloseButton = true,
@@ -55,7 +57,8 @@
     () => open,
     (value) => open = value,
     () => ({ closeOnEsc, closeOnOutsideClick }),
-    () => trigger
+    () => trigger,
+    () => initialFocus,
   );
   const id = dialogState.id;
 
