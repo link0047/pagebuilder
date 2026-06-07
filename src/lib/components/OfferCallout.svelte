@@ -19,6 +19,7 @@
     ariaLabel?: string;
     color?: string;
     size?: Size;
+    [key: string]: unknown;
   }
 
   let {
@@ -28,7 +29,8 @@
     legalText,
     ariaLabel,
     color = "#212121",
-    size = "md"
+    size = "md",
+    ...restProps
   }: Props = $props();
 
   // Sizing Map
@@ -67,6 +69,7 @@
   style:--wcag-ui-callout-color={color}
   style:--wcag-ui-callout-display-size={displaySize}
   aria-label={ariaLabel}
+  {...restProps}
 >
   {#if heading}
     <div class="wcag-ui-offer-callout__heading">{heading}</div>

@@ -13,6 +13,7 @@
 		alignment?: Alignment;
 		color?: string;
 		children?: Snippet;
+		[key: string]: unknown;
 	}
 
 	let {
@@ -21,7 +22,8 @@
 		weight,
 		alignment = "left",
 		color = "inherit",
-		children
+		children,
+		...restProps
 	}: Props = $props();
 </script>
 
@@ -45,6 +47,7 @@
 	class:wcag-ui-heading--align-center={alignment === "center"}
 	class:wcag-ui-heading--align-right={alignment === "right"}
 	style="--wcag-ui-heading-color:{color}"
+	{...restProps}
 >
 	{@render children?.()}
 </svelte:element>

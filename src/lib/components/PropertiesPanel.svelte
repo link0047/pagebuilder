@@ -263,7 +263,7 @@
       </Button>
     </div>
   </header>
-  <div class="properties-panel__content">
+  <div class="properties-panel__content" data-sidebar-content>
     {#if isOpen && selectedComponent && schema}
       {#each schema.sections as section}
         <PropertiesPanelSection label={section.title} icon={section.icon} collapsed={section.collapsed}>

@@ -15,6 +15,7 @@
     color?: Responsive<string>;
     truncate?: boolean;
     children?: Snippet;
+    [key: string]: unknown;
   }
 
   let {
@@ -25,7 +26,8 @@
     underline = false,
     color = "inherit",
     truncate = false,
-    children
+    children,
+    ...restProps
   }: Props = $props();
 
   function resolve<T>(value: Responsive<T> | undefined, fallback: T): Required<Breakpoints<T>> {
@@ -98,6 +100,7 @@
   style:--wcag-ui-text-underline-mobile={resolvedUnderline.mobile ? "underline" : "none"}
   style:--wcag-ui-text-underline-tablet={resolvedUnderline.tablet ? "underline" : "none"}
   style:--wcag-ui-text-underline-desktop={resolvedUnderline.desktop ? "underline" : "none"}
+  {...restProps}
 >
   {@render children?.()}
 </span>

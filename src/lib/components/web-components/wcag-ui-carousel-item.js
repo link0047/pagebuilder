@@ -12,7 +12,7 @@ class WCAGUICarouselItem extends HTMLElement {
 
           display: block;
           position: relative;
-          contain: content;
+
           scroll-snap-align: start;
           scroll-snap-stop: always;
           transition: border-color .2s ease-in-out;

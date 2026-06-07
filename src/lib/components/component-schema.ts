@@ -1853,6 +1853,12 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
               { value: "4", text: "Level 4" },
               { value: "5", text: "Level 5" },
             ]
+          },
+          {
+            type: "checkbox",
+            label: "Disable Hover",
+            property: "props.disableHover",
+            defaultValue: true,
           }
         ]
       }

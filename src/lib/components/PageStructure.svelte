@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageTreeNode } from "./types";
 
+  import { getContext } from "svelte";
   import PageStructure from "./PageStructure.svelte";
   import Button from "./Button.svelte";
   import Tree from "./Tree.svelte";
@@ -10,6 +11,7 @@
   import MenuItem from "./MenuItem.svelte";
   import { getAppState } from "./app-state.svelte";
   import { childConfigs, componentRegistry, type ChildOption } from "./component-registry";
+  import debounce from "$lib/utils/debounced";
 
   type Props = {
     pageTree?: PageTreeNode;
@@ -18,6 +20,7 @@
 
   let { pageTree, path = [] }: Props = $props();
 
+  const sendToPreview = getContext<(type: string, data?: Record<string, unknown>) => void>("sendToPreview");
   let appState = getAppState();
   let addChildButtonRef = $state<HTMLButtonElement>();
 
@@ -36,9 +39,27 @@
     return parent?.children?.length ?? 0;
   })());
 
+  const isHovered = $derived(appState.hoveredComponentPath?.join(",") === path.join(","));
   let currentIndex = $derived(path[path.length - 1] ?? 0);
   let canMoveUp = $derived(path.length > 0 && currentIndex > 0);
   let canMoveDown = $derived(path.length > 0 && currentIndex < siblingCount - 1);
+
+  const debouncedHover = debounce((pathStr: string) => {
+    sendToPreview("preview-hover", { path: pathStr });
+  }, 300);
+
+  function handlePointerOver(event: PointerEvent) {
+    const el = (event.target as Element)?.closest("[data-tree-item-path]") as HTMLElement | null;
+    if (el?.dataset.treeItemPath !== path.join(",")) return;
+    debouncedHover(path.join(","));
+  }
+
+  function handlePointerOut(event: PointerEvent) {
+    const related = event.relatedTarget as Node | null;
+    if (related && (event.currentTarget as HTMLElement).contains(related)) return;
+    debouncedHover.cancel();
+    sendToPreview("preview-hover", { path: null });
+  }
 
   function deleteComponent() {
     if (path.length > 0) {
@@ -49,6 +70,8 @@
   function editProperties() {
     if (path.length > 0) {
       appState.selectComponent(path);
+      console.log("[editProperties] sending preview-select", path.join(","));
+      sendToPreview("preview-select", { path: path.join(",") });
     }
   }
 
@@ -81,9 +104,6 @@
       },
       path
     );
-
-    console.log({ option });
-    console.log(JSON.stringify($state.snapshot(appState.pageTree), null, 2));
   }
 </script>
 
@@ -119,6 +139,10 @@
   <TreeItem
     hasChildren={!!childConfig}
     expanded={true}
+    data-tree-item-path={path.join(",")}
+    highlighted={isHovered}
+    onpointerover={handlePointerOver}
+    onpointerout={handlePointerOut}
   >
     {#snippet text()}
       {#if pageTree.meta}

@@ -65,6 +65,7 @@
   }
 
   .preview-content {
+    --uikit-preview-max-width: ;
     width: 100%;
     overflow-y: scroll;
     max-width: var(--uikit-preview-max-width);

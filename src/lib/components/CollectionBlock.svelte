@@ -61,19 +61,27 @@
     if (!equalHeight || !carouselEl) return;
     await tick();
 
-    const items = carouselEl.querySelectorAll("wcag-ui-carousel-item");
-    let tallest = 0;
+    const firstItem = carouselEl.querySelector("wcag-ui-carousel-item") as HTMLElement | null;
+    if (!firstItem) return;
 
-    items.forEach((item) => {
-      // temporarily allow natural height to measure
-      (item as HTMLElement).style.height = "auto";
-      tallest = Math.max(tallest, (item as HTMLElement).offsetHeight);
-      (item as HTMLElement).style.height = "";
-    });
+    const card = firstItem.querySelector(".wcag-ui-card") as HTMLElement | null;
+    if (!card) return;
 
-    if (tallest > 0) {
-      carouselEl.style.setProperty("--wcag-ui-carousel-track-height", `${tallest}px`);
+    const img = card.querySelector("img");
+    if (img && !img.complete) {
+      await new Promise(resolve => {
+        img.addEventListener("load", resolve, { once: true });
+        img.addEventListener("error", resolve, { once: true });
+      });
     }
+
+    const height = card.offsetHeight;
+    if (height <= 0) return;
+
+    const items = carouselEl.querySelectorAll("wcag-ui-carousel-item");
+    items.forEach((item) => {
+      (item as HTMLElement).style.height = `${height}px`;
+    });
   }
 
   const inlineStyle = $derived([
@@ -129,8 +137,6 @@
     class="collection-block__content"
     class:collection-block__content--equal-height={equalHeight}
     style:--wcag-ui-carousel-item-aspect-ratio={itemAspectRatio}
-    style:--wcag-ui-carousel-item-height={equalHeight ? "100%" : undefined}
-    style:--wcag-ui-carousel-item-slot-height={equalHeight ? "100%" : undefined}
   >
     <wcag-ui-carousel breakpoints={JSON.stringify(resolvedBreakpoints)}>
       {@render children?.()}
@@ -145,7 +151,6 @@
   }
 
   .collection-block__content--equal-height::part(track) {
-    --wcag-ui-carousel-track-height: ;
     height: var(--wcag-ui-carousel-track-height);
     align-items: stretch;
   }

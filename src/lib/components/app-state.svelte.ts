@@ -181,6 +181,7 @@ class AppState {
     this.#isDirty = false;
     this.#isLocked = false;
     this.#lockedBy = null;
+    this.#hoveredComponentPath = null;
     this.#resetSelection();
   }
 
@@ -288,6 +289,8 @@ class AppState {
   }
 
   deselectComponent(): void {
+    // move focus away before hiding the panel
+    (document.activeElement as HTMLElement)?.blur();
     this.#resetSelection();
   }
 

@@ -7,6 +7,7 @@
 		text?: Snippet;
 		expanded?: boolean;
 		hasChildren?: boolean;
+		highlighted?: boolean;
 		tag?: "li" | "div";
 		[key: string]: unknown;
 	};
@@ -16,6 +17,7 @@
 		text,
 		expanded = false,
 		hasChildren: hasChildrenProp,
+		highlighted = false,
 		tag = "li",
 		...restProps
 	}: Props = $props();
@@ -100,6 +102,7 @@
 	bind:this={ref}
 	class="wcag-ui-treeitem"
 	class:wcag-ui-treeitem--focused={isFocused}
+	class:wcag-ui-treeitem--highlighted={highlighted}
 	role="treeitem"
 	aria-level={currentLevel}
 	aria-selected={isSelected}
@@ -238,6 +241,7 @@
 		background-color: #eef3fc;
 	}
 
+	.wcag-ui-treeitem--highlighted > .wcag-ui-treeitem__content,
 	.wcag-ui-treeitem--focused > .wcag-ui-treeitem__content,
 	.wcag-ui-treeitem__content:hover {
 		background-color: hsla(220, 20%, 65%, 0.08);

@@ -102,7 +102,7 @@
     };
 
     newAnimation.oncancel = () => {
-      console.log("cancel");
+      // console.log("cancel");
     };
 
     return newAnimation;

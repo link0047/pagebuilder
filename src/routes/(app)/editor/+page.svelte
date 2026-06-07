@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { onDestroy, getContext } from "svelte";
+
   import Button from "$lib/components/Button.svelte";
   import Icon from "$lib/components/Icon.svelte";
   import Menu from "$lib/components/Menu.svelte";
@@ -14,6 +16,7 @@
   const appState = getAppState();
 
   let addSectionButtonRef = $state<HTMLButtonElement>();
+  const sendToPreview = getContext<(type: string, data?: Record<string, unknown>) => void>("sendToPreview");
 
   function addSection(name: string) {
     const config = sectionConfigs.find((s) => s.name === name);
@@ -27,11 +30,13 @@
       meta: { label: config.label, ...config.defaultMeta },
       children: config.defaultChildren,
     });
-
-    // Auto-select the newly added section
-    // const newIndex = appState.pageTree.children.length - 1;
-    // appState.selectComponent([newIndex]);
   }
+
+  onDestroy(() => {
+    sendToPreview("preview-select", { path: null });
+    sendToPreview("preview-hover", { path: null });
+    appState.clearBuild();
+  });
 </script>
 
 <svelte:head>

@@ -24,6 +24,7 @@
     layout?: Layout,
     tag?: Tag,
     hoverable?: boolean;
+    disableHover?: boolean;
     headlineTag?: HeadlineTag,
     href?: string,
     type?: ButtonType,
@@ -46,6 +47,7 @@
     layout,
     tag = "div",
     hoverable = false,
+    disableHover = false,
     headlineTag,
     href,
     type,
@@ -67,8 +69,8 @@
   this={computedTag}
   class="wcag-ui-card"
   data-selected={computedTag === "button" ? selected : undefined}
-  class:wcag-ui-card--interactive={computedTag !== "div"}
-  class:wcag-ui-card--hoverable={hoverable}
+  class:wcag-ui-card--interactive={computedTag !== "div" && !disableHover}
+  class:wcag-ui-card--hoverable={hoverable && !disableHover}
   class:wcag-ui-card--filled={variant === "filled"}
   class:wcag-ui-card--elevated={variant === "elevated"}
   class:wcag-ui-card--elevation-1={computedElevation === 1}
