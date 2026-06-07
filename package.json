@@ -26,7 +26,7 @@
 	"dependencies": {
 		"@neondatabase/serverless": "^1.1.0",
 		"@types/html-minifier": "^4.0.6",
-		"better-auth": "^1.6.10",
+		"better-auth": "1.6.11",
 		"dompurify": "^3.4.2",
 		"html-minifier": "^4.0.0",
 		"lightningcss": "^1.32.0",
