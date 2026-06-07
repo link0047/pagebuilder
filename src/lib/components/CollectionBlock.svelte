@@ -55,35 +55,6 @@
     ...restProps
   }: Props = $props();
 
-  let carouselEl = $state<HTMLElement | null>(null);
-
-  async function measureTallestItem() {
-    if (!equalHeight || !carouselEl) return;
-    await tick();
-
-    const firstItem = carouselEl.querySelector("wcag-ui-carousel-item") as HTMLElement | null;
-    if (!firstItem) return;
-
-    const card = firstItem.querySelector(".wcag-ui-card") as HTMLElement | null;
-    if (!card) return;
-
-    const img = card.querySelector("img");
-    if (img && !img.complete) {
-      await new Promise(resolve => {
-        img.addEventListener("load", resolve, { once: true });
-        img.addEventListener("error", resolve, { once: true });
-      });
-    }
-
-    const height = card.offsetHeight;
-    if (height <= 0) return;
-
-    const items = carouselEl.querySelectorAll("wcag-ui-carousel-item");
-    items.forEach((item) => {
-      (item as HTMLElement).style.height = `${height}px`;
-    });
-  }
-
   const inlineStyle = $derived([
     ctaBackgroundColor && `--product-card-cta-bg-color: ${ctaBackgroundColor}`,
     ctaTextColor && `--product-card-cta-text-color: ${ctaTextColor}`,
@@ -115,7 +86,6 @@
   onMount(async () => {
     await import("$lib/components/web-components/wcag-ui-carousel");
     await import("$lib/components/web-components/wcag-ui-carousel-item");
-    await measureTallestItem();
   });
 </script>
 
@@ -133,12 +103,13 @@
   {...restProps}
 >
   <div
-    bind:this={carouselEl}
     class="collection-block__content"
-    class:collection-block__content--equal-height={equalHeight}
     style:--wcag-ui-carousel-item-aspect-ratio={itemAspectRatio}
   >
-    <wcag-ui-carousel breakpoints={JSON.stringify(resolvedBreakpoints)}>
+    <wcag-ui-carousel
+      breakpoints={JSON.stringify(resolvedBreakpoints)}
+      equal-height={equalHeight ? "" : undefined}
+    >
       {@render children?.()}
     </wcag-ui-carousel>
   </div>
@@ -148,10 +119,5 @@
   .collection-block__content {
     box-sizing: border-box;
     padding-inline: 0.25rem;
-  }
-
-  .collection-block__content--equal-height::part(track) {
-    height: var(--wcag-ui-carousel-track-height);
-    align-items: stretch;
   }
 </style>

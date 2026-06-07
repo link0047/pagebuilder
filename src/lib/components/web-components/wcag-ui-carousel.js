@@ -194,6 +194,7 @@ class WCAGUICarousel extends HTMLElement {
       "space-between",
       "starting-index",
       "breakpoints",
+      "equal-height",
     ];
   }
 
@@ -219,6 +220,8 @@ class WCAGUICarousel extends HTMLElement {
   #prevButton = null;
   /** @type {HTMLButtonElement | null} */
   #nextButton = null;
+  /** @type {boolean} */
+  #equalHeight = false;
 
   // Resolved options (may change with breakpoints)
   #slidesPerView = 2;
@@ -360,6 +363,11 @@ class WCAGUICarousel extends HTMLElement {
         if (this.#abortController) {
           this.#setupBreakpoints();
         }
+        break;
+
+      case "equal-height":
+        this.#equalHeight = newValue !== null;
+        this.#applyEqualHeight();
         break;
     }
   }
@@ -590,6 +598,36 @@ class WCAGUICarousel extends HTMLElement {
 
     this.#applyTrackCSSVars();
     this.#updateButtonStates();
+    this.#applyEqualHeight();
+  };
+
+  #applyEqualHeight = async () => {
+    if (!this.#equalHeight) return;
+
+    const items = this.#slideItems();
+    const firstItem = /** @type {HTMLElement | undefined} */ (items[0]);
+    if (!firstItem) return;
+
+    const content = /** @type {HTMLElement | null} */ (firstItem.firstElementChild);
+    if (!content) return;
+
+    const img = content.querySelector("img");
+    if (img && !img.complete) {
+      await new Promise(resolve => {
+        img.addEventListener("load", resolve, { once: true });
+        img.addEventListener("error", resolve, { once: true });
+      });
+    }
+
+    const height = content.offsetHeight;
+    if (height <= 0) return;
+
+    const track = /** @type {HTMLElement} */ (this.#track);
+    track.style.height = `${height}px`;
+
+    items.forEach((item) => {
+      /** @type {HTMLElement} */ (item).style.height = `${height}px`;
+    });
   };
 
   // ---------------------------------------------------------------------------
