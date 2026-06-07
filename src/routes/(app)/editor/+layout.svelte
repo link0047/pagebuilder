@@ -85,12 +85,10 @@
       const inSidebar = target.closest("[data-sidebar-content]");
       const onIframe = target.closest("iframe");
 
-      if (inSidebar || onIframe) return;
-
-      appState.hoverComponent(null);
-      appState.deselectComponent();
-      sendToPreview("preview-hover", { path: null });
-      sendToPreview("preview-select", { path: null });
+      if (!inSidebar || !onIframe) {
+        sendToPreview("preview-hover", { path: null });
+        sendToPreview("preview-select", { path: null });
+      }
     }, { signal });
 
     const handleResize = debounce((entries: ResizeObserverEntry[]) => {

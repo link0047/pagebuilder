@@ -1,4 +1,4 @@
-import type { ComponentNode, RootNode, PageTreeNode, TreePath, PreviewMode } from "./types";
+import type { ComponentNode, RootNode, PageTreeNode, TreePath, PreviewMode, BuildType } from "./types";
 import type { PartialComponentNode } from "./component-registry";
 import type { User } from "better-auth";
 
@@ -30,6 +30,7 @@ class AppState {
   #lastSavedAt = $state<Date | null>(null);
   #statusMessage = $state<string | null>(null);
   #isDirty = $state(false);
+  #buildType = $state<BuildType>("homepage");
 
   #isLocked = $state(false);
   #lockedBy = $state<string | null>(null);
@@ -70,6 +71,10 @@ class AppState {
 
   get statusMessage(): string | null {
     return this.#statusMessage;
+  }
+
+  get buildType(): BuildType {
+    return this.#buildType;
   }
 
   // -------------------------
@@ -149,6 +154,11 @@ class AppState {
     this.#statusMessage = message;
   }
 
+  setBuildType(type: BuildType): void {
+    this.#buildType = type;
+    this.#isDirty = true;
+  }
+
   // -------------------------
   // Build management
   // -------------------------
@@ -157,6 +167,7 @@ class AppState {
     buildData: RootNode,
     buildId?: string,
     buildName?: string,
+    buildType?: BuildType,
   ): void {
     if (!buildData || buildData.type !== "root") {
       console.error("Invalid build data: expected a root node");
@@ -167,6 +178,7 @@ class AppState {
     this.#pageTree = structuredClone(buildData);
     this.#currentBuildId = buildId ?? null;
     this.#buildName = buildName ?? null;
+    this.#buildType = buildType ?? "homepage";
     this.#lastSavedAt = null;
     this.#isDirty = false;
     this.#resetSelection();
@@ -185,11 +197,12 @@ class AppState {
     this.#resetSelection();
   }
 
-  getSavePayload(): { content: RootNode; isNew: boolean; id: string | null } {
+  getSavePayload(): { content: RootNode; isNew: boolean; id: string | null; buildType: BuildType } {
     return {
       content: $state.snapshot(this.#pageTree) as RootNode,
       isNew: !this.#currentBuildId,
       id: this.#currentBuildId,
+      buildType: this.#buildType,
     };
   }
 

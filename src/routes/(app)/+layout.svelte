@@ -138,7 +138,7 @@
     isSaving = true;
     save.set("idle");
 
-    const { content, isNew, id } = appState.getSavePayload();
+    const { content, isNew, id, buildType } = appState.getSavePayload();
     const name = appState.buildName ?? generateBuildName("Homepage");
 
     try {
@@ -149,7 +149,7 @@
       } else {
         const newBuild = await createBuild({
           name,
-          buildType: "homepage",
+          buildType,
           content,
           thumbnailUrl: "https://placehold.co/400x400"
         });

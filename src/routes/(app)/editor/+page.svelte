@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { onDestroy, getContext } from "svelte";
+  import type { BuildType } from "$lib/components/types";
 
+  import { onDestroy, getContext } from "svelte";
   import Button from "$lib/components/Button.svelte";
   import Icon from "$lib/components/Icon.svelte";
   import Menu from "$lib/components/Menu.svelte";
@@ -44,8 +45,15 @@
 </svelte:head>
 
 <AppSidebarHeader title="Page Structure">
-  <Select label="type" labelPosition="notched" size="sm">
-    <option value="Homepage">Homepage</option>
+  <Select
+    label="type"
+    labelPosition="notched"
+    size="sm"
+    value={appState.buildType}
+    disabled={!!appState.currentBuildId}
+    onchange={(event: Event) => appState.setBuildType((event.target as HTMLSelectElement).value as BuildType)}
+  >
+    <option value="homepage">Homepage</option>
   </Select>
 </AppSidebarHeader>
 

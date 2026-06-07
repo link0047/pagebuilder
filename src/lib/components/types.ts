@@ -27,3 +27,4 @@ export type PageTreeNode = RootNode | ComponentNode;
 export type TreePath = number[];
 export type PreviewMode = "mobile" | "tablet" | "desktop";
 export type MaybeElement = HTMLElement | null | undefined;
+export type BuildType = "homepage" | "category" | "landing_page" | "custom";
