@@ -1,7 +1,1 @@
-allowBuilds:
-  esbuild: set this to true or false
-  svelte-preprocess: true
-blockExoticSubdeps: true
-trustPolicy: no-downgrade
-trustPolicyExclude:
-  - chokidar@4.0.3
+
