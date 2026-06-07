@@ -25,6 +25,7 @@
 
 <main
   bind:this={outerRef}
+  id="preview-pane"
   class="preview-viewport"
   style:padding-block-start={hasBanner ? "calc(1.5rem + 3rem)" : "1.5rem"}
 >

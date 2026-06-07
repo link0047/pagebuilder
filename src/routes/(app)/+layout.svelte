@@ -21,6 +21,7 @@
   import Tooltip from "$lib/components/Tooltip.svelte";
 
   import { copyToClipboard } from "$lib/utils/clipboard";
+  import { screenshot, toBlob } from "$lib/utils/screenshot";
   import { attempt } from "$lib/utils/attempt";
   import { getInitials } from "$lib/utils/getInitials";
   import { generateBuildName } from "$lib/utils/buildName";
@@ -28,7 +29,7 @@
   import { BREAKPOINTS } from "$lib/constants/breakpoints";
 
   import { signout, getUser } from "$lib/api/auth.remote";
-  import { createBuild, updateBuild, deleteBuild, refreshLock, releaseLock } from "$lib/api/builds.remote";
+  import { createBuild, updateBuild, deleteBuild, refreshLock, releaseLock, uploadThumbnail } from "$lib/api/builds.remote";
 
   let { children }: LayoutProps = $props();
 
@@ -144,6 +145,7 @@
       if (!isNew && id) {
         await updateBuild({ id, content, name });
         appState.onSaveSuccess(id, name);
+        captureAndUploadThumbnail(id);
       } else {
         const newBuild = await createBuild({
           name,
@@ -152,6 +154,7 @@
           thumbnailUrl: "https://placehold.co/400x400"
         });
         appState.onSaveSuccess(newBuild.id, name);
+        captureAndUploadThumbnail(newBuild.id);
       }
 
       // clear dirty state - currently read-only prop
@@ -161,6 +164,26 @@
       save.set("error"); // no auto-dismiss — user must see that save failed
     } finally {
       isSaving = false;
+    }
+  }
+
+  async function captureAndUploadThumbnail(buildId: string) {
+    try {
+      const element = document.getElementById("preview-pane");
+      if (!element) return;
+
+      const result = await screenshot(element);
+      const blob = await toBlob(result.canvas);
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      const { url } = await uploadThumbnail({ base64, buildId, folder: "builds" });
+      await updateBuild({ id: buildId, thumbnailUrl: url });
+    } catch (error) {
+      console.error("Failed to capture thumbnail", error);
     }
   }
 

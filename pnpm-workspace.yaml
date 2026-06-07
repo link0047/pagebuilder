@@ -2,3 +2,5 @@ allowBuilds:
   svelte-preprocess: true
 blockExoticSubdeps: true
 trustPolicy: no-downgrade
+trustPolicyExclude:
+  - chokidar@4.0.3

@@ -120,9 +120,9 @@
   closeOnOutsideClick={!isOpeningBuild}
   hasCloseButton={!isOpeningBuild}
 >
-  <div class="dialog-content" inert={isOpeningBuild}>
-    <section class="section" aria-labelledby="templates-heading">
-      <h3 class="section__heading" id="templates-heading">Templates</h3>
+  <div class="new-build-dialog" inert={isOpeningBuild}>
+    <section class="new-build-dialog__section" aria-labelledby="templates-heading">
+      <h3 class="new-build-dialog__heading" id="templates-heading">Templates</h3>
       <BuildPicker
         bind:ref={templatePickerRef}
         items={templateOptions}
@@ -139,17 +139,17 @@
       </BuildPicker>
     </section>
 
-    <section class="section" aria-labelledby="recent-heading">
-      <h3 class="section__heading" id="recent-heading">Start From Recent</h3>
+    <section class="new-build-dialog__section" aria-labelledby="recent-heading">
+      <h3 class="new-build-dialog__heading" id="recent-heading">Start From Recent</h3>
       {#if recentBuildsQuery.loading}
-        <p class="muted">Loading recent builds...</p>
+        <p class="new-build-dialog__status">Loading recent builds...</p>
       {:else if recentBuildsQuery.error}
-        <p class="error">Failed to load recent builds</p>
+        <p class="new-build-dialog__status new-build-dialog__status--error">Failed to load recent builds</p>
       {:else if recentBuildsQuery.current && recentBuildsQuery.current.length > 0}
-        <div class="recent-header" aria-hidden="true">
-          <span class="recent-header__icon"><Icon size="16"><use href="#file-document-outline" /></Icon></span>
-          <span>Name</span>
-          <span class="recent-header__date">Last opened by you</span>
+        <div class="new-build-dialog__recent-header" aria-hidden="true">
+          <span class="new-build-dialog__recent-header-icon"><Icon size="16"><use href="#file-document-outline" /></Icon></span>
+          <span class="new-build-dialog__recent-header-name">Name</span>
+          <span class="new-build-dialog__recent-header-date">Last updated</span>
         </div>
         <BuildPicker
           items={recentBuildsQuery.current}
@@ -166,13 +166,13 @@
           {/snippet}
         </BuildPicker>
       {:else}
-        <p class="muted">No recent builds yet</p>
+      <p class="new-build-dialog__status">No recent builds yet</p>
       {/if}
     </section>
   </div>
 
   {#snippet footer()}
-    <div class="actions">
+    <div class="new-build-dialog__actions">
       <Button variant="ghost" onclick={() => (open = false)} disabled={isOpeningBuild}>Cancel</Button>
       <Button color="success" loading={isOpeningBuild} onclick={() => handleFooterAction()}>{footerLabel}</Button>
     </div>
@@ -180,26 +180,26 @@
 </Dialog>
 
 <style>
-  .dialog-content {
+  .new-build-dialog {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .section {
+  .new-build-dialog__section {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .section__heading {
+  .new-build-dialog__heading {
     font-size: 1rem;
     margin: 0;
     line-height: 1;
     color: #4f4f4f;
   }
 
-  .recent-header {
+  .new-build-dialog__recent-header {
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
@@ -211,27 +211,26 @@
     color: #4f4f4f;
   }
 
-  .recent-header__icon {
+  .new-build-dialog__recent-header-icon {
     display: flex;
     color: #9b9b9b;
   }
 
-  .recent-header__date {
+  .new-build-dialog__recent-header-date {
     white-space: nowrap;
   }
 
-  .muted,
-  .error {
+  .new-build-dialog__status {
     font-size: 0.875rem;
     color: #6b6b6b;
     margin: 0;
   }
 
-  .error {
+  .new-build-dialog__status--error {
     color: #b91c1c;
   }
 
-  .actions {
+  .new-build-dialog__actions {
     display: flex;
     gap: 0.75rem;
     width: fit-content;

@@ -61,4 +61,10 @@
     gap: 1rem;
     container-type: inline-size;
   }
+
+  @media (max-width: 640px) {
+    .editorial-block__container {
+      gap: 0.5rem;
+    }
+  }
 </style>

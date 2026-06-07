@@ -1,6 +1,7 @@
 import { getRequestEvent, query, command } from "$app/server";
 import { error, redirect, isHttpError } from "@sveltejs/kit";
 import { sql } from "$lib/server/database";
+import { uploadToCloudinary } from "$lib/server/cloudinary";
 import {
   createBuildSchema,
   createTemplateSchema,
@@ -13,6 +14,7 @@ import {
   getBuildSchema,
   listBuildsSchema,
   recentBuildsSchema,
+  uploadThumbnailSchema,
 } from "$lib/schema/builds";
 
 const LOCK_STALE_INTERVAL = "5 minutes";
@@ -355,4 +357,12 @@ export const refreshLock = command(lockBuildSchema, async ({ id }) => {
     WHERE id = ${id} AND locked_by = ${user.id}
   `;
   return { success: true };
+});
+
+export const uploadThumbnail = command(uploadThumbnailSchema, async ({ base64, buildId, folder }) => {
+  const response = await fetch(base64);
+  const blob = await response.blob();
+  const publicId = `${folder}/${buildId}`;
+  const url = await uploadToCloudinary(blob, publicId);
+  return { url };
 });

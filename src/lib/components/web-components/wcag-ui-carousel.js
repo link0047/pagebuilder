@@ -76,6 +76,7 @@ class WCAGUICarousel extends HTMLElement {
         .wcag-ui-carousel__track {
           box-sizing: border-box;
           display: grid;
+          align-items: stretch;
           grid-auto-flow: column;
           grid-auto-columns: calc(
             (100% - (var(--wcag-ui-carousel-slides-per-view) - 1) * var(--wcag-ui-carousel-space-between))
@@ -369,8 +370,10 @@ class WCAGUICarousel extends HTMLElement {
 
   /** Move to the previous slide group. */
   prev() {
+    console.log("[prev] called — currentSlide:", this.#currentSlide, "isAtStart:", this.#isAtStart, "maxSlideIndex:", this.#maxSlideIndex);
     if (this.#isAtStart) return;
     this.#currentSlide = Math.max(1, this.#currentSlide - this.#slidesPerGroup);
+    console.log("[prev] → scrolling to:", this.#currentSlide);
     this.#scrollToSlide(this.#currentSlide);
     this.#updateButtonStates();
     this.#updateStatus();
@@ -378,13 +381,10 @@ class WCAGUICarousel extends HTMLElement {
 
   /** Move to the next slide group. */
   next() {
+    console.log("[next] called — currentSlide:", this.#currentSlide, "isAtEnd:", this.#isAtEnd, "maxSlideIndex:", this.#maxSlideIndex);
     if (this.#isAtEnd) return;
-
-    this.#currentSlide = Math.min(
-      this.#maxSlideIndex,
-      this.#currentSlide + this.#slidesPerGroup
-    );
-
+    this.#currentSlide = Math.min(this.#maxSlideIndex, this.#currentSlide + this.#slidesPerGroup);
+    console.log("[next] → scrolling to:", this.#currentSlide);
     this.#scrollToSlide(this.#currentSlide);
     this.#updateButtonStates();
     this.#updateStatus();
@@ -427,7 +427,7 @@ class WCAGUICarousel extends HTMLElement {
 
   /** Highest index a slide can be the "active" (leftmost visible) slide. */
   get #maxSlideIndex() {
-    return Math.max(1, this.#totalSlides - this.#slidesPerView + 1);
+    return Math.max(1, Math.floor(this.#totalSlides - this.#slidesPerView + 1));
   }
 
   /** Returns all direct wcag-ui-carousel-item children (including auto-wrapped ones). */
@@ -475,6 +475,11 @@ class WCAGUICarousel extends HTMLElement {
     const target = /** @type {HTMLElement | undefined} */ (items[slideIndex - 1]);
 
     if (!target) return;
+
+    if (slideIndex >= this.#maxSlideIndex) {
+      this.#track.scrollTo({ left: this.#track.scrollWidth, behavior });
+      return;
+    }
 
     this.#track.scrollTo({ left: target.offsetLeft, behavior });
   }
@@ -599,6 +604,7 @@ class WCAGUICarousel extends HTMLElement {
     const track = /** @type {HTMLElement} */ (this.#track);
     const slideWidth = track.scrollWidth / this.#totalSlides;
     const newSlide = Math.round(track.scrollLeft / slideWidth) + 1;
+    console.log("[scrollend] scrollLeft:", track.scrollLeft, "slideWidth:", slideWidth, "newSlide:", newSlide, "currentSlide:", this.#currentSlide);
 
     if (newSlide !== this.#currentSlide) {
       this.#currentSlide = newSlide;

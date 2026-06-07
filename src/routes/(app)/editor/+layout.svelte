@@ -94,6 +94,7 @@
       bind:this={iframe}
       src="/preview"
       title="Page preview"
+      id="preview-iframe"
       class="preview-frame"
       sandbox="allow-scripts allow-same-origin allow-forms"
     ></iframe>

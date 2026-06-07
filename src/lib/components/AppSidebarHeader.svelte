@@ -58,4 +58,11 @@
     padding-inline: .5rem;
     padding-block-end: 1rem;
   }
+
+  .app-sidebar-header__action {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: .5rem;
+  }
 </style>

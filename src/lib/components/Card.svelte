@@ -23,6 +23,7 @@
     elevation?: Elevation,
     layout?: Layout,
     tag?: Tag,
+    hoverable?: boolean;
     headlineTag?: HeadlineTag,
     href?: string,
     type?: ButtonType,
@@ -44,6 +45,7 @@
     elevation,
     layout,
     tag = "div",
+    hoverable = false,
     headlineTag,
     href,
     type,
@@ -66,6 +68,7 @@
   class="wcag-ui-card"
   data-selected={computedTag === "button" ? selected : undefined}
   class:wcag-ui-card--interactive={computedTag !== "div"}
+  class:wcag-ui-card--hoverable={hoverable}
   class:wcag-ui-card--filled={variant === "filled"}
   class:wcag-ui-card--elevated={variant === "elevated"}
   class:wcag-ui-card--elevation-1={computedElevation === 1}
@@ -293,6 +296,7 @@
   }
 
   @layer states {
+    .wcag-ui-card--hoverable,
     .wcag-ui-card--interactive {
       cursor: pointer;
       transition: box-shadow 200ms ease, transform 200ms ease;
@@ -309,11 +313,11 @@
       outline-offset: 2px;
     }
 
-    .wcag-ui-card--interactive:hover {
+    :is(.wcag-ui-card--interactive, .wcag-ui-card--hoverable):hover {
       --wcag-ui-card-box-shadow: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px 0px rgba(0, 0, 0, 0.30);
     }
 
-    .wcag-ui-card--interactive:active {
+    :is(.wcag-ui-card--interactive, .wcag-ui-card--hoverable):active {
       transform: translateY(1px);
     }
 

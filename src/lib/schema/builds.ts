@@ -74,3 +74,9 @@ export const duplicateBuildSchema = v.object({
 export const lockBuildSchema = v.object({
   id: v.pipe(v.string(), v.uuid())
 });
+
+export const uploadThumbnailSchema = v.object({
+  buildId: v.pipe(v.string(), v.uuid()),
+  folder: v.string(),
+  base64: v.pipe(v.string(), v.startsWith("data:image/")),
+});
