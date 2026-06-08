@@ -1,8 +1,9 @@
 <script lang="ts">
   import type { PartialComponentNode } from "./component-registry";
+  import type { PageSection } from "./types";
 
   import { getAppState } from "./app-state.svelte";
-  import { componentSchemas, type ComponentName, type ControlSchema } from "./component-schema";
+  import { componentSchemas, sectionSchemas, type ComponentName, type ControlSchema } from "./component-schema";
   import PropertiesPanelSection from "./PropertiesPanelSection.svelte";
   import Icon from "./Icon.svelte";
   import Button from "./Button.svelte";
@@ -41,6 +42,10 @@
       ? componentSchemas[selectedComponent.name]
       : null
   );
+  const selectedSection = $derived(appState.selectedSection);
+  const sectionSchema = $derived(
+    selectedSection ? sectionSchemas[selectedSection] : null
+  );
 
   function isValidComponentName(name: string): name is ComponentName {
     return name in componentSchemas;
@@ -67,11 +72,28 @@
 
   // All reads and writes go through AppState — no local duplication
   function getValue(property: string): any {
-    return appState.getPropertyValue(property);
+    switch (selectedSection) {
+      case "page":
+        return appState.getPageSettingValue(property);
+      case "heading":
+        return appState.getPageHeadingValue(property);
+      default:
+        return appState.getPropertyValue(property);
+    }
   }
 
   function setValue(property: string, value: unknown): void {
-    appState.updateProperty(property, sanitizeValue(property, value));
+    const sanitized = sanitizeValue(property, value);
+    switch (selectedSection) {
+      case "page":
+        appState.updatePageSetting({ [property]: sanitized });
+        break;
+      case "heading":
+        appState.updatePageHeading({ [property]: sanitized });
+        break;
+      default:
+        appState.updateProperty(property, sanitized);
+    }
   }
 
   function resolveOptionValue(option: string | { value: string; text: string }): string {
@@ -221,6 +243,7 @@
   role="complementary"
   aria-label={title}
   aria-hidden={!isOpen}
+  data-sidebar-panel
 >
   <header class="properties-panel__header">
     <div class="properties-panel__back-button">
@@ -237,6 +260,7 @@
       </Button>
     </div>
     <div class="properties-panel__label">
+      {#if selectedComponent}
       <EditableLabel
         size="sm"
         variant="ghost"
@@ -249,21 +273,26 @@
           }
         }}
       />
+      {:else}
+        {title}
+      {/if}
     </div>
-    <div class="properties-panel__options-button">
-      <Button
-        size="sm"
-        variant="ghost"
-        shape="rounded-square"
-        bind:ref={optionsButtonRef}
-      >
-        <Icon>
-          <use href="#dots-horizontal" />
-        </Icon>
-      </Button>
-    </div>
+    {#if selectedComponent}
+      <div class="properties-panel__options-button">
+        <Button
+          size="sm"
+          variant="ghost"
+          shape="rounded-square"
+          bind:ref={optionsButtonRef}
+        >
+          <Icon>
+            <use href="#dots-horizontal" />
+          </Icon>
+        </Button>
+      </div>
+    {/if}
   </header>
-  <div class="properties-panel__content" data-sidebar-content>
+  <div class="properties-panel__content">
     {#if isOpen && selectedComponent && schema}
       {#each schema.sections as section}
         <PropertiesPanelSection label={section.title} icon={section.icon} collapsed={section.collapsed}>
@@ -298,36 +327,48 @@
           {/each}
         </PropertiesPanelSection>
       {/each}
+    {:else if isOpen && selectedSection && sectionSchema}
+      {#each sectionSchema.sections as section}
+        <PropertiesPanelSection label={section.title} icon={section.icon} collapsed={section.collapsed}>
+          {#each section.controls as control}
+            {#if ["segmentedbutton", "textfield", "textarea", "select", "colorpicker", "hint", "number", "checkbox"].includes(control.type)}
+              {@render renderControls(control)}
+            {/if}
+          {/each}
+        </PropertiesPanelSection>
+      {/each}
     {/if}
   </div>
 </div>
 
-<Menu anchor={optionsButtonRef}>
-  <MenuItem onclick={() => editMode = true}>
-    {#snippet leading()}
-      <Icon size="16">
-        <use href="#pencil-outline" />
-      </Icon>
-    {/snippet}
-    Rename
-  </MenuItem>
-  <MenuItem onclick={handleDuplicate}>
-    {#snippet leading()}
-      <Icon size="16">
-        <use href="#duplicate" />
-      </Icon>
-    {/snippet}
-    Duplicate
-  </MenuItem>
-  <MenuItem onclick={handleDelete}>
-    {#snippet leading()}
-      <Icon size="16">
-        <use href="#delete" />
-      </Icon>
-    {/snippet}
-    Delete
-  </MenuItem>
-</Menu>
+{#if selectedComponent}
+  <Menu anchor={optionsButtonRef}>
+    <MenuItem onclick={() => editMode = true}>
+      {#snippet leading()}
+        <Icon size="16">
+          <use href="#pencil-outline" />
+        </Icon>
+      {/snippet}
+      Rename
+    </MenuItem>
+    <MenuItem onclick={handleDuplicate}>
+      {#snippet leading()}
+        <Icon size="16">
+          <use href="#duplicate" />
+        </Icon>
+      {/snippet}
+      Duplicate
+    </MenuItem>
+    <MenuItem onclick={handleDelete}>
+      {#snippet leading()}
+        <Icon size="16">
+          <use href="#delete" />
+        </Icon>
+      {/snippet}
+      Delete
+    </MenuItem>
+  </Menu>
+{/if}
 
 <style>
   .properties-panel {

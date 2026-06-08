@@ -1,3 +1,5 @@
+import type { PageSection } from "./types";
+
 export type ControlSchema = {
   type: "textfield" | "textarea" | "number" | "colorpicker" | "checkbox" | "select" | "segmentedbutton" | "group" | "tabs" | "hint";
   property?: string;
@@ -28,6 +30,8 @@ type ComponentSchema = {
   sections: SectionSchema[];
 };
 
+type SectionSchemaMap = Record<PageSection, ComponentSchema>;
+
 // Define component names as a union type
 export type ComponentName =
   | "Hero"
@@ -46,6 +50,116 @@ export type ComponentName =
   | "RecommendationBlock"
   | "CollectionBlockProductCard"
   | "CollectionBlockCard"
+
+export const sectionSchemas: SectionSchemaMap = {
+  page: {
+    sections: [
+      {
+        title: "Layout",
+        icon: "layout",
+        controls: [
+          {
+            type: "textfield",
+            label: "Spacing",
+            property: "spacing",
+            placeholder: "e.g. 2rem",
+            description: "Gap between page sections"
+          },
+          {
+            type: "textfield",
+            label: "Max Width",
+            property: "maxWidth",
+            placeholder: "e.g. 87.5rem",
+          },
+          {
+            type: "textfield",
+            label: "Padding Block",
+            property: "padding.block",
+            placeholder: "e.g. 1rem",
+          },
+          {
+            type: "textfield",
+            label: "Padding Inline",
+            property: "padding.inline",
+            placeholder: "e.g. 1rem",
+          },
+        ]
+      },
+      {
+        title: "Appearance",
+        icon: "styling",
+        collapsed: true,
+        controls: [
+          {
+            type: "colorpicker",
+            label: "Background Color",
+            property: "background"
+          }
+        ]
+      }
+    ]
+  },
+  heading: {
+    sections: [
+      {
+        title: "Content",
+        icon: "text",
+        controls: [
+          {
+            type: "textfield",
+            label: "Text",
+            property: "text",
+            placeholder: "Page heading text"
+          },
+          {
+            type: "select",
+            label: "Tag",
+            property: "tag",
+            defaultValue: "h1",
+            options: [
+              { value: "h1", text: "H1" },
+              { value: "h2", text: "H2" },
+              { value: "h3", text: "H3" },
+            ]
+          },
+          {
+            type: "select",
+            label: "Size",
+            property: "size",
+            options: [
+              { value: "sm", text: "Small" },
+              { value: "md", text: "Medium" },
+              { value: "lg", text: "Large" },
+            ]
+          },
+          {
+            type: "select",
+            label: "Weight",
+            property: "weight",
+            options: [
+              { value: "normal", text: "Normal" },
+              { value: "medium", text: "Medium" },
+              { value: "semibold", text: "Semibold" },
+              { value: "bold", text: "Bold" },
+            ]
+          },
+          {
+            type: "segmentedbutton",
+            label: "Alignment",
+            property: "alignment",
+            options: ["left", "center", "right"],
+            defaultValue: "left"
+          },
+          {
+            type: "colorpicker",
+            label: "Color",
+            property: "color"
+          }
+        ]
+      }
+    ]
+  }
+};
 
 export const componentSchemas: Record<ComponentName, ComponentSchema> = {
   Hero: {

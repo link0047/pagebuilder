@@ -24,6 +24,7 @@ const COMPONENT_FILES = [
   "Card",
   "ProductCard",
   "Image",
+  "Page",
 ].map((name) => `src/lib/components/${name}.svelte`);
 
 async function attempt(promise) {
@@ -36,19 +37,7 @@ async function attempt(promise) {
 }
 
 async function extractCSSFromFiles(files) {
-  let extractedCSS = `
-  .page {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-		font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-		background-color: #fff;
-  	direction: ltr;
-		display: flex;
-		flex-flow: column nowrap;
-		gap: 2rem;
-		padding-inline: .5rem;
-	}`;
+  let extractedCSS = "";
 
   for (const file of files) {
     const [error, content] = await attempt(readFile(file, "utf-8"));

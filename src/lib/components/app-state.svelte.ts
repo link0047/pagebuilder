@@ -1,4 +1,14 @@
-import type { ComponentNode, RootNode, PageTreeNode, TreePath, PreviewMode, BuildType } from "./types";
+import type {
+  ComponentNode,
+  RootNode,
+  PageTreeNode,
+  TreePath,
+  PreviewMode,
+  BuildType,
+  PageSettings,
+  PageHeading,
+  PageSection
+} from "./types";
 import type { PartialComponentNode } from "./component-registry";
 import type { User } from "better-auth";
 
@@ -31,6 +41,7 @@ class AppState {
   #statusMessage = $state<string | null>(null);
   #isDirty = $state(false);
   #buildType = $state<BuildType>("homepage");
+  #selectedSection = $state<PageSection | null>(null);
 
   #isLocked = $state(false);
   #lockedBy = $state<string | null>(null);
@@ -47,6 +58,18 @@ class AppState {
 
   get pageTree(): RootNode {
     return this.#pageTree;
+  }
+
+  get pageSettings(): PageSettings {
+    return this.#pageTree.settings ?? {};
+  }
+
+  get pageHeading(): PageHeading {
+    return this.#pageTree.heading ?? { hidden: true };
+  }
+
+  get selectedSection(): PageSection | null {
+    return this.#selectedSection;
   }
 
   // -------------------------
@@ -141,6 +164,14 @@ class AppState {
     return this.#user;
   }
 
+  getPageSettingValue(property: string): any {
+    return this.#getNestedValue(this.#pageTree.settings ?? {}, property.split("."));
+  }
+
+  getPageHeadingValue(property: string): any {
+    return this.#getNestedValue(this.#pageTree.heading ?? {}, property.split("."));
+  }
+
   setUser(user: User | null): void {
     this.#user = user;
     this.#userResolved = true;
@@ -157,6 +188,23 @@ class AppState {
   setBuildType(type: BuildType): void {
     this.#buildType = type;
     this.#isDirty = true;
+  }
+
+  updatePageSetting(settings: Partial<PageSettings>): void {
+    this.#pageTree.settings = { ...this.#pageTree.settings, ...settings };
+    this.#isDirty = true;
+  }
+
+  updatePageHeading(heading: Partial<PageHeading>): void {
+    this.#pageTree.heading = { ...this.#pageTree.heading, ...heading };
+    this.#isDirty = true;
+  }
+
+  editSection(section: PageSection): void {
+    this.#selectedSection = section;
+    this.#selectedComponentPath = null;
+    this.#selectedComponent = null;
+    this.#isPropertiesPanelOpen = true;
   }
 
   // -------------------------
@@ -299,6 +347,7 @@ class AppState {
     this.#selectedComponentPath = path;
     this.#selectedComponent = component;
     this.#isPropertiesPanelOpen = true;
+    this.#selectedSection = null;
   }
 
   deselectComponent(): void {

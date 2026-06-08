@@ -13,6 +13,10 @@
   import ScrollableArea from "$lib/components/ScrollableArea.svelte";
   import EmptyState from "$lib/components/EmptyState.svelte";
   import Select from "$lib/components/Select.svelte";
+  import Separator from "$lib/components/Separator.svelte";
+  import Tree from "$lib/components/Tree.svelte";
+  import TreeItem from "$lib/components/TreeItem.svelte";
+  import PageStructureItem from "$lib/components/PageStructureItem.svelte";
 
   const appState = getAppState();
 

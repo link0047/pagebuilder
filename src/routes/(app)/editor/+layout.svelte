@@ -82,10 +82,12 @@
       if (!target) return;
 
       // ignore clicks inside the sidebar or on the iframe itself
-      const inSidebar = target.closest("[data-sidebar-content]");
+      const inSidebar = target.closest("[data-sidebar-panel]");
       const onIframe = target.closest("iframe");
 
-      if (!inSidebar || !onIframe) {
+      if (!inSidebar && !onIframe) {
+        appState.hoverComponent(null);
+        appState.deselectComponent();
         sendToPreview("preview-hover", { path: null });
         sendToPreview("preview-select", { path: null });
       }
@@ -139,7 +141,11 @@
 
 <AppSidebar>
   {@render children?.()}
-  <PropertiesPanel title={appState.selectedComponent?.meta.label} />
+  <PropertiesPanel title={
+    appState.selectedSection === "page" ? "Page" :
+    appState.selectedSection === "heading" ? "Heading" :
+    appState.selectedComponent?.meta.label
+  } />
 </AppSidebar>
 
 <PreviewPane maxWidth="{appState.previewWidth}px" bind:ref={previewPaneRef} bind:outerRef={previewOuterRef}>

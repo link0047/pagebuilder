@@ -12,6 +12,7 @@
 		weight?: Weight;
 		alignment?: Alignment;
 		color?: string;
+		visuallyHidden?: boolean;
 		children?: Snippet;
 		[key: string]: unknown;
 	}
@@ -22,6 +23,7 @@
 		weight,
 		alignment = "left",
 		color = "inherit",
+		visuallyHidden = false,
 		children,
 		...restProps
 	}: Props = $props();
@@ -30,6 +32,7 @@
 <svelte:element
 	this={tag}
 	class="wcag-ui-heading"
+	class:wcag-ui-heading--visually-hidden={visuallyHidden}
 	class:wcag-ui-heading--h1={tag === "h1"}
 	class:wcag-ui-heading--h2={tag === "h2"}
 	class:wcag-ui-heading--h3={tag === "h3"}
@@ -58,6 +61,18 @@
 		color: var(--wcag-ui-heading-color, inherit);
 		font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 	}
+
+	.wcag-ui-heading--visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
 
 	.wcag-ui-heading--h1 {
 		font-size: 3rem;
