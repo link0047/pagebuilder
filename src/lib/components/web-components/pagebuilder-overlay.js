@@ -79,6 +79,8 @@ class PageBuilderOverlay extends HTMLElement {
   #selectedPath = null;
   /** @type {HTMLSpanElement | null} */
   #labelText = null;
+  /** @type {ResizeObserver | null} */
+  #resizeObserver = null;
 
   constructor() {
     super();
@@ -99,6 +101,8 @@ class PageBuilderOverlay extends HTMLElement {
   disconnectedCallback() {
     this.#abortController?.abort();
     this.#abortController = null;
+    this.#resizeObserver?.disconnect();
+    this.#resizeObserver = null;
   }
 
   #onMessage = (/** @type {MessageEvent} */ event) => {
@@ -130,6 +134,10 @@ class PageBuilderOverlay extends HTMLElement {
       this.removeAttribute("active");
       return;
     }
+
+    if (this.#resizeObserver) this.#resizeObserver.disconnect();
+    this.#resizeObserver = new ResizeObserver(() => this.#reposition());
+    this.#resizeObserver.observe(el);
 
     const rect = el.getBoundingClientRect();
     this.style.width = `${rect.width}px`;

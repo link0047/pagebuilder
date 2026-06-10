@@ -84,8 +84,9 @@
       // ignore clicks inside the sidebar or on the iframe itself
       const inSidebar = target.closest("[data-sidebar-panel]");
       const onIframe = target.closest("iframe");
+      const inEditableLabel = target.closest("[data-editable-label]");
 
-      if (!inSidebar && !onIframe) {
+      if (!inSidebar && !onIframe && !inEditableLabel) {
         appState.hoverComponent(null);
         appState.deselectComponent();
         sendToPreview("preview-hover", { path: null });

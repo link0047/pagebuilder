@@ -10,6 +10,7 @@
     editMode?: boolean;
     oncommit?: (value: string) => void;
     menuItems?: Snippet;
+    [key: string]: unknown;
   };
 
   let {

@@ -280,7 +280,7 @@
       </Icon>
       Exit editing
     </Button>
-    <EditableLabelSplit size="sm" variant="ghost" value={appState.buildName} bind:editMode={isRenaming} oncommit={handleRename}>
+    <EditableLabelSplit size="sm" variant="ghost" value={appState.buildName} bind:editMode={isRenaming} oncommit={handleRename} data-editable-label>
       {#snippet menuItems()}
         <MenuItem onclick={() => isRenaming = true}>Rename</MenuItem>
         <MenuItem onclick={handleDelete}>Delete</MenuItem>

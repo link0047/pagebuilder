@@ -67,12 +67,6 @@ export const sectionSchemas: SectionSchemaMap = {
           },
           {
             type: "textfield",
-            label: "Max Width",
-            property: "maxWidth",
-            placeholder: "e.g. 87.5rem",
-          },
-          {
-            type: "textfield",
             label: "Padding Block",
             property: "padding.block",
             placeholder: "e.g. 1rem",
