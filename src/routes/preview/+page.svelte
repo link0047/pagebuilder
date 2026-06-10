@@ -20,13 +20,26 @@
 
     window.addEventListener("message", (event) => {
       if (event.origin !== window.location.origin) return;
-      if (event.data?.type === "tree-update") {
-        tree = event.data.tree;
-      }
-      if (event.data?.type === "preview-hover") {
-        // forwarded back from parent — update overlay
-        const path = event.data.path as string | null;
-        overlay.setAttribute("hovered-path", path ?? "");
+
+      // console.log(event.data?.type);
+      switch (event.data?.type) {
+        case "tree-update": {
+          tree = event.data.tree;
+          break;
+        }
+        case "preview-hover": {
+          // forwarded back from parent — update overlay
+          const path = event.data.path as string | null;
+          overlay.setAttribute("hovered-path", path ?? "");
+          break;
+        }
+        case "preview-scroll-to": {
+          const path = event.data.path as string | null;
+          if (!path) return;
+          const el = document.querySelector(`[data-component-path="${path}"]`) as HTMLElement | null;
+          el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          break;
+        }
       }
     }, { signal });
 
@@ -76,7 +89,6 @@
         ? (target as Element)?.closest("[data-component-path]") as HTMLElement | null
         : null;
 
-      console.log(target);
       window.parent.postMessage({
         type: "preview-click",
         path: el?.dataset.componentPath ?? null

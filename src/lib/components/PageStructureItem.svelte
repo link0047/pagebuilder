@@ -101,6 +101,9 @@
     text-align: start;
     padding: 0;
     margin: 0;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
     cursor: pointer;
     font-size: inherit;
     font-family: inherit;

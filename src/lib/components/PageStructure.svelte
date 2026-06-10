@@ -46,8 +46,9 @@
   let canMoveUp = $derived(path.length > 0 && currentIndex > 0);
   let canMoveDown = $derived(path.length > 0 && currentIndex < siblingCount - 1);
 
-  const debouncedHover = debounce((pathStr: string) => {
-    sendToPreview("preview-hover", { path: pathStr });
+  const debouncedHover = debounce((path: string) => {
+    sendToPreview("preview-scroll-to", { path });
+    sendToPreview("preview-hover", { path });
   }, 300);
 
   function handlePointerOver(event: PointerEvent) {
@@ -138,6 +139,7 @@
         />
       {/snippet}
     </TreeItem>
+    <Separator gap={4} />
     <TreeItem>
       {#snippet text()}
         <PageStructureItem
@@ -164,8 +166,7 @@
         </PageStructureItem>
       {/snippet}
     </TreeItem>
-
-    <Separator />
+    <Separator gap={4} />
     {#each pageTree.children as child, index (child.id ?? index)}
       <PageStructure pageTree={child} path={[...path, index]} />
     {/each}

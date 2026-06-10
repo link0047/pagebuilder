@@ -15,6 +15,7 @@
     headingLevel?: HeadingLevel;
     backgroundColor?: string;
     blockId?: string;
+    [key: string]: unknown;
   };
 
   let uid = generateId("recblock");
@@ -28,6 +29,7 @@
     headingLevel = 2,
     backgroundColor,
     blockId = `spn-ui-recblock-${uid}`,
+    ...restProps
   }: Props = $props();
 
   const items = Array(6).fill(null);
@@ -48,6 +50,7 @@
   data-component="RecommendationBlock"
   data-block-id={blockId}
   style={inlineStyle}
+  {...restProps}
 >
   <div class="rec-block__grid">
     {#each items as _}

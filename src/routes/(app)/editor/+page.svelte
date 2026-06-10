@@ -100,7 +100,7 @@
   .panel-content {
     display: flex;
     flex-direction: column;
-    padding-block: 1rem;
+    padding-block: .25rem 1rem;
     padding-inline: 0.5rem;
     gap: 1rem;
   }

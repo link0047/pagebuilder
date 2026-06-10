@@ -22,6 +22,7 @@ const config = {
     csp: {
       directives: {
         "frame-ancestors": ["self"],
+        "worker-src": ["self", "blob:"],
         "img-src": ["self", "data:", "https:"],
       },
       reportOnly: {
@@ -30,6 +31,7 @@ const config = {
         "style-src": ["self", "unsafe-inline"],
         "img-src": ["self", "data:", "https:"],
         "font-src": ["self"],
+        "worker-src": ["self", "blob:"],
         "connect-src": ["self"],
         "frame-ancestors": ["self"],
         "base-uri": ["self"],
