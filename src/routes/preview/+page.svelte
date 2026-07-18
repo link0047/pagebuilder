@@ -1,9 +1,7 @@
 <script lang="ts">
   import type { RootNode } from "$lib/components/types";
   import { onMount } from "svelte";
-  import Page from "$lib/components/Page.svelte";
-  import Preview from "$lib/components/Preview.svelte";
-  import Heading from "$lib/components/Heading.svelte";
+  import PageDocument from "$lib/components/PageDocument.svelte";
 
   let tree = $state<RootNode | null>(null);
 
@@ -106,19 +104,5 @@
 </script>
 
 {#if tree}
-  <Page spacing={tree.settings?.spacing ?? "2rem"} {...tree.settings}>
-    {#if tree.heading}
-      <Heading
-        tag={tree.heading.tag ?? "h1"}
-        visuallyHidden={tree.heading.hidden}
-        size={tree.heading.size}
-        weight={tree.heading.weight}
-        alignment={tree.heading.alignment}
-        color={tree.heading.color}
-      >
-        {tree.heading.text ?? ""}
-      </Heading>
-    {/if}
-    <Preview pageTree={tree} />
-  </Page>
+  <PageDocument pageTree={tree} />
 {/if}
