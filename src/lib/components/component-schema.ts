@@ -1,9 +1,31 @@
 import type { PageSection } from "./types";
 
 export type ControlSchema = {
-  type: "textfield" | "textarea" | "number" | "colorpicker" | "checkbox" | "select" | "segmentedbutton" | "group" | "tabs" | "hint";
+  type:
+    | "textfield"
+    | "textarea"
+    | "number"
+    | "colorpicker"
+    | "checkbox"
+    | "select"
+    | "segmentedbutton"
+    | "group"
+    | "tabs"
+    | "hint"
+    | "slider"            // existing Slider.svelte; `unit` appends a suffix
+    | "labelled-card"     // LabelledCard: card + heading, children stack
+    | "spacing-field"     // SpacingField: 4-side padding/margin box
+    | "link-field"        // LinkField: href + external flag
+    | "image-url-field"   // ImageUrlField: URL with advisory validation
+    | "array-field";      // ArrayField: repeatable sub-form
   property?: string;
   label?: string;
+  /**
+   * Render the label for assistive tech only. The label is still required —
+   * this hides it visually, it doesn't remove it. Use where surrounding
+   * context already names the field.
+   */
+  hideLabel?: boolean;
   placeholder?: string;
   description?: string;
   defaultValue?: any;
@@ -17,11 +39,69 @@ export type ControlSchema = {
     icon?: string;
     controls: Omit<ControlSchema, "tabs">[];
   }[];
+  /**
+   * Suffix appended to the displayed value, e.g. "px". Presence also decides
+   * the storage shape: with a unit the panel stores a CSS string ("24px"),
+   * without one it stores a raw number.
+   */
+  unit?: string;
+  /**
+   * Group lays its children in a row by default. LabelledCard stacks its
+   * children, so nest a `group` inside one to pair controls side by side.
+   */
+  direction?: "horizontal" | "vertical";
+  gap?: string;
+  /**
+   * Which sides to expose, in render order. Omit to use SpacingField's default
+   * of ["top", "bottom", "left", "right"], which pairs top/bottom on the first
+   * row of the 2-column grid and left/right on the second.
+   */
+  sides?: ("top" | "right" | "bottom" | "left")[];
+  /**
+   * Permit negative values. Defaults true in SpacingField — pass false for
+   * padding, where negatives are invalid CSS and silently dropped.
+   */
+  allowNegative?: boolean;
+  /** Show the "link all sides" toggle. Defaults false. */
+  linkable?: boolean;
+  /**
+   * `property` points at an ARRAY. `item` describes the sub-form rendered per
+   * element; its control properties are item-relative ("text", "link.href")
+   * and the panel rebases them onto `${property}.${index}.${childProperty}`.
+   */
+  item?: { controls: ControlSchema[] };
+  /** Template for each row's header, e.g. "Subheading ${text}". */
+  itemLabel?: string;
+  /**
+   * Row header when the item's text is empty. A [first, rest] pair labels the
+   * first row differently from the others — a heading array's first entry is
+   * the real heading element and the rest render as spans.
+   */
+  itemFallback?: [string, string] | string;
+  /**
+   * Controls shown ONLY on the first row. For props that belong to the first
+   * heading specifically but are stored block-level.
+   */
+  firstItemControls?: ControlSchema[];
+  /**
+   * Inside an array item, treat `property` as a full path from the component
+   * root rather than item-relative. Needed for firstItemControls, whose props
+   * live on the block, not on the item.
+   */
+  absolute?: boolean;
+  /** Label for the add button. */
+  addLabel?: string;
+  /** Shape used for a newly added element. */
+  defaultItem?: Record<string, any>;
 };
 
 type SectionSchema = {
   title: string;
-  icon?: "desktop" | "tablet" | "mobile" | "image" | "video" | "styling" | "content" | "layout" | "text" | "content-positioning";
+  icon?:
+    | "desktop" | "tablet" | "mobile"
+    | "image" | "video" | "styling" | "content"
+    | "layout" | "text" | "content-positioning"
+    | "heading" | "spacing";
   collapsed?: boolean;
   controls: ControlSchema[];
 };
@@ -154,6 +234,261 @@ export const sectionSchemas: SectionSchemaMap = {
     ]
   }
 };
+
+
+// ---------------------------------------------------------------------------
+// Shared heading / layout / hero sections
+// ---------------------------------------------------------------------------
+//
+// EditorialBlock, CollectionBlock, and RecommendationBlock all render through
+// BlockSection and share these three sections. They're builders rather than a
+// shared const so each block gets its own object (the panel mutates nothing,
+// but shared references across schemas invite accidents).
+
+const WEIGHT_OPTIONS = [
+  { value: "400", text: "Normal — 400" },
+  { value: "500", text: "Medium — 500" },
+  { value: "600", text: "Semibold — 600" },
+  { value: "700", text: "Bold — 700" },
+];
+
+// Heading size is a px slider — px is what non-technical authors think in.
+// 12–64px covers fine print through a display headline; step 2 keeps values on
+// a sane rhythm rather than letting authors land on 37px.
+//
+// Trade-off accepted: px does not scale with the reader's browser font-size
+// setting the way rem does. If that becomes an accessibility concern the fix is
+// display-only — keep this slider in px and divide by 16 on write in
+// PropertiesPanel. The read path already converts rem -> px.
+const SIZE_SLIDER = {
+  min: 12,
+  max: 64,
+  step: 2,
+  unit: "px",
+} as const;
+
+export function layoutSection(): SectionSchema {
+  return {
+    title: "Layout",
+    icon: "spacing",
+    collapsed: true,
+    controls: [
+      {
+        type: "spacing-field",
+        label: "Padding",
+        property: "props.layout.padding",
+        // All four sides. Negative padding is invalid CSS, so opt out of the
+        // component's permissive default. Linking is offered here because one
+        // uniform inset across four sides is a common move.
+        allowNegative: false,
+        linkable: true,
+      },
+      {
+        type: "spacing-field",
+        label: "Margin",
+        property: "props.layout.margin",
+        // Negative margins are valid and useful, so the permissive default
+        // stands. Only two sides, so linking isn't worth the extra control.
+        sides: ["top", "bottom"],
+      },
+    ],
+  };
+}
+
+export function headingsSection(): SectionSchema {
+  return {
+    title: "Headings",
+    icon: "heading",
+    controls: [
+      {
+        // One array covers the title and every subheading. The first entry
+        // renders at `headingLevel`; the rest render as spans.
+        type: "array-field",
+        // No label: the section header already says "Headings".
+        property: "props.headings",
+        addLabel: "Add heading",
+        itemLabel: "${text}",
+        // Only the first entry becomes a heading element — the rest are spans,
+        // so they're subheadings in the UI too.
+        itemFallback: ["Heading", "Subheading"],
+        max: 4,
+        // 0, not 1: a block with no heading is a legitimate layout, and
+        // BlockSection already renders no header markup for it. Forcing one
+        // row meant the only way to clear a heading was to blank its text,
+        // leaving an empty object in the array.
+        min: 0,
+        defaultItem: {
+          text: "",
+          size: "24px",
+          weight: "500",
+          color: "#000000",
+          link: { href: "", external: false },
+        },
+        item: {
+          controls: [
+            {
+              // Label hidden: the row this sits in is already titled "Heading"
+              // or "Subheading", so a visible "Text" above the first field is
+              // noise. Still announced to screen readers.
+              type: "textfield",
+              label: "Text",
+              hideLabel: true,
+              property: "text",
+              placeholder: "e.g. Haunt Your Own Front Yard!",
+            },
+            {
+              // Stacked, not paired. Weight is one select but Color is a
+              // swatch plus a hex field, so a 50/50 split clipped the hex —
+              // and the reorder gutter takes ~28px off the card's width before
+              // any of this. LabelledCard's controls are already a flex column,
+              // so listing them here is enough; no wrapping group.
+              type: "labelled-card",
+              label: "Type",
+              controls: [
+                { type: "slider", label: "Size", property: "size", defaultValue: 24, ...SIZE_SLIDER },
+                { type: "select", label: "Weight", property: "weight", defaultValue: "500", options: WEIGHT_OPTIONS },
+                { type: "colorpicker", label: "Color", property: "color" },
+              ],
+            },
+            { type: "link-field", label: "Link", property: "link" },
+          ],
+        },
+        // First row only. Stored block-level (props.headingLevel, not per-item)
+        // because only one heading element exists — but it reads as that
+        // heading's property, so that's where it's edited.
+        firstItemControls: [
+          {
+            type: "select",
+            label: "Heading level",
+            property: "props.headingLevel",
+            // Not rebased onto the item: headingLevel is a block prop, so the
+            // path is already complete.
+            absolute: true,
+            // String, not number — the option values below are strings and a
+            // numeric default would match none of them, leaving the select blank.
+            defaultValue: "2",
+            description: "Use the correct level for your page structure",
+            options: [
+              { value: "2", text: "H2" },
+              { value: "3", text: "H3" },
+              { value: "4", text: "H4" },
+            ],
+          },
+        ],
+      },
+      {
+        type: "slider",
+        label: "Spacing between headings",
+        property: "props.headingGap",
+        min: 0,
+        max: 24,
+        step: 1,
+        unit: "px",
+        defaultValue: 4,
+      },
+      {
+        // Block-level, not per-heading: alignment applies to the group.
+        type: "segmentedbutton",
+        label: "Alignment",
+        property: "props.titleAlignment",
+        options: ["left", "center", "right"],
+        defaultValue: "center",
+      },
+    ],
+  };
+}
+
+export function heroSection(): SectionSchema {
+  // One breakpoint's controls. Property paths are built per tab so the same
+  // shape backs mobile/tablet/desktop without three near-copies.
+  const sourceControls = (
+    bp: "mobile" | "tablet" | "desktop"
+  ): Omit<ControlSchema, "tabs">[] => {
+    const base = `props.hero.${bp}`;
+    const inherits = bp === "tablet" ? "mobile" : "tablet";
+    return [
+      {
+        type: "image-url-field",
+        label: "Scene7 image URL",
+        property: `${base}.url`,
+        placeholder: "https://s7.spirithalloween.com/is/image/Spirit/...",
+        description:
+          bp === "mobile"
+            ? "Paste the Scene7 image path"
+            : `Leave empty to use the ${inherits} image`,
+      },
+      {
+        type: "image-url-field",
+        label: "2x image URL",
+        property: `${base}.url2x`,
+        placeholder: "Optional — for high-density displays",
+        description: "Optional. Used on high-density screens only.",
+      },
+      {
+        // Transforms are per-breakpoint: a desktop image usually wants a
+        // different width than a mobile one, which is the point of splitting.
+        //
+        // They do NOT inherit independently — HeroSource falls back as a unit,
+        // so an empty tablet tab uses mobile's url AND mobile's wid. Setting
+        // only tablet's width does nothing without a tablet url.
+        type: "labelled-card",
+        label: "Image transforms",
+        controls: [
+          {
+            type: "group",
+            direction: "horizontal",
+            gap: ".75rem",
+            controls: [
+              { type: "number", label: "Width", property: `${base}.params.wid`, placeholder: "1200" },
+              { type: "number", label: "Quality", property: `${base}.params.qlt`, placeholder: "85" },
+            ],
+          },
+        ],
+      },
+    ];
+  };
+
+  return {
+    title: "Hero image",
+    icon: "image",
+    collapsed: true,
+    controls: [
+      // No "enable" toggle: the URL *is* the switch. An empty mobile url means
+      // no hero, which BlockSection already handles. A separate flag would let
+      // an author type a valid URL and still render nothing.
+      //
+      // Mobile is the base. Tablet falls back to mobile, desktop to tablet.
+      {
+        type: "tabs",
+        tabs: [
+          { label: "Mobile", controls: sourceControls("mobile") },
+          { label: "Tablet", controls: sourceControls("tablet") },
+          { label: "Desktop", controls: sourceControls("desktop") },
+        ],
+      },
+      {
+        // Alt describes the subject, which doesn't change with the crop, so it
+        // sits outside the tabs. Three descriptions of one image is three
+        // chances to disagree when a screen reader only hears one.
+        type: "textfield",
+        label: "Alt text",
+        property: "props.hero.alt",
+        placeholder: "Describe the image for accessibility",
+      },
+      {
+        // Placement is layout, not source — also outside the tabs.
+        type: "segmentedbutton",
+        label: "Placement",
+        property: "props.imagePlacement",
+        options: [
+          { value: "above", text: "Above headings" },
+          { value: "below", text: "Below headings" },
+        ],
+        defaultValue: "above",
+      },
+    ],
+  };
+}
 
 export const componentSchemas: Record<ComponentName, ComponentSchema> = {
   Hero: {
@@ -1289,49 +1624,15 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
 
   EditorialBlock: {
     sections: [
-      {
-        title: "Content",
-        icon: "content",
-        controls: [
-          {
-            type: "textfield",
-            label: "Title",
-            property: "props.title",
-            placeholder: "e.g. New Arrivals, Shop by Style",
-            description: "Optional — leave empty to hide the title"
-          },
-          {
-            type: "select",
-            label: "Title Size",
-            property: "props.titleSize",
-            defaultValue: "md",
-            options: [
-              { value: "sm", text: "Small — 1.25rem" },
-              { value: "md", text: "Medium — 1.5rem" },
-              { value: "lg", text: "Large — 1.75rem" },
-              { value: "xl", text: "Extra Large — 2rem" },
-              { value: "2xl", text: "2XL — 2.5rem" },
-            ]
-          },
-          {
-            type: "segmentedbutton",
-            label: "Title Alignment",
-            property: "props.titleAlignment",
-            options: ["left", "center", "right"],
-            defaultValue: "center"
-          },
-        ]
-      },
+      layoutSection(),
+      headingsSection(),
+      heroSection(),
       {
         title: "Appearance",
         icon: "styling",
         collapsed: true,
         controls: [
-          {
-            type: "colorpicker",
-            label: "Title Color",
-            property: "props.titleColor",
-          },
+          // Title Color moved into each heading (headingsSection -> Type card).
           {
             type: "colorpicker",
             label: "Background Color",
@@ -1688,39 +1989,9 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
 
   CollectionBlock: {
     sections: [
-      {
-        title: "Content",
-        icon: "content",
-        controls: [
-          {
-            type: "textfield",
-            label: "Title",
-            property: "props.title",
-            placeholder: "e.g. Best Sellers, New Arrivals",
-            description: "Optional — leave empty to hide the title"
-          },
-          {
-            type: "select",
-            label: "Title Size",
-            property: "props.titleSize",
-            defaultValue: "md",
-            options: [
-              { value: "sm", text: "Small — 1.25rem" },
-              { value: "md", text: "Medium — 1.5rem" },
-              { value: "lg", text: "Large — 1.75rem" },
-              { value: "xl", text: "Extra Large — 2rem" },
-              { value: "2xl", text: "2XL — 2.5rem" },
-            ]
-          },
-          {
-            type: "segmentedbutton",
-            label: "Title Alignment",
-            property: "props.titleAlignment",
-            options: ["left", "center", "right"],
-            defaultValue: "center"
-          }
-        ]
-      },
+      layoutSection(),
+      headingsSection(),
+      heroSection(),
       {
         title: "Carousel",
         icon: "layout",
@@ -1808,11 +2079,7 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
         icon: "styling",
         collapsed: true,
         controls: [
-          {
-            type: "colorpicker",
-            label: "Title Color",
-            property: "props.titleColor",
-          },
+          // Title Color moved into each heading (headingsSection -> Type card).
           {
             type: "colorpicker",
             label: "Background Color",
@@ -2116,6 +2383,10 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
     ]
   },
 
+  // NOTE: FeaturedCategories still uses the props.title / props.titleSize
+  // shape. Left as-is deliberately — confirm whether it renders through
+  // BlockSection before migrating it. If it has its own heading markup,
+  // moving its props to `headings` would silently blank the title.
   FeaturedCategories: {
     sections: [
       {
@@ -2222,46 +2493,18 @@ export const componentSchemas: Record<ComponentName, ComponentSchema> = {
             label: "Block ID",
             property: "props.blockId",
             description: "Unique identifier used to inject recommendations"
-          },
-          {
-            type: "textfield",
-            label: "Title",
-            property: "props.title",
-            placeholder: "e.g. Recommended For You",
-            description: "Optional — leave empty to hide the title"
-          },
-          {
-            type: "select",
-            label: "Title Size",
-            property: "props.titleSize",
-            defaultValue: "md",
-            options: [
-              { value: "sm", text: "Small — 1.25rem" },
-              { value: "md", text: "Medium — 1.5rem" },
-              { value: "lg", text: "Large — 1.75rem" },
-              { value: "xl", text: "Extra Large — 2rem" },
-              { value: "2xl", text: "2XL — 2.5rem" },
-            ]
-          },
-          {
-            type: "segmentedbutton",
-            label: "Title Alignment",
-            property: "props.titleAlignment",
-            options: ["left", "center", "right"],
-            defaultValue: "center"
           }
         ]
       },
+      layoutSection(),
+      headingsSection(),
+      heroSection(),
       {
         title: "Appearance",
         icon: "styling",
         collapsed: true,
         controls: [
-          {
-            type: "colorpicker",
-            label: "Title Color",
-            property: "props.titleColor",
-          },
+          // Title Color moved into each heading (headingsSection -> Type card).
           {
             type: "colorpicker",
             label: "Background Color",

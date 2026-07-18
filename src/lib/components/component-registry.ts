@@ -102,6 +102,10 @@ export const sectionConfigs: SectionConfig[] = [
     defaultChildren: [],
   },
   {
+    // NOTE: still on the title / titleSize shape. Left as-is deliberately —
+    // confirm whether FeaturedCategories renders through BlockSection before
+    // migrating it. If it has its own heading markup, moving these props to
+    // `headings` would silently blank the title.
     label: "Featured Categories",
     name: "FeaturedCategories",
     defaultProps: {
@@ -124,8 +128,14 @@ export const sectionConfigs: SectionConfig[] = [
     label: "Editorial Block",
     name: "EditorialBlock",
     defaultProps: {
+      // Seed one empty heading so the panel's ArrayField has a row to render
+      // and its `min: 1` is satisfiable. "24px" rather than the old "md" token:
+      // same rendering (TITLE_SIZES.md = 1.5rem = 24px), but new content
+      // shouldn't write a vocabulary we're retiring.
+      headings: [
+        { text: "", size: "24px", weight: "500", color: "#000000" },
+      ],
       titleAlignment: "left",
-      titleSize: "md",
     },
     defaultData: {},
     defaultChildren: [
@@ -145,8 +155,10 @@ export const sectionConfigs: SectionConfig[] = [
     label: "Collection Block",
     name: "CollectionBlock",
     defaultProps: {
+      headings: [
+        { text: "", size: "24px", weight: "500", color: "#000000" },
+      ],
       titleAlignment: "center",
-      titleSize: "md",
       backgroundColor: "#f6f5f1",
       equalHeight: false,
       breakpoints: {
@@ -162,9 +174,10 @@ export const sectionConfigs: SectionConfig[] = [
     label: "Recommendation Block",
     name: "RecommendationBlock",
     defaultProps: {
-      title: "Recommended For You",
+      headings: [
+        { text: "Recommended For You", size: "24px", weight: "500", color: "#000000" },
+      ],
       titleAlignment: "center",
-      titleSize: "md",
     },
     defaultData: {},
   },

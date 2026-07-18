@@ -3,21 +3,22 @@
 	type DecodingStrategy = "async" | "sync" | "auto";
 	type FetchPriority = "high" | "low" | "auto";
 
+	type MaybeString = string | undefined | null;
 	type WarningType = {
 	  type: "missingSource" | "missingAlt" | "loadError";
 	  message: string;
-	  src?: string;
+	  src?: MaybeString;
 	}
 
 	type Props = {
-	  src: string | undefined;
+	  src: MaybeString;
 	  width: number;
 	  height: number;
 	  loading?: LoadingStrategy;
 	  decoding?: DecodingStrategy;
 	  alt: string;
 	  fetchpriority?: FetchPriority;
-	  onError?: (src?: string) => void;
+	  onError?: (src?: MaybeString) => void;
 		onWarning?: (warning: WarningType) => void;
 		showWarnings?: boolean;
 		useFallback?: boolean;

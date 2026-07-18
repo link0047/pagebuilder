@@ -38,11 +38,14 @@
 		--wcag-ui-control-group-columns: auto;
 		--wcag-ui-control-group-rows: auto;
 		--wcag-ui-control-group-gap: 1rem;
+		--wcag-ui-control-group-padding-inline: 0;
+		--wcag-ui-control-group-padding-block: 0;
 	}
 
 	.wcag-ui-control-group {
 		border: none;
-		padding: 0;
+		padding-inline: var(--wcag-ui-control-group-padding-inline);
+		padding-block: var(--wcag-ui-control-group-padding-block);
 		margin: 0;
 	}
 

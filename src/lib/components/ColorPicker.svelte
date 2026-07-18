@@ -98,36 +98,47 @@
   class:wcag-ui-color-picker--invalid={!isValid && validationState === "validating"}
 >
   <legend class="wcag-ui-color-picker__legend">{label}</legend>
+
   <div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
     Selected color: {colorState.value}
   </div>
-  <label for={colorState.colorId} class="visually-hidden">Color swatch</label>
-  <input
-    data-testid="color-picker-swatch"
-    id={colorState.colorId}
-    class="wcag-ui-color-picker__input-color"
-    type="color"
-    value={colorState.normalizedHex}
-    oninput={handleColorInput}
-  />
-  <label for={colorState.textId} class="visually-hidden">Color value</label>
-  <input
-    data-testid="color-picker-text-input"
-    id={colorState.textId}
-    class="wcag-ui-color-picker__input-text"
-    type="text"
-    value={colorState.value}
-    onfocus={handleTextFocus}
-    oninput={handleTextInput}
-    onblur={handleTextBlur}
-    pattern=".*"
-    aria-invalid={!isValid}
-    aria-describedby={isValid ? undefined : colorState.errorId}
-    spellcheck="false"
-    autocomplete="off"
-    placeholder="#000000"
-    {...restProps}
-  />
+
+  <!--
+    Swatch and text share one bordered box rather than sitting side by side as
+    two grid items. The pair then costs roughly one control's width, which is
+    what lets this fit in a narrow panel column.
+  -->
+  <div class="wcag-ui-color-picker__field">
+    <label for={colorState.colorId} class="visually-hidden">Color swatch</label>
+    <input
+      data-testid="color-picker-swatch"
+      id={colorState.colorId}
+      class="wcag-ui-color-picker__input-color"
+      type="color"
+      value={colorState.normalizedHex}
+      oninput={handleColorInput}
+    />
+
+    <label for={colorState.textId} class="visually-hidden">Color value</label>
+    <input
+      data-testid="color-picker-text-input"
+      id={colorState.textId}
+      class="wcag-ui-color-picker__input-text"
+      type="text"
+      value={colorState.value}
+      onfocus={handleTextFocus}
+      oninput={handleTextInput}
+      onblur={handleTextBlur}
+      pattern=".*"
+      aria-invalid={!isValid}
+      aria-describedby={isValid ? undefined : colorState.errorId}
+      spellcheck="false"
+      autocomplete="off"
+      placeholder="#000000"
+      {...restProps}
+    />
+  </div>
+
   {#if !isValid && validationState === "validating"}
     <span id={colorState.errorId} class="wcag-ui-color-picker__message-error" role="alert">
       Please enter a valid CSS color (e.g., #000, #000000, rgb(0,0,0), transparent)
@@ -157,15 +168,28 @@
       --wcag-ui-color-picker-input-outline-width: 2px;
       --wcag-ui-color-picker-input-outline-offset: -2px;
       --wcag-ui-color-picker-input-transition-duration: 0.2s;
-   --wcag-ui-color-picker-input-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+      --wcag-ui-color-picker-input-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
 
-      --wcag-ui-color-picker-input-color-size: 2.5rem;
+      /* Inset in the field, so smaller than the old standalone 2.5rem. */
+      --wcag-ui-color-picker-input-color-size: 1.5rem;
       --wcag-ui-color-picker-input-color-background: transparent;
+      /*
+        The swatch needs its own outline: the field behind it is white, so a
+        white or near-white value is otherwise invisible. Sized in px, not the
+        field's border width — it has to read against the colour it contains,
+        not match the box around it.
+      */
+      --wcag-ui-color-picker-input-color-border-width: 2px;
+      --wcag-ui-color-picker-input-color-border-color: #989898;
+
+      --wcag-ui-color-picker-field-gap: .375rem;
+      --wcag-ui-color-picker-field-padding: .25rem;
+      --wcag-ui-color-picker-field-height: 2.25rem;
 
       --wcag-ui-color-picker-input-text-font-size: 1rem;
       --wcag-ui-color-picker-input-text-font-weight: 400;
       --wcag-ui-color-picker-input-text-line-height: 1;
-      --wcag-ui-color-picker-input-text-padding-inline: .5rem;
+      --wcag-ui-color-picker-input-text-padding-inline: .25rem;
       --wcag-ui-color-picker-input-text-color: #212121;
 
       --wcag-ui-color-picker-focus-outline-color: #2451b2;
@@ -182,28 +206,41 @@
       border-radius: var(--wcag-ui-color-picker-border-radius);
       padding: var(--wcag-ui-color-picker-padding);
       margin: 0;
-      display: grid;
-      grid-template-areas:
-        "legend legend"
-        "color text";
-      grid-template-columns: auto 1fr;
-      row-gap: var(--wcag-ui-color-picker-gap);
-      column-gap: var(--wcag-ui-color-picker-gap);
+      display: flex;
+      flex-direction: column;
+      gap: var(--wcag-ui-color-picker-gap);
       font-family: var(--wcag-ui-color-picker-font-family);
+      /*
+        A <fieldset> defaults to `min-inline-size: min-content`, which is why
+        this control refused to shrink and overflowed its container regardless
+        of what the parent did. It's a UA style on fieldset specifically, not
+        the usual flex/grid min-size rule.
+      */
+      min-inline-size: 0;
     }
 
     .wcag-ui-color-picker__legend {
-      grid-area: legend;
-      line-height: 1;
+      line-height: var(--wcag-ui-color-picker-legend-line-height);
       float: left;
+      padding: 0;
       font-size: var(--wcag-ui-color-picker-legend-font-size);
       color: var(--wcag-ui-color-picker-legend-color);
     }
 
-    :is(.wcag-ui-color-picker__input-color, .wcag-ui-color-picker__input-text) {
+    /*
+      The bordered box. The border/outline lives here rather than on the two
+      inputs, so the swatch reads as sitting inside the field.
+    */
+    .wcag-ui-color-picker__field {
       box-sizing: border-box;
-      appearance: none;
-      line-height: 1;
+      display: flex;
+      align-items: center;
+      gap: var(--wcag-ui-color-picker-field-gap);
+      /* Without this the text input's intrinsic width sets a floor. */
+      min-width: 0;
+      height: var(--wcag-ui-color-picker-field-height);
+      padding-inline-start: var(--wcag-ui-color-picker-field-padding);
+      background: #fff;
       border: var(--wcag-ui-color-picker-input-border-width) solid var(--wcag-ui-color-picker-input-border-color);
       border-radius: var(--wcag-ui-color-picker-input-border-radius);
       outline: var(--wcag-ui-color-picker-input-outline-width) solid transparent;
@@ -212,19 +249,31 @@
     }
 
     .wcag-ui-color-picker__input-color {
-      grid-area: color;
+      box-sizing: border-box;
+      appearance: none;
+      flex-shrink: 0;
       padding: 0;
       width: var(--wcag-ui-color-picker-input-color-size);
       height: var(--wcag-ui-color-picker-input-color-size);
       aspect-ratio: 1 / 1;
       cursor: pointer;
+      border: var(--wcag-ui-color-picker-input-color-border-width) solid var(--wcag-ui-color-picker-input-color-border-color);
+      /* Slightly tighter than the field so it nests cleanly in the corner. */
+      border-radius: calc(var(--wcag-ui-color-picker-input-border-radius) - 1px);
       background-color: var(--wcag-ui-color-picker-input-color-background);
+      outline-offset: 1px;
     }
 
+    /*
+      The fill itself. Sized to 100% of the input's content box rather than the
+      token, since the input's own border now takes up part of that box —
+      hard-coding the token here would push the fill past the border.
+    */
     .wcag-ui-color-picker__input-color::-webkit-color-swatch {
-      width: var(--wcag-ui-color-picker-input-color-size);
-      height: var(--wcag-ui-color-picker-input-color-size);
+      width: 100%;
+      height: 100%;
       border: none;
+      border-radius: calc(var(--wcag-ui-color-picker-input-border-radius) - 2px);
     }
 
     .wcag-ui-color-picker__input-color::-webkit-color-swatch-wrapper {
@@ -235,9 +284,10 @@
 
     /* Firefox */
     .wcag-ui-color-picker__input-color::-moz-color-swatch {
-      width: var(--wcag-ui-color-picker-input-color-size);
-      height: var(--wcag-ui-color-picker-input-color-size);
+      width: 100%;
+      height: 100%;
       border: none;
+      border-radius: calc(var(--wcag-ui-color-picker-input-border-radius) - 2px);
     }
 
     .wcag-ui-color-picker__input-color::-moz-focus-inner {
@@ -247,48 +297,78 @@
     }
 
     .wcag-ui-color-picker__input-text {
-      grid-area: text;
+      box-sizing: border-box;
+      appearance: none;
+      flex: 1;
+      /*
+        Text inputs carry an implicit `size="20"` — roughly 180px of intrinsic
+        width they will not shrink below. In a flex row that becomes the floor
+        for the whole control, and the overflow lands on whatever contains it.
+      */
+      min-width: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+      background: none;
+      line-height: var(--wcag-ui-color-picker-input-text-line-height);
       font-size: var(--wcag-ui-color-picker-input-text-font-size);
       font-weight: var(--wcag-ui-color-picker-input-text-font-weight);
       padding-inline: var(--wcag-ui-color-picker-input-text-padding-inline);
       color: var(--wcag-ui-color-picker-input-text-color);
+      /* Long values (rgb(...), color names) truncate rather than push. */
+      text-overflow: ellipsis;
     }
 
     .wcag-ui-color-picker__message-error {
-      grid-area: error;
       font-size: 0.875rem;
       color: var(--wcag-ui-color-picker-error-color);
-      line-height: 1;
+      line-height: 1.3;
     }
   }
 
   @layer states {
-    .wcag-ui-color-picker--invalid {
-    grid-template-areas:
-      "legend legend"
-      "color text"
-      "error error";
+    .wcag-ui-color-picker--invalid .wcag-ui-color-picker__field {
+      --wcag-ui-color-picker-input-border-color: var(--wcag-ui-color-picker-error-color);
     }
 
-    :is(.wcag-ui-color-picker__input-color, .wcag-ui-color-picker__input-text):focus-visible {
+    /*
+      Focus and hover move to the wrapper: the inputs no longer have borders of
+      their own, so a ring on them would sit inside the field and read as a
+      second box.
+    */
+    .wcag-ui-color-picker__field:has(:focus-visible) {
       outline-color: var(--wcag-ui-color-picker-focus-outline-color);
     }
 
-    :is(.wcag-ui-color-picker__input-color, .wcag-ui-color-picker__input-text):hover {
+    .wcag-ui-color-picker__field:hover {
       outline-color: var(--wcag-ui-color-picker-hover-outline-color);
+    }
+
+    /*
+      The swatch is separately focusable, and a ring on the wrapper alone can't
+      show which of the two has focus. This gives the swatch its own.
+    */
+    .wcag-ui-color-picker__input-color:focus-visible {
+      outline: 2px solid var(--wcag-ui-color-picker-focus-outline-color);
     }
   }
 
   @layer accessibility {
     @media (prefers-reduced-motion: reduce) {
-      .wcag-ui-color-picker__input-color, .wcag-ui-color-picker__input-text {
+      .wcag-ui-color-picker__field {
         transition: none;
       }
     }
 
     @media (prefers-contrast: high) {
-      .wcag-ui-color-picker__input-color, .wcag-ui-color-picker__input-text {
+      .wcag-ui-color-picker__field {
         border-width: 2px;
+      }
+
+      .wcag-ui-color-picker {
+        --wcag-ui-color-picker-input-color-border-color: #000;
+        --wcag-ui-color-picker-input-color-border-width: 3px;
       }
     }
   }

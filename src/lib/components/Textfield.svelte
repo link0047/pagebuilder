@@ -7,9 +7,11 @@
   type LabelPosition = "above" | "left" | "inside" | "notched";
   type Size = "sm" | "md" | "lg" | "xl";
   type Shape = "default" | "square" | "pill" | "rounded";
+	type SideOption = "both" | "leading" | "trailing";
 
   export type Props = {
     label: string;
+    hideLabel?: boolean;
     type?: InputType,
     variant?: Variant,
     labelPosition?: LabelPosition,
@@ -18,11 +20,12 @@
     required?: boolean | null,
     value?: string | number | undefined;
     error?: boolean,
-    description?: string,
+    description?: string | Snippet,
     errorMessage?: string,
     ref?: HTMLInputElement,
     leading?: Snippet,
     trailing?: Snippet,
+		passThroughSides?: SideOption;
     [key: string]: unknown;
   };
 
@@ -33,6 +36,7 @@
 
 	let {
 		label,
+		hideLabel = false,
 		type = "text",
 		variant = "outlined",
     description,
@@ -46,25 +50,31 @@
 		ref = $bindable(),
 		leading,
     trailing,
+		passThroughSides,
 		...restProps
 	}: Props = $props();
 
   let isLabelFloating = $state(false);
+  const effectiveLabelPosition = $derived(hideLabel ? "above" : labelPosition);
+  const hasLeading = $derived(!!leading);
+  const hasTrailing = $derived(!!trailing);
+	const passLeading = $derived(passThroughSides === "both" || passThroughSides === "leading");
+  const passTrailing = $derived(passThroughSides === "both" || passThroughSides === "trailing");
 
 	function handleBlur({ target }: FocusEvent): void {
-    if (labelPosition === "notched" && !(target as HTMLInputElement).value.length) {
+    if (effectiveLabelPosition === "notched" && !(target as HTMLInputElement).value.length) {
       isLabelFloating = false;
     }
   }
 
   function handleFocus({ target }: FocusEvent): void {
-    if (labelPosition === "notched" && !(target as HTMLInputElement).value.length) {
+    if (effectiveLabelPosition === "notched" && !(target as HTMLInputElement).value.length) {
       isLabelFloating = true;
     }
   }
 
   function handleKeyup(): void {
-    if (labelPosition === "notched" && !isLabelFloating) {
+    if (effectiveLabelPosition === "notched" && !isLabelFloating) {
       isLabelFloating = true;
     }
   }
@@ -98,21 +108,31 @@
   class:wcag-ui-textfield--shape-square={shape === "square"}
   class:wcag-ui-textfield--shape-pill={shape === "pill"}
   class:wcag-ui-textfield--shape-rounded={shape === "rounded"}
-  data-label-position={labelPosition}
+  data-label-position={effectiveLabelPosition}
 >
-  {#if labelPosition !== "notched"}
-    <label id={labelId} class="wcag-ui-textfield__label" for={inputId}>
+  {#if effectiveLabelPosition !== "notched"}
+    <label
+      id={labelId}
+      class="wcag-ui-textfield__label"
+      for={inputId}
+      class:wcag-ui-visually-hidden={hideLabel}
+    >
       {label}
     </label>
   {/if}
   <div class="wcag-ui-textfield__field">
     {#if leading}
-      <span class="wcag-ui-textfield__leading">
+      <span
+	      class="wcag-ui-textfield__leading"
+	      class:wcag-ui-textfield__side--pass-through={passLeading}
+	    >
         {@render leading()}
       </span>
     {/if}
     <input
   		class="wcag-ui-textfield__input"
+			class:wcag-ui-textfield__input--has-leading={hasLeading}
+		  class:wcag-ui-textfield__input--has-trailing={hasTrailing}
   		id={inputId}
   		{type}
       {value}
@@ -126,7 +146,7 @@
   		onanimationstart={handleAnimation}
   		{...restProps}
   	/>
-    {#if labelPosition === "notched"}
+    {#if effectiveLabelPosition === "notched"}
       <div class="wcag-ui-textfield__notched-outline">
         <div class="wcag-ui-textfield__notched-outline-leading"></div>
         <div class="wcag-ui-textfield__notched-outline-notch">
@@ -143,7 +163,10 @@
       </div>
   	{/if}
     {#if trailing}
-      <span class="wcag-ui-textfield__trailing">
+      <span
+	      class="wcag-ui-textfield__trailing"
+	      class:wcag-ui-textfield__side--pass-through={passTrailing}
+	    >
         {@render trailing()}
       </span>
     {/if}
@@ -151,7 +174,13 @@
   {#if description || error}
   	<div id={messageId} class="wcag-ui-textfield__support-text">
       {#if description}
-        <div class="wcag-ui-textfield__description">{description}</div>
+        <div class="wcag-ui-textfield__description">
+					{#if typeof description === "string"}
+            {description}
+          {:else}
+            {@render description()}
+          {/if}
+				</div>
       {/if}
       {#if error && errorMessage}
         <div class="wcag-ui-textfield__error-message" aria-live="assertive" role="alert">
@@ -169,6 +198,7 @@
     :root {
       --wcag-ui-textfield-gap: .25rem;
       --wcag-ui-textfield-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+      --wcag-ui-textfield-color: #212121;
 
       --wcag-ui-textfield-label-color: #212121;
       --wcag-ui-textfield-label-font-size: .875rem;
@@ -208,6 +238,7 @@
       display: grid;
       gap: var(--wcag-ui-textfield-gap);
       font-family: var(--wcag-ui-textfield-font-family);
+      color: var(--wcag-ui-textfield-color);
     }
 
     .wcag-ui-textfield__label {
@@ -262,6 +293,19 @@
     .wcag-ui-textfield__trailing {
       right: var(--wcag-ui-textfield-input-padding-inline);
     }
+
+    .wcag-ui-textfield__input--has-leading {
+      padding-left: calc(var(--wcag-ui-textfield-icon-size) + (var(--wcag-ui-textfield-input-padding-inline) * 2));
+    }
+
+    .wcag-ui-textfield__input--has-trailing {
+      padding-right: calc(var(--wcag-ui-textfield-icon-size) + (var(--wcag-ui-textfield-input-padding-inline) * 2));
+    }
+
+		.wcag-ui-textfield__side--pass-through {
+	    pointer-events: none;
+	    user-select: none;
+	  }
 
     /* ── Support text ────────────────────────────────── */
     .wcag-ui-textfield__support-text {
@@ -432,6 +476,18 @@
   }
 
   @layer accessibility {
+    .wcag-ui-visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .wcag-ui-textfield__input {
         transition: none;

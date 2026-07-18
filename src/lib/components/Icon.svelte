@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { type Snippet } from "svelte";
+	import type { SVGAttributes } from "svelte/elements";
 	import { toCSSUnit } from "$lib/utils/css";
 
-	type Props = {
-		viewBox?: string;
-		children?: Snippet;
-		size?: string | number | null;
-		"aria-label"?: string;
-		[key: string]: unknown;
+	type Props = SVGAttributes<SVGSVGElement> & {
+    children?: Snippet;
+    size?: string | number | null;
 	};
 
 	let {
@@ -30,25 +28,33 @@
 	{...restProps}
 	aria-hidden={hasAccessibleLabel ? undefined : "true"}
 	role={hasAccessibleLabel ? "img" : undefined}
-	style:--uikit-icon-width={cssSize}
+	style:--wcag-ui-icon-width={cssSize}
 	style:--uikit-icon-height={cssSize}
 >
 	{@render children?.()}
 </svg>
 
 <style>
-	.icon {
-	  --uikit-icon-width: 1.5rem;
-	  --uikit-icon-height: 1.5rem;
-		--uikit-icon-fill: currentcolor;
-		--uikit-icon-stroke: none;
+	@layer variables, base;
 
-		display: inline-block;
-		vertical-align: middle;
-		width: var(--uikit-icon-width);
-		height: var(--uikit-icon-height);
-		fill: var(--uikit-icon-fill);
-  	stroke: var(--uikit-icon-stroke);
-		flex-shrink: 0;
+	@layer variables {
+		:root {
+			--wcag-ui-icon-width: 1.5rem;
+		  --wcag-ui-icon-height: 1.5rem;
+			--wcag-ui-icon-fill: currentcolor;
+			--wcag-ui-icon-stroke: none;
+		}
+	}
+
+	@layer base {
+		.icon {
+			display: inline-block;
+			vertical-align: middle;
+			width: var(--wcag-ui-icon-width);
+			height: var(--wcag-ui-icon-height);
+			fill: var(--wcag-ui-icon-fill);
+	  	stroke: var(--wcag-ui-icon-stroke);
+			flex-shrink: 0;
+		}
 	}
 </style>

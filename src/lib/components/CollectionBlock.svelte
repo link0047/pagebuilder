@@ -1,23 +1,39 @@
 <script lang="ts">
-  import { type Snippet, onMount, tick } from "svelte";
+  import { type Snippet, onMount } from "svelte";
   import { BREAKPOINTS } from "$lib/constants/breakpoints";
   import BlockSection, {
-    type BlockImage,
     type Alignment,
     type TitleSize,
+    type Heading,
+    type LinkValue,
     type HeadingLevel,
+    type HeroImage,
     type ImagePlacement,
+    type LayoutSpacing,
   } from "./BlockSection.svelte";
 
   type Props = {
-    title?: string;
+    headings?: Heading[];
+    headingGap?: number | string;
     titleAlignment?: Alignment;
-    titleSize?: TitleSize;
-    titleColor?: string;
-    titleWeight?: string;
     headingLevel?: HeadingLevel;
+
+    // --- shim: delete once every build and template is migrated ---
+    /** @deprecated Use `headings`. */
+    title?: string;
+    /** @deprecated Use `headings[0].size`. */
+    titleSize?: TitleSize;
+    /** @deprecated Use `headings[0].color`. */
+    titleColor?: string;
+    /** @deprecated Use `headings[0].weight`. */
+    titleWeight?: string;
+    /** @deprecated Use `headings[0].link`. */
+    titleLink?: LinkValue;
+    // --- end shim ---
+
     backgroundColor?: string;
-    image?: BlockImage;
+    layout?: LayoutSpacing;
+    hero?: HeroImage;
     imagePlacement?: ImagePlacement;
     children?: Snippet;
     ctaBackgroundColor?: string;
@@ -33,14 +49,20 @@
   };
 
   let {
-    title,
+    headings,
+    headingGap,
     titleAlignment = "center",
-    titleSize = "md",
+    headingLevel = 2,
+    title,
+    // No default: the shim must tell "unset" from "md", or an unset size would
+    // migrate as an explicit token.
+    titleSize,
     titleColor,
     titleWeight,
-    headingLevel = 2,
+    titleLink,
     backgroundColor = "#f6f5f1",
-    image,
+    layout,
+    hero,
     imagePlacement = "above",
     ctaBackgroundColor,
     ctaTextColor,
@@ -90,14 +112,18 @@
 </script>
 
 <BlockSection
-  {title}
+  {headings}
+  {headingGap}
   {titleAlignment}
+  {headingLevel}
+  {title}
   {titleSize}
   {titleColor}
   {titleWeight}
-  {headingLevel}
+  {titleLink}
   {backgroundColor}
-  {image}
+  {layout}
+  {hero}
   {imagePlacement}
   style={inlineStyle}
   {...restProps}

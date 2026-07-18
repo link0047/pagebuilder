@@ -1,52 +1,80 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
   import BlockSection, {
-    type BlockImage,
     type Alignment,
     type HeadingLevel,
     type ImagePlacement,
     type TitleSize,
+    type LinkValue,
+    type Heading,
+    type LayoutSpacing,
+    type HeroImage,
   } from "./BlockSection.svelte";
 
   type Props = {
     children?: Snippet;
-    title?: string;
+    footer?: Snippet;
+    headings?: Heading[];
+    headingGap?: number | string;
     titleAlignment?: Alignment;
-    titleSize?: TitleSize;
-    titleColor?: string;
-    titleWeight?: string;
     headingLevel?: HeadingLevel;
+
+    // --- shim: delete once every build and template is migrated ---
+    /** @deprecated Use `headings`. */
+    title?: string;
+    /** @deprecated Use `headings[0].size`. */
+    titleSize?: TitleSize;
+    /** @deprecated Use `headings[0].color`. */
+    titleColor?: string;
+    /** @deprecated Use `headings[0].weight`. */
+    titleWeight?: string;
+    /** @deprecated Use `headings[0].link`. */
+    titleLink?: LinkValue;
+    // --- end shim ---
     backgroundColor?: string;
-    image?: BlockImage;
+    layout?: LayoutSpacing;
+    hero?: HeroImage;
     imagePlacement?: ImagePlacement;
     [key: string]: unknown;
   };
 
   let {
     children,
-    title,
+    footer,
+    headings,
+    headingGap,
     titleAlignment = "left",
-    titleSize = "md",
+    headingLevel = 2,
+    title,
+    // No default here: the shim must be able to tell "unset" from "md", or a
+    // heading whose size was never chosen would migrate as an explicit "md".
+    titleSize,
     titleColor,
     titleWeight,
-    headingLevel = 2,
+    titleLink,
     backgroundColor,
-    image,
+    layout,
+    hero,
     imagePlacement = "below",
     ...restProps
   }: Props = $props();
 </script>
 
 <BlockSection
-  {title}
+  {headings}
+  {headingGap}
   {titleAlignment}
+  {headingLevel}
+  {title}
   {titleSize}
   {titleColor}
   {titleWeight}
-  {headingLevel}
+  {titleLink}
   backgroundColor={backgroundColor ?? undefined}
-  {image}
+  {layout}
+  {hero}
   {imagePlacement}
+  {footer}
   {...restProps}
 >
   <div class="editorial-block__container">

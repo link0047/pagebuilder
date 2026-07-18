@@ -410,6 +410,94 @@ class AppState {
   }
 
   // -------------------------
+  // ArrayField helpers
+  // -------------------------
+
+  getArrayValue(propertyPath: string): any[] {
+    if (!this.#selectedComponent) return [];
+
+    const source = this.#resolveSection(this.#selectedComponent, propertyPath);
+    if (!source) return [];
+
+    const keyParts = propertyPath.split(".").slice(1);
+    const value = this.#getNestedValue(source, keyParts);
+
+    return Array.isArray(value) ? value : [];
+  }
+
+  addArrayItem(propertyPath: string, defaultItem: any): void {
+    if (!this.#selectedComponentPath) return;
+    const component = this.getNodeAtPath(this.#selectedComponentPath);
+    if (component?.type !== "component") return;
+
+    const source = this.#resolveSection(component, propertyPath);
+    if (!source) return;
+
+    const keyParts = propertyPath.split(".").slice(1);
+    let arr = this.#getNestedValue(source, keyParts);
+
+    if (!Array.isArray(arr)) {
+      this.#setNestedValue(source, keyParts, []);
+      // Re-read rather than reusing the literal we just wrote. Assigning into a
+      // $state proxy stores a *proxied copy*, so the local array is a detached
+      // orphan — pushing to it updates nothing and the first click silently
+      // does nothing. (Second click finds the array and works, which is what
+      // made this look like "two clicks to add one item".)
+      arr = this.#getNestedValue(source, keyParts);
+    }
+
+    // Snapshot the default item to break references and push to the reactive array
+    arr.push(structuredClone($state.snapshot(defaultItem)));
+
+    this.#isDirty = true;
+    // Re-assign to trigger reactivity for observers of selectedComponent
+    this.#selectedComponent = component;
+  }
+
+  removeArrayItem(propertyPath: string, index: number): void {
+    if (!this.#selectedComponentPath) return;
+    const component = this.getNodeAtPath(this.#selectedComponentPath);
+    if (component?.type !== "component") return;
+
+    const source = this.#resolveSection(component, propertyPath);
+    if (!source) return;
+
+    const keyParts = propertyPath.split(".").slice(1);
+    const arr = this.#getNestedValue(source, keyParts);
+
+    if (Array.isArray(arr)) {
+      arr.splice(index, 1);
+      this.#isDirty = true;
+      this.#selectedComponent = component;
+    }
+  }
+
+  moveArrayItem(propertyPath: string, index: number, direction: "up" | "down"): void {
+    if (!this.#selectedComponentPath) return;
+    const component = this.getNodeAtPath(this.#selectedComponentPath);
+    if (component?.type !== "component") return;
+
+    const source = this.#resolveSection(component, propertyPath);
+    if (!source) return;
+
+    const keyParts = propertyPath.split(".").slice(1);
+    const arr = this.#getNestedValue(source, keyParts);
+
+    if (!Array.isArray(arr)) return;
+
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= arr.length) return;
+
+    // Swap elements
+    const temp = arr[index];
+    arr[index] = arr[targetIndex];
+    arr[targetIndex] = temp;
+
+    this.#isDirty = true;
+    this.#selectedComponent = component;
+  }
+
+  // -------------------------
   // Private helpers
   // -------------------------
 
@@ -458,9 +546,20 @@ class AppState {
 
     for (let i = 0; i < keyParts.length - 1; i++) {
       const key = keyParts[i];
-      if (!current[key] || typeof current[key] !== "object") {
-        current[key] = {};
+      const nextKey = keyParts[i + 1];
+      const nextIsIndex = /^\d+$/.test(nextKey);
+
+      const existing = current[key];
+      const existingIsContainer = existing !== null && typeof existing === "object";
+
+      if (!existingIsContainer) {
+        // Create the container the NEXT key implies. Writing "headings.0.text"
+        // with a plain {} here builds { headings: { "0": { text } } } — an
+        // object keyed by "0", not an array — and every Array.isArray check
+        // downstream (getArrayValue included) then fails silently.
+        current[key] = nextIsIndex ? [] : {};
       }
+
       current = current[key];
     }
 

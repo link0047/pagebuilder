@@ -4,17 +4,17 @@ export type TabsColor = "default" | "primary";
 export type TabsShape = "default" | "square" | "pill";
 
 export type TabsConfig = {
-	variant: TabsVariant;
-	size: TabsSize;
-	color: TabsColor;
-	shape: TabsShape;
+  variant: TabsVariant;
+  size: TabsSize;
+  color: TabsColor;
+  shape: TabsShape;
   fullWidth: boolean;
   value: string | null;
-	onValueChange: (value: string) => void;
+  onValueChange: (value: string) => void;
 };
 
 export type Tab = {
   id: string;
-	value: string;
-	element: HTMLElement | null;
+  value: string;
+  element: HTMLElement | null;
 };

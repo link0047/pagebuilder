@@ -88,7 +88,6 @@
 
       if (!inSidebar && !onIframe && !inEditableLabel) {
         appState.hoverComponent(null);
-        appState.deselectComponent();
         sendToPreview("preview-hover", { path: null });
         sendToPreview("preview-select", { path: null });
       }

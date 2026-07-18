@@ -5,3 +5,10 @@ blockExoticSubdeps: true
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - cookie@0.7.0
+  - html-minifier@4.0.1
+overrides:
+  cookie@<0.7.0: ^0.7.0
+  html-minifier@<=4.0.0: ^4.0.1

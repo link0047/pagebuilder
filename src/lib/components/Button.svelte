@@ -259,8 +259,8 @@
   }
 
   .wcag-ui-button--ghost {
-    --wcag-ui-button-bg-color: transparent;
-    --wcag-ui-button-border-color: transparent;
+    background-color: transparent;
+    border-color: transparent;
     --wcag-ui-button-color: #38393b;
     --wcag-ui-button-hover-bg-color: #eeeeef;
     --wcag-ui-button-hover-border-color: #eeeeef;
@@ -365,6 +365,7 @@
   }
 
   .wcag-ui-button--danger {
+    --wcag-ui-button-color: #fff;
     --wcag-ui-button-bg-color: #cb2a2f;
     --wcag-ui-button-border-color: #cb2a2f;
     --wcag-ui-button-hover-bg-color: #e5484d;

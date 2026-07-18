@@ -10,30 +10,31 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"migrate": "node --env-file=.env scripts/run-migrate.js"
+		"migrate": "node --env-file=.env scripts/run-migrate.js",
+		"test": "node --env-file=.env scripts/migrate-heading.js --build 790b0c8d-4400-4ded-94a4-64112c392560"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-vercel": "^6.3.3",
-		"@sveltejs/kit": "^2.59.1",
+		"@sveltejs/kit": "^2.65.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
-		"@types/node": "^25.7.0",
-		"svelte": "^5.55.5",
-		"svelte-check": "^4.4.8",
+		"@types/node": "^25.9.3",
+		"svelte": "^5.56.3",
+		"svelte-check": "^4.6.0",
 		"typescript": "^6.0.3",
-		"vite": "^8.0.12"
+		"vite": "^8.0.16"
 	},
 	"packageManager": "pnpm@11.5.0+sha512.dbfcc4f81cf48597afd4bc391ffdf12c11f1a9fb83a395bfa6b0a2d9cc2fd8ffebafdb1ccbd529632153f793904c2615b7f09fe1a345473fd1c35845172a8eb1",
 	"dependencies": {
 		"@neondatabase/serverless": "^1.1.0",
-		"@types/html-minifier": "^4.0.6",
-		"better-auth": "1.6.11",
-		"dompurify": "^3.4.2",
-		"html-minifier": "^4.0.0",
+		"@types/html-minifier-terser": "^7.0.2",
+		"better-auth": "1.6.16",
+		"dompurify": "^3.4.9",
+		"html-minifier-terser": "^7.2.0",
 		"lightningcss": "^1.32.0",
 		"node-html-parser": "^7.1.0",
 		"purgecss": "^8.0.0",
-		"resend": "^6.12.3",
-		"svelte-preprocess": "^6.0.3",
-		"valibot": "^1.4.0"
+		"resend": "^6.12.4",
+		"svelte-preprocess": "^6.0.5",
+		"valibot": "^1.4.1"
 	}
 }

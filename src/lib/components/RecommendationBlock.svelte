@@ -1,19 +1,39 @@
 <script lang="ts">
   import BlockSection, {
     type Alignment,
+    type Heading,
     type HeadingLevel,
+    type HeroImage,
+    type ImagePlacement,
+    type LayoutSpacing,
+    type LinkValue,
     type TitleSize,
   } from "./BlockSection.svelte";
   import { generateId } from "$lib/utils/unique-id-generator";
 
   type Props = {
-    title?: string;
+    headings?: Heading[];
+    headingGap?: number | string;
     titleAlignment?: Alignment;
-    titleSize?: TitleSize;
-    titleColor?: string;
-    titleWeight?: string;
     headingLevel?: HeadingLevel;
+
+    // --- shim: delete once every build and template is migrated ---
+    /** @deprecated Use `headings`. */
+    title?: string;
+    /** @deprecated Use `headings[0].size`. */
+    titleSize?: TitleSize;
+    /** @deprecated Use `headings[0].color`. */
+    titleColor?: string;
+    /** @deprecated Use `headings[0].weight`. */
+    titleWeight?: string;
+    /** @deprecated Use `headings[0].link`. */
+    titleLink?: LinkValue;
+    // --- end shim ---
+
     backgroundColor?: string;
+    layout?: LayoutSpacing;
+    hero?: HeroImage;
+    imagePlacement?: ImagePlacement;
     blockId?: string;
     [key: string]: unknown;
   };
@@ -21,13 +41,21 @@
   let uid = generateId("recblock");
 
   let {
-    title,
+    headings,
+    headingGap,
     titleAlignment = "center",
-    titleSize = "md",
+    headingLevel = 2,
+    title,
+    // No default: the shim must tell "unset" from "md", or an unset size would
+    // migrate as an explicit token.
+    titleSize,
     titleColor,
     titleWeight,
-    headingLevel = 2,
+    titleLink,
     backgroundColor,
+    layout,
+    hero,
+    imagePlacement = "above",
     blockId = `spn-ui-recblock-${uid}`,
     ...restProps
   }: Props = $props();
@@ -40,13 +68,19 @@
 </script>
 
 <BlockSection
-  {title}
+  {headings}
+  {headingGap}
   {titleAlignment}
+  {headingLevel}
+  {title}
   {titleSize}
   {titleColor}
   {titleWeight}
-  {headingLevel}
+  {titleLink}
   {backgroundColor}
+  {layout}
+  {hero}
+  {imagePlacement}
   data-component="RecommendationBlock"
   data-block-id={blockId}
   style={inlineStyle}

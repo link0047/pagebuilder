@@ -4,6 +4,7 @@ export type ComponentMeta = {
   label: string;
   id?: string;
   parentId?: string;
+  slot?: string;
 };
 
 export type ComponentNode = {
