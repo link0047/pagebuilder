@@ -4,7 +4,7 @@ import type { RootNode, ComponentNode } from "$lib/components/types";
 import previewStylesCSS from "$styles/generated/preview-styles.css?raw";;
 import { error, json } from "@sveltejs/kit";
 import { render } from "svelte/server";
-import { minify } from "html-minifier";
+import { minify } from "html-minifier-terser";
 import { PurgeCSS } from "purgecss";
 import { parse } from "node-html-parser";
 import { attempt } from "$lib/utils/attempt";
