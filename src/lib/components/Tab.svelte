@@ -119,6 +119,11 @@
       font-weight: 600;
     }
 
+    .wcag-ui-tabs__tab--enclosed[aria-selected="true"] {
+      background-color: #fff;
+      color: #212121;
+    }
+
     .wcag-ui-tabs__tab--underline[aria-selected="true"]:before {
       content: "";
       position: absolute;
