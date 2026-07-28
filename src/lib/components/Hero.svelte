@@ -209,108 +209,137 @@
 </div>
 
 <style>
-  @layer variables, base, variants, responsive;
-
-  @layer variables {
-    .hero {
-      --hero-border-radius: 0.75rem;
-      --hero-font-family: system-ui, -apple-system, BlinkMacSystemFont,
-        "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      --hero-content-padding-mobile: 1rem;
-      --hero-content-padding-tablet: 1rem;
-      --hero-content-padding-desktop: 1rem;
-      --hero-content-padding-wide: 1rem;
-      --hero-content-gap-mobile: 0.5rem;
-      --hero-content-gap-tablet: 0.5rem;
-      --hero-content-gap-desktop: 0.5rem;
-      --hero-content-gap-wide: 0.5rem;
-      --hero-content-text-align-mobile: left;
-      --hero-content-text-align-tablet: ;
-      --hero-content-text-align-desktop: ;
-      --hero-split-valign-mobile: center;
-      --hero-split-valign-tablet: center;
-      --hero-split-valign-desktop: center;
-      --hero-split-halign-mobile: start;
-      --hero-split-halign-tablet: start;
-      --hero-split-halign-desktop: start;
-    }
+  /* ── Variables ── */
+  .hero {
+    --hero-border-radius: 0.75rem;
+    --hero-font-family: system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --hero-content-padding-mobile: 1rem;
+    --hero-content-padding-tablet: 1rem;
+    --hero-content-padding-desktop: 1rem;
+    --hero-content-padding-wide: 1rem;
+    --hero-content-gap-mobile: 0.5rem;
+    --hero-content-gap-tablet: 0.5rem;
+    --hero-content-gap-desktop: 0.5rem;
+    --hero-content-gap-wide: 0.5rem;
+    --hero-content-text-align-mobile: left;
+    --hero-content-text-align-tablet: ;
+    --hero-content-text-align-desktop: ;
+    --hero-split-valign-mobile: center;
+    --hero-split-valign-tablet: center;
+    --hero-split-valign-desktop: center;
+    --hero-split-halign-mobile: start;
+    --hero-split-halign-tablet: start;
+    --hero-split-halign-desktop: start;
   }
 
-  @layer base {
-    .hero {
-      position: relative;
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      container-type: inline-size;
-      font-family: var(--hero-font-family);
-      border-radius: var(--hero-border-radius);
-      overflow: hidden;
-    }
+  /* ── Base ── */
+  .hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    container-type: inline-size;
+    font-family: var(--hero-font-family);
+    border-radius: var(--hero-border-radius);
+    overflow: hidden;
+  }
 
-    .hero__visual {
-      grid-column: 1 / -1;
-      grid-row: 1;
-      display: block;
-      width: 100%;
-      height: auto;
-      overflow: hidden;
-    }
+  .hero__visual {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+  }
 
+  .hero__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: var(--hero-content-text-align-mobile);
+    padding: var(--hero-content-padding-mobile);
+    z-index: 1;
+  }
+
+  /* ── Variants ── */
+  .hero--split-start {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "visual content";
+  }
+
+  .hero--split-end {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "content visual";
+  }
+
+  .hero--split-start .hero__visual {
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+  }
+
+  .hero--split-end .hero__visual {
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+  }
+
+  :is(.hero--split-start, .hero--split-end) .hero__visual {
+    grid-area: visual;
+  }
+
+  :is(.hero--split-start, .hero--split-end) .hero__content {
+    grid-area: content;
+    justify-content: var(--hero-split-valign-mobile, center);
+    align-items: var(--hero-split-halign-mobile, start);
+  }
+
+  .hero--overlay .hero__content {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    align-self: var(--hero-split-valign-mobile, center);
+    justify-self: var(--hero-split-halign-mobile, start);
+  }
+
+  /* ── Responsive ── */
+  @container (min-width: 668px) {
     .hero__content {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      text-align: var(--hero-content-text-align-mobile);
-      padding: var(--hero-content-padding-mobile);
-      z-index: 1;
-    }
-  }
-
-  @layer variants {
-    /* ── Split ─────────────────────────────────────────────── */
-
-    .hero--split-start {
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas: "visual content";
-    }
-
-    .hero--split-end {
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas: "content visual";
-    }
-
-    .hero--split-start .hero__visual {
-      border-start-end-radius: 0;
-      border-end-end-radius: 0;
-    }
-
-    .hero--split-end .hero__visual {
-      border-start-start-radius: 0;
-      border-end-start-radius: 0;
-    }
-
-    :is(.hero--split-start, .hero--split-end) .hero__visual {
-      grid-area: visual;
+      padding: var(--hero-content-padding-tablet);
+      gap: var(--hero-content-gap-tablet);
+      text-align: var(--hero-content-text-align-tablet, var(--hero-content-text-align-mobile));
     }
 
     :is(.hero--split-start, .hero--split-end) .hero__content {
-      grid-area: content;
-      justify-content: var(--hero-split-valign-mobile, center);
-      align-items: var(--hero-split-halign-mobile, start);
+      justify-content: var(--hero-split-valign-tablet, center);
+      align-items: var(--hero-split-halign-tablet, start);
     }
 
-    /* ── Overlay ───────────────────────────────────────────── */
-
     .hero--overlay .hero__content {
-      grid-column: 1 / -1;
-      grid-row: 1;
-      align-self: var(--hero-split-valign-mobile, center);
-      justify-self: var(--hero-split-halign-mobile, start);
+      align-self: var(--hero-split-valign-tablet, center);
+      justify-self: var(--hero-split-halign-tablet, start);
     }
   }
 
-  @layer responsive {
-    @container (min-width: 668px) {
+  @container (min-width: 1025px) {
+    .hero__content {
+      padding: var(--hero-content-padding-desktop);
+      gap: var(--hero-content-gap-desktop);
+      text-align: var(--hero-content-text-align-desktop, var(--hero-content-text-align-tablet, var(--hero-content-text-align-mobile)));
+    }
+
+    :is(.hero--split-start, .hero--split-end) .hero__content {
+      justify-content: var(--hero-split-valign-desktop, center);
+      align-items: var(--hero-split-halign-desktop, start);
+    }
+
+    .hero--overlay .hero__content {
+      align-self: var(--hero-split-valign-desktop, center);
+      justify-self: var(--hero-split-halign-desktop, start);
+    }
+  }
+
+  /* Fallback for browsers that do not support container queries */
+  @supports not (container-type: inline-size) {
+    @media (min-width: 668px) {
       .hero__content {
         padding: var(--hero-content-padding-tablet);
         gap: var(--hero-content-gap-tablet);
@@ -328,7 +357,7 @@
       }
     }
 
-    @container (min-width: 1025px) {
+    @media (min-width: 1025px) {
       .hero__content {
         padding: var(--hero-content-padding-desktop);
         gap: var(--hero-content-gap-desktop);
@@ -343,44 +372,6 @@
       .hero--overlay .hero__content {
         align-self: var(--hero-split-valign-desktop, center);
         justify-self: var(--hero-split-halign-desktop, start);
-      }
-    }
-
-    @supports not (container-type: inline-size) {
-      @media (min-width: 668px) {
-        .hero__content {
-          padding: var(--hero-content-padding-tablet);
-          gap: var(--hero-content-gap-tablet);
-          text-align: var(--hero-content-text-align-tablet, var(--hero-content-text-align-mobile));
-        }
-
-        :is(.hero--split-start, .hero--split-end) .hero__content {
-          justify-content: var(--hero-split-valign-tablet, center);
-          align-items: var(--hero-split-halign-tablet, start);
-        }
-
-        .hero--overlay .hero__content {
-          align-self: var(--hero-split-valign-tablet, center);
-          justify-self: var(--hero-split-halign-tablet, start);
-        }
-      }
-
-      @media (min-width: 1025px) {
-        .hero__content {
-          padding: var(--hero-content-padding-desktop);
-          gap: var(--hero-content-gap-desktop);
-          text-align: var(--hero-content-text-align-desktop, var(--hero-content-text-align-tablet, var(--hero-content-text-align-mobile)));
-        }
-
-        :is(.hero--split-start, .hero--split-end) .hero__content {
-          justify-content: var(--hero-split-valign-desktop, center);
-          align-items: var(--hero-split-halign-desktop, start);
-        }
-
-        .hero--overlay .hero__content {
-          align-self: var(--hero-split-valign-desktop, center);
-          justify-self: var(--hero-split-halign-desktop, start);
-        }
       }
     }
   }

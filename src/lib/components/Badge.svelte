@@ -82,185 +82,179 @@
 </span>
 
 <style>
-  @layer variables, base, colors, variants, sizes, shapes, positions;
-
-  @layer variables {
-    :root {
-      --wcag-ui-badge-color: #e6e6e7;
-      --wcag-ui-badge-bg-color: #333335;
-      --wcag-ui-badge-outlined-color: #333335;
-      --wcag-ui-badge-gap: 0px;
-      --wcag-ui-badge-height: 1.5rem;
-      --wcag-ui-badge-padding-inline: .5rem;
-      --wcag-ui-badge-border-width: 0;
-      --wcag-ui-badge-border-style: solid;
-      --wcag-ui-badge-border-color: #66676a;
-      --wcag-ui-badge-border-radius: .25rem;
-      --wcag-ui-badge-font-size: .75rem;
-      --wcag-ui-badge-font-weight: 500;
-      --wcag-ui-badge-line-height: 1;
-      --wcag-ui-badge-letter-spacing: .04em;
-      --wcag-ui-badge-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
+  /* --- Variables --- */
+  .wcag-ui-badge {
+    --wcag-ui-badge-color: #e6e6e7;
+    --wcag-ui-badge-bg-color: #333335;
+    --wcag-ui-badge-outlined-color: #333335;
+    --wcag-ui-badge-gap: 0px;
+    --wcag-ui-badge-height: 1.5rem;
+    --wcag-ui-badge-padding-inline: .5rem;
+    --wcag-ui-badge-border-width: 0;
+    --wcag-ui-badge-border-style: solid;
+    --wcag-ui-badge-border-color: #66676a;
+    --wcag-ui-badge-border-radius: .25rem;
+    --wcag-ui-badge-font-size: .75rem;
+    --wcag-ui-badge-font-weight: 500;
+    --wcag-ui-badge-line-height: 1;
+    --wcag-ui-badge-letter-spacing: .04em;
+    --wcag-ui-badge-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
 
-  @layer base {
-    .wcag-ui-badge {
-      display: inline-flex;
-      align-items: center;
-      width: fit-content;
-      border-radius: var(--wcag-ui-badge-border-radius);
-      border: var(--wcag-ui-badge-border-width) var(--wcag-ui-badge-border-style) var(--wcag-ui-badge-border-color);
-      padding-inline-start: var(--wcag-ui-badge-padding-inline);
-      padding-inline-end: calc(
-        var(--wcag-ui-badge-padding-inline) - var(--wcag-ui-badge-letter-spacing)
-      );
-      height: var(--wcag-ui-badge-height);
-      color: var(--wcag-ui-badge-color);
-      background-color: var(--wcag-ui-badge-bg-color);
-      box-sizing: border-box;
-      font-family: var(--wcag-ui-badge-font-family);
-      font-size: var(--wcag-ui-badge-font-size);
-      font-weight: var(--wcag-ui-badge-font-weight);
-      line-height: var(--wcag-ui-badge-line-height);
-      letter-spacing: var(--wcag-ui-badge-letter-spacing);
-      text-transform: uppercase;
-      gap: .5ch;
-      max-width: 100%;
-      overflow: hidden;
-
-    }
-    .wcag-ui-badge__content {
-      display: block;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      min-width: 0;
-    }
+  /* --- Base --- */
+  .wcag-ui-badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    border-radius: var(--wcag-ui-badge-border-radius);
+    border: var(--wcag-ui-badge-border-width) var(--wcag-ui-badge-border-style) var(--wcag-ui-badge-border-color);
+    padding-inline-start: var(--wcag-ui-badge-padding-inline);
+    padding-inline-end: calc(
+      var(--wcag-ui-badge-padding-inline) - var(--wcag-ui-badge-letter-spacing)
+    );
+    height: var(--wcag-ui-badge-height);
+    color: var(--wcag-ui-badge-color);
+    background-color: var(--wcag-ui-badge-bg-color);
+    box-sizing: border-box;
+    font-family: var(--wcag-ui-badge-font-family);
+    font-size: var(--wcag-ui-badge-font-size);
+    font-weight: var(--wcag-ui-badge-font-weight);
+    line-height: var(--wcag-ui-badge-line-height);
+    letter-spacing: var(--wcag-ui-badge-letter-spacing);
+    text-transform: uppercase;
+    gap: .5ch;
+    max-width: 100%;
+    overflow: hidden;
   }
 
-  @layer colors {
-    .wcag-ui-badge--primary {
-      --wcag-ui-badge-color: #fff;
-      --wcag-ui-badge-outlined-color: #2a508f;
-      --wcag-ui-badge-bg-color: #2a508f;
-      --wcag-ui-badge-border-color: #2a508f;
-    }
-
-    .wcag-ui-badge--secondary {
-      --wcag-ui-badge-color: #333335;
-      --wcag-ui-badge-outlined-color: #333335;
-      --wcag-ui-badge-bg-color: #e5e6e7;
-      --wcag-ui-badge-border-color: #a8a8a8;
-    }
-
-    .wcag-ui-badge--success {
-      --wcag-ui-badge-color: #fff;
-      --wcag-ui-badge-outlined-color: #008a00;
-      --wcag-ui-badge-bg-color: #008a00;
-      --wcag-ui-badge-border-color: #008a00;
-    }
-
-    .wcag-ui-badge--warning {
-      --wcag-ui-badge-color: #4c2100;
-      --wcag-ui-badge-outlined-color: #a35200;
-      --wcag-ui-badge-bg-color: #ffb224;
-      --wcag-ui-badge-border-color: #ffb224;
-    }
-
-    .wcag-ui-badge--danger {
-      --wcag-ui-badge-color: #fff;
-      --wcag-ui-badge-outlined-color: #b22327;
-      --wcag-ui-badge-bg-color: #cb2a2f;
-      --wcag-ui-badge-border-color: #cb2a2f;
-    }
-
-    .wcag-ui-badge--info {
-      --wcag-ui-badge-color: #fff;
-      --wcag-ui-badge-outlined-color: #0062d1;
-      --wcag-ui-badge-bg-color: #0062d1;
-      --wcag-ui-badge-border-color: #0062d1;
-    }
-
-    .wcag-ui-badge--neutral {
-      --wcag-ui-badge-color: #38393b;
-      --wcag-ui-badge-outlined-color: #38393b;
-      --wcag-ui-badge-bg-color: #fafafa;
-      --wcag-ui-badge-border-color: #e5e6e7;
-    }
+  .wcag-ui-badge__content {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
   }
 
-  @layer variants {
-    .wcag-ui-badge--outlined {
-      --wcag-ui-badge-bg-color: transparent;
-      --wcag-ui-badge-border-width: 2px;
-      --wcag-ui-badge-color: var(--wcag-ui-badge-outlined-color, #333335);
-    }
+  /* --- Color Modifiers --- */
+  .wcag-ui-badge--primary {
+    --wcag-ui-badge-color: #fff;
+    --wcag-ui-badge-outlined-color: #2a508f;
+    --wcag-ui-badge-bg-color: #2a508f;
+    --wcag-ui-badge-border-color: #2a508f;
   }
 
-  @layer sizes {
-    .wcag-ui-badge--size-sm {
-      --wcag-ui-badge-height: 1.25rem;
-      --wcag-ui-badge-font-size: .6875rem;
-    }
-    .wcag-ui-badge--size-lg {
-      --wcag-ui-badge-height: 2rem;
-    }
+  .wcag-ui-badge--secondary {
+    --wcag-ui-badge-color: #333335;
+    --wcag-ui-badge-outlined-color: #333335;
+    --wcag-ui-badge-bg-color: #e5e6e7;
+    --wcag-ui-badge-border-color: #a8a8a8;
   }
 
-  @layer shapes {
-    .wcag-ui-badge--shape-pill {
-      --wcag-ui-badge-padding-inline: .75rem;
-      --wcag-ui-badge-border-radius: calc(var(--wcag-ui-badge-height) / 2);
-    }
-    .wcag-ui-badge--shape-square {
-      --wcag-ui-badge-border-radius: 0;
-    }
+  .wcag-ui-badge--success {
+    --wcag-ui-badge-color: #fff;
+    --wcag-ui-badge-outlined-color: #008a00;
+    --wcag-ui-badge-bg-color: #008a00;
+    --wcag-ui-badge-border-color: #008a00;
   }
 
-  @layer positions {
-    [data-position] {
-      position: absolute;
-    }
+  .wcag-ui-badge--warning {
+    --wcag-ui-badge-color: #4c2100;
+    --wcag-ui-badge-outlined-color: #a35200;
+    --wcag-ui-badge-bg-color: #ffb224;
+    --wcag-ui-badge-border-color: #ffb224;
+  }
 
-    [data-position="top-left"] {
-      inset: var(--wcag-ui-badge-gap) auto auto var(--wcag-ui-badge-gap);
-    }
+  .wcag-ui-badge--danger {
+    --wcag-ui-badge-color: #fff;
+    --wcag-ui-badge-outlined-color: #b22327;
+    --wcag-ui-badge-bg-color: #cb2a2f;
+    --wcag-ui-badge-border-color: #cb2a2f;
+  }
 
-    [data-position="top-right"] {
-      inset: var(--wcag-ui-badge-gap) var(--wcag-ui-badge-gap) auto auto;
-    }
+  .wcag-ui-badge--info {
+    --wcag-ui-badge-color: #fff;
+    --wcag-ui-badge-outlined-color: #0062d1;
+    --wcag-ui-badge-bg-color: #0062d1;
+    --wcag-ui-badge-border-color: #0062d1;
+  }
 
-    [data-position="bottom-left"] {
-      inset: auto auto var(--wcag-ui-badge-gap) var(--wcag-ui-badge-gap);
-    }
+  .wcag-ui-badge--neutral {
+    --wcag-ui-badge-color: #38393b;
+    --wcag-ui-badge-outlined-color: #38393b;
+    --wcag-ui-badge-bg-color: #fafafa;
+    --wcag-ui-badge-border-color: #e5e6e7;
+  }
 
-    [data-position="bottom-right"] {
-      inset: auto var(--wcag-ui-badge-gap) var(--wcag-ui-badge-gap) auto;
-    }
+  /* --- Variant Modifiers --- */
+  .wcag-ui-badge--outlined {
+    --wcag-ui-badge-bg-color: transparent;
+    --wcag-ui-badge-border-width: 2px;
+    --wcag-ui-badge-color: var(--wcag-ui-badge-outlined-color, #333335);
+  }
 
-    [data-flush][data-position="top-left"] {
-      border-start-start-radius: 0;
-      border-start-end-radius: 0;
-      border-end-start-radius: 0;
-    }
+  /* --- Size Modifiers --- */
+  .wcag-ui-badge--size-sm {
+    --wcag-ui-badge-height: 1.25rem;
+    --wcag-ui-badge-font-size: .6875rem;
+  }
 
-    [data-flush][data-position="top-right"] {
-      border-start-start-radius: 0;
-      border-start-end-radius: 0;
-      border-end-end-radius: 0;
-    }
+  .wcag-ui-badge--size-lg {
+    --wcag-ui-badge-height: 2rem;
+  }
 
-    [data-flush][data-position="bottom-left"] {
-      border-start-start-radius: 0;
-      border-end-start-radius: 0;
-      border-end-end-radius: 0;
-    }
+  /* --- Shape Modifiers --- */
+  .wcag-ui-badge--shape-pill {
+    --wcag-ui-badge-padding-inline: .75rem;
+    --wcag-ui-badge-border-radius: calc(var(--wcag-ui-badge-height) / 2);
+  }
 
-    [data-flush][data-position="bottom-right"] {
-      border-start-end-radius: 0;
-      border-end-start-radius: 0;
-      border-end-end-radius: 0;
-    }
+  .wcag-ui-badge--shape-square {
+    --wcag-ui-badge-border-radius: 0;
+  }
+
+  /* --- Position Modifiers --- */
+  [data-position] {
+    position: absolute;
+  }
+
+  [data-position="top-left"] {
+    inset: var(--wcag-ui-badge-gap) auto auto var(--wcag-ui-badge-gap);
+  }
+
+  [data-position="top-right"] {
+    inset: var(--wcag-ui-badge-gap) var(--wcag-ui-badge-gap) auto auto;
+  }
+
+  [data-position="bottom-left"] {
+    inset: auto auto var(--wcag-ui-badge-gap) var(--wcag-ui-badge-gap);
+  }
+
+  [data-position="bottom-right"] {
+    inset: auto var(--wcag-ui-badge-gap) var(--wcag-ui-badge-gap) auto;
+  }
+
+  /* --- Flush Corner Adjustments --- */
+  [data-flush][data-position="top-left"] {
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+    border-end-start-radius: 0;
+  }
+
+  [data-flush][data-position="top-right"] {
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+  }
+
+  [data-flush][data-position="bottom-left"] {
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+  }
+
+  [data-flush][data-position="bottom-right"] {
+    border-start-end-radius: 0;
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
   }
 </style>

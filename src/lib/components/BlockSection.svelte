@@ -337,109 +337,108 @@
 </section>
 
 <style>
-  @layer variables, base;
-
-  @layer variables {
-    .spn-ui-block {
-      --spn-ui-block-bg: transparent;
-      --spn-ui-block-title-align: center;
-      --spn-ui-block-border-radius: 1rem;
-      --spn-ui-block-padding-block-end: 1rem;
-      --spn-ui-block-header-padding-inline: 1rem;
-      --spn-ui-block-header-padding-block: 1rem;
-      --spn-ui-block-title-size: 1.5rem;
-      --spn-ui-block-title-weight: 600;
-      --spn-ui-block-title-color: #212121;
-      --spn-ui-block-title-line-height: 1.2;
-      --spn-ui-block-heading-gap: 0.25rem;
-      --spn-ui-block-subtitle-size: 1rem;
-      --spn-ui-block-subtitle-weight: 500;
-      --spn-ui-block-subtitle-color: inherit;
-    }
+  /* --- Variables --- */
+  .spn-ui-block {
+    --spn-ui-block-bg: transparent;
+    --spn-ui-block-title-align: center;
+    --spn-ui-block-border-radius: 1rem;
+    --spn-ui-block-padding-block-end: 1rem;
+    --spn-ui-block-header-padding-inline: 1rem;
+    --spn-ui-block-header-padding-block: 1rem;
+    --spn-ui-block-title-size: 1.5rem;
+    --spn-ui-block-title-weight: 600;
+    --spn-ui-block-title-color: #212121;
+    --spn-ui-block-title-line-height: 1.2;
+    --spn-ui-block-heading-gap: 0.25rem;
+    --spn-ui-block-subtitle-size: 1rem;
+    --spn-ui-block-subtitle-weight: 500;
+    --spn-ui-block-subtitle-color: inherit;
+    --spn-ui-block-padding: 0;
+    --spn-ui-block-margin: 0;
   }
 
-  @layer base {
-    .spn-ui-block {
-      display: flex;
-      flex-direction: column;
-      border-radius: var(--spn-ui-block-border-radius);
-      background-color: var(--spn-ui-block-bg);
-      /* Author-set padding/margin override the defaults when present. */
-      padding: var(--spn-ui-block-padding, 0 0 var(--spn-ui-block-padding-block-end));
-      margin: var(--spn-ui-block-margin, 0);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
+  /* --- Base --- */
+  .spn-ui-block {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--spn-ui-block-border-radius);
+    background-color: var(--spn-ui-block-bg);
+    /* Author-set padding/margin override the defaults when present. */
+    padding: var(--spn-ui-block-padding, 0 0 var(--spn-ui-block-padding-block-end));
+    margin: var(--spn-ui-block-margin, 0);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
 
-    .spn-ui-block:not(:has(.spn-ui-block__header)):not([style*="--spn-ui-block-padding"]) {
-      padding-block-start: var(--spn-ui-block-padding-block-end);
-    }
+  .spn-ui-block:not(:has(.spn-ui-block__header)):not([style*="--spn-ui-block-padding"]) {
+    padding-block-start: var(--spn-ui-block-padding-block-end);
+  }
 
-    .spn-ui-block__header {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+  .spn-ui-block__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-    .spn-ui-block__image {
-      display: block;
-      width: 100%;
-      overflow: hidden;
-    }
+  .spn-ui-block__image {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+  }
 
-    .spn-ui-block__headings {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spn-ui-block-heading-gap);
-      width: 100%;
-      padding-inline: var(--spn-ui-block-header-padding-inline);
-      padding-block: var(--spn-ui-block-header-padding-block);
-    }
+  .spn-ui-block__headings {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spn-ui-block-heading-gap);
+    width: 100%;
+    padding-inline: var(--spn-ui-block-header-padding-inline);
+    padding-block: var(--spn-ui-block-header-padding-block);
+  }
 
-    .spn-ui-block__title {
-      margin: 0;
-      width: 100%;
-      line-height: var(--spn-ui-block-title-line-height);
-      font-weight: var(--spn-ui-block-title-weight);
-      font-size: var(--spn-ui-block-title-size);
-      color: var(--spn-ui-block-title-color);
-      text-align: var(--spn-ui-block-title-align);
-      overflow-wrap: break-word;
-      word-break: break-word;
-    }
+  .spn-ui-block__title {
+    margin: 0;
+    width: 100%;
+    line-height: var(--spn-ui-block-title-line-height);
+    font-weight: var(--spn-ui-block-title-weight);
+    font-size: var(--spn-ui-block-title-size);
+    color: var(--spn-ui-block-title-color);
+    text-align: var(--spn-ui-block-title-align);
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
 
-    .spn-ui-block__subtitle {
-      margin: 0;
-      width: 100%;
-      line-height: 1.3;
-      font-size: var(--spn-ui-block-subtitle-size);
-      font-weight: var(--spn-ui-block-subtitle-weight);
-      color: var(--spn-ui-block-subtitle-color);
-      text-align: var(--spn-ui-block-title-align);
-      overflow-wrap: break-word;
-      word-break: break-word;
-    }
+  .spn-ui-block__subtitle {
+    margin: 0;
+    width: 100%;
+    line-height: 1.3;
+    font-size: var(--spn-ui-block-subtitle-size);
+    font-weight: var(--spn-ui-block-subtitle-weight);
+    color: var(--spn-ui-block-subtitle-color);
+    text-align: var(--spn-ui-block-title-align);
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
 
-    .spn-ui-block__link {
-      display: block;
-      color: inherit;
-    }
+  .spn-ui-block__link {
+    display: block;
+    color: inherit;
+  }
 
-    /* Underline the heading text on hover rather than letting Link decorate
-       itself. The whole descendant part is one :global(...) at the end of the
-       sequence — Svelte rejects :global() in the middle, and the hover target
-       is Link's own <a>, which this component's scoping can't reach. */
-    .spn-ui-block__link:hover :global(.spn-ui-block__title),
-    .spn-ui-block__link:hover :global(.spn-ui-block__subtitle) {
-      text-decoration: underline;
-    }
+  .spn-ui-block__header-content {
+    display: block;
+  }
 
-    .spn-ui-block__header-content { display: block; }
+  .spn-ui-block__content {
+    flex: 1;
+  }
 
-    .spn-ui-block__content { flex: 1; }
+  .spn-ui-block__footer {
+    margin-block-start: 1rem;
+    padding-inline: var(--spn-ui-block-header-padding-inline);
+  }
 
-    .spn-ui-block__footer {
-      margin-block-start: 1rem;
-      padding-inline: var(--spn-ui-block-header-padding-inline);
-    }
+  /* --- Interaction States --- */
+  .spn-ui-block__link:hover :global(.spn-ui-block__title),
+  .spn-ui-block__link:hover :global(.spn-ui-block__subtitle) {
+    text-decoration: underline;
   }
 </style>

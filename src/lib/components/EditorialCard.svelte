@@ -211,164 +211,158 @@
 </div>
 
 <style>
-  @layer variables, base, variants, responsive;
-
-  @layer variables {
-    .spn-ui-editorial-card {
-      --spn-ui-editoralcard-display-m: block;
-      --spn-ui-editoralcard-display-t: block;
-      --spn-ui-editoralcard-display-d: block;
-      --spn-ui-editoralcard-background: #fff;
-      --spn-ui-editoralcard-color: #212121;
-      --spn-ui-editoralcard-column-m: span 6;
-      --spn-ui-editoralcard-column-t: span 4;
-      --spn-ui-editoralcard-column-d: span 3;
-      --spn-ui-editoralcard-row-m: span 1;
-      --spn-ui-editoralcard-row-t: span 1;
-      --spn-ui-editoralcard-row-d: span 1;
-      --spn-ui-editoralcard-text-alignment: center;
-      --spn-ui-editoralcard-font-family: system-ui, -apple-system,
-        BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
-        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-      --spn-ui-editorialcard-overlay-align-m: flex-start;
-      --spn-ui-editorialcard-overlay-justify-m: flex-start;
-      --spn-ui-editorialcard-overlay-align-t: flex-start;
-      --spn-ui-editorialcard-overlay-justify-t: flex-start;
-      --spn-ui-editorialcard-overlay-align-d: flex-start;
-      --spn-ui-editorialcard-overlay-justify-d: flex-start;
-      --spn-ui-editorialcard-overlay-padding-m: 0.5rem;
-      --spn-ui-editorialcard-overlay-padding-t: 0.5rem;
-      --spn-ui-editorialcard-overlay-padding-d: 0.5rem;
-      --spn-ui-editorialcard-overlay-bg: ;
-    }
+  /* --- Variables --- */
+  .spn-ui-editorial-card {
+    --spn-ui-editoralcard-display-m: block;
+    --spn-ui-editoralcard-display-t: block;
+    --spn-ui-editoralcard-display-d: block;
+    --spn-ui-editoralcard-background: #fff;
+    --spn-ui-editoralcard-color: #212121;
+    --spn-ui-editoralcard-column-m: span 6;
+    --spn-ui-editoralcard-column-t: span 4;
+    --spn-ui-editoralcard-column-d: span 3;
+    --spn-ui-editoralcard-row-m: span 1;
+    --spn-ui-editoralcard-row-t: span 1;
+    --spn-ui-editoralcard-row-d: span 1;
+    --spn-ui-editoralcard-text-alignment: center;
+    --spn-ui-editoralcard-font-family: system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+      "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --spn-ui-editorialcard-overlay-align-m: flex-start;
+    --spn-ui-editorialcard-overlay-justify-m: flex-start;
+    --spn-ui-editorialcard-overlay-align-t: flex-start;
+    --spn-ui-editorialcard-overlay-justify-t: flex-start;
+    --spn-ui-editorialcard-overlay-align-d: flex-start;
+    --spn-ui-editorialcard-overlay-justify-d: flex-start;
+    --spn-ui-editorialcard-overlay-padding-m: 0.5rem;
+    --spn-ui-editorialcard-overlay-padding-t: 0.5rem;
+    --spn-ui-editorialcard-overlay-padding-d: 0.5rem;
+    --spn-ui-editorialcard-overlay-bg: ;
   }
 
-  @layer base {
-    .spn-ui-editorial-card {
-      position: relative;
-      background-color: var(--spn-ui-editoralcard-background);
-      font-family: var(--spn-ui-editoralcard-font-family);
-      grid-column: var(--spn-ui-editoralcard-column-m);
-      grid-row: var(--spn-ui-editoralcard-row-m);
-      border-radius: 1rem;
-      overflow: hidden;
-      height: fit-content;
-      display: var(--spn-ui-editoralcard-display-m);
-      text-align: var(--spn-ui-editoralcard-text-alignment);
-    }
+  /* --- Base --- */
+  .spn-ui-editorial-card {
+    position: relative;
+    background-color: var(--spn-ui-editoralcard-background);
+    font-family: var(--spn-ui-editoralcard-font-family);
+    grid-column: var(--spn-ui-editoralcard-column-m);
+    grid-row: var(--spn-ui-editoralcard-row-m);
+    border-radius: 1rem;
+    overflow: hidden;
+    height: fit-content;
+    display: var(--spn-ui-editoralcard-display-m);
+    text-align: var(--spn-ui-editoralcard-text-alignment);
+  }
 
-    .spn-ui-editorial-card__media-container {
-      position: relative;
-      overflow: hidden;
+  .spn-ui-editorial-card__media-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .spn-ui-editorial-card__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: var(--spn-ui-editorialcard-overlay-align-m);
+    align-items: var(--spn-ui-editorialcard-overlay-justify-m);
+    background-color: var(--spn-ui-editorialcard-overlay-bg);
+    padding: var(--spn-ui-editorialcard-overlay-padding-m);
+    box-sizing: border-box;
+    pointer-events: none;
+  }
+
+  .spn-ui-editorial-card__overlay > :global(*) {
+    pointer-events: auto;
+  }
+
+  .spn-ui-editorial-card__link,
+  .spn-ui-editorial-card__link:visited {
+    display: block;
+    text-decoration: none;
+    color: var(--spn-ui-editoralcard-color);
+  }
+
+  .spn-ui-editorial-card__link:is(:hover, :focus-visible) {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .spn-ui-editorial-card__content {
+    box-sizing: border-box;
+    min-height: 3rem;
+    display: flex;
+    flex-flow: column nowrap;
+    color: var(--spn-ui-editoralcard-color);
+  }
+
+  .spn-ui-editorial-card__content:not(:empty) {
+    padding-block: 1rem;
+    padding-inline: 1rem;
+  }
+
+  .spn-ui-editorial-card__headline {
+    margin: 0;
+    line-height: 1.4;
+    font-size: 1.2rem;
+  }
+
+  .spn-ui-editorial-card__subhead {
+    margin: 0;
+    line-height: 1.2;
+    font-weight: 500;
+    font-size: 1.125rem;
+  }
+
+  .spn-ui-editorial-card__supportingText {
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .spn-ui-editorial-card__actions {
+    width: 100%;
+  }
+
+  .spn-ui-editorial-card__actions:empty {
+    display: none;
+  }
+
+  /* --- Variant Modifiers --- */
+  .spn-ui-editorial-card--textAlignment-left {
+    --spn-ui-editoralcard-text-alignment: left;
+  }
+
+  .spn-ui-editorial-card--textAlignment-right {
+    --spn-ui-editoralcard-text-alignment: right;
+  }
+
+  /* --- Responsive --- */
+  @media (min-width: 668px) {
+    .spn-ui-editorial-card {
+      grid-column: var(--spn-ui-editoralcard-column-t);
+      grid-row: var(--spn-ui-editoralcard-row-t);
+      display: var(--spn-ui-editoralcard-display-t);
     }
 
     .spn-ui-editorial-card__overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: var(--spn-ui-editorialcard-overlay-align-m);
-      align-items: var(--spn-ui-editorialcard-overlay-justify-m);
-      background-color: var(--spn-ui-editorialcard-overlay-bg);
-      padding: var(--spn-ui-editorialcard-overlay-padding-m);
-      box-sizing: border-box;
-      pointer-events: none;
-    }
-
-    .spn-ui-editorial-card__overlay > :global(*) {
-      pointer-events: auto;
-    }
-
-    .spn-ui-editorial-card__link,
-    .spn-ui-editorial-card__link:visited {
-      display: block;
-      text-decoration: none;
-      color: var(--spn-ui-editoralcard-color);
-    }
-
-    .spn-ui-editorial-card__link:is(:hover, :focus-visible) {
-      text-decoration: underline;
-      cursor: pointer;
-    }
-
-    .spn-ui-editorial-card__content {
-      box-sizing: border-box;
-      min-height: 3rem;
-      display: flex;
-      flex-flow: column nowrap;
-      color: var(--spn-ui-editoralcard-color);
-    }
-
-    .spn-ui-editorial-card__content:not(:empty) {
-      padding-block: 1rem;
-      padding-inline: 1rem;
-    }
-
-    .spn-ui-editorial-card__headline {
-      margin: 0;
-      line-height: 1.4;
-      font-size: 1.2rem;
-    }
-
-    .spn-ui-editorial-card__subhead {
-      margin: 0;
-      line-height: 1.2;
-      font-weight: 500;
-      font-size: 1.125rem;
-    }
-
-    .spn-ui-editorial-card__supportingText {
-      font-size: 1rem;
-      line-height: 1.2;
-    }
-
-    .spn-ui-editorial-card__actions {
-      width: 100%;
-    }
-
-    .spn-ui-editorial-card__actions:empty {
-      display: none;
+      justify-content: var(--spn-ui-editorialcard-overlay-align-t);
+      align-items: var(--spn-ui-editorialcard-overlay-justify-t);
+      padding: var(--spn-ui-editorialcard-overlay-padding-t);
     }
   }
 
-  @layer variants {
-    .spn-ui-editorial-card--textAlignment-left {
-      --spn-ui-editoralcard-text-alignment: left;
+  @media (min-width: 1025px) {
+    .spn-ui-editorial-card {
+      grid-column: var(--spn-ui-editoralcard-column-d);
+      grid-row: var(--spn-ui-editoralcard-row-d);
+      display: var(--spn-ui-editoralcard-display-d);
     }
 
-    .spn-ui-editorial-card--textAlignment-right {
-      --spn-ui-editoralcard-text-alignment: right;
-    }
-  }
-
-  @layer responsive {
-    @media (min-width: 668px) {
-      .spn-ui-editorial-card {
-        grid-column: var(--spn-ui-editoralcard-column-t);
-        grid-row: var(--spn-ui-editoralcard-row-t);
-        display: var(--spn-ui-editoralcard-display-t);
-      }
-
-      .spn-ui-editorial-card__overlay {
-        justify-content: var(--spn-ui-editorialcard-overlay-align-t);
-        align-items: var(--spn-ui-editorialcard-overlay-justify-t);
-        padding: var(--spn-ui-editorialcard-overlay-padding-t);
-      }
-    }
-
-    @media (min-width: 1025px) {
-      .spn-ui-editorial-card {
-        grid-column: var(--spn-ui-editoralcard-column-d);
-        grid-row: var(--spn-ui-editoralcard-row-d);
-        display: var(--spn-ui-editoralcard-display-d);
-      }
-
-      .spn-ui-editorial-card__overlay {
-        justify-content: var(--spn-ui-editorialcard-overlay-align-d);
-        align-items: var(--spn-ui-editorialcard-overlay-justify-d);
-        padding: var(--spn-ui-editorialcard-overlay-padding-d);
-      }
+    .spn-ui-editorial-card__overlay {
+      justify-content: var(--spn-ui-editorialcard-overlay-align-d);
+      align-items: var(--spn-ui-editorialcard-overlay-justify-d);
+      padding: var(--spn-ui-editorialcard-overlay-padding-d);
     }
   }
 </style>
