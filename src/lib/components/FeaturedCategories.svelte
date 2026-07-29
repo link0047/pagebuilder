@@ -66,6 +66,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--featured-categories-container-gap);
+    position: relative !important;
   }
 
   @container (min-width: 768px) {
