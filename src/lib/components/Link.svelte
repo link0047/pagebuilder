@@ -121,7 +121,7 @@
 
 <style>
   /* --- Variables --- */
-  .wcag-ui-link {
+  :root {
     --wcag-ui-link-height: 2.5rem;
     --wcag-ui-link-padding-inline: 0.75rem;
 

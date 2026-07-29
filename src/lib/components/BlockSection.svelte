@@ -404,6 +404,7 @@
     text-align: var(--spn-ui-block-title-align);
     overflow-wrap: break-word;
     word-break: break-word;
+    --wcag-ui-link-font-weight: var(--spn-ui-block-title-weight);
   }
 
   .spn-ui-block__subtitle {
@@ -416,6 +417,7 @@
     text-align: var(--spn-ui-block-title-align);
     overflow-wrap: break-word;
     word-break: break-word;
+    --wcag-ui-link-font-weight: var(--spn-ui-block-subtitle-weight);
   }
 
   .spn-ui-block__link {

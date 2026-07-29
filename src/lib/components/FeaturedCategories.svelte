@@ -66,6 +66,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--featured-categories-container-gap);
+    /* needed to fight the global styling in site 7/29/2026 */
     position: relative !important;
   }
 
