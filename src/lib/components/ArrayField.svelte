@@ -152,12 +152,13 @@
   {/each}
 
   <Button
+    color="primary"
     variant="ghost"
     onclick={add}
     fullWidth
     disabled={!canAdd}
   >
-    <Icon size="0.875rem"><use href="#plus" /></Icon>
+    <Icon size="0.875rem"><use href="#plus-circle-outline" /></Icon>
     {addLabel}
   </Button>
 </div>
