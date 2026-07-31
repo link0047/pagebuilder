@@ -175,6 +175,10 @@
     cursor: pointer;
   }
 
+  .wcag-ui-link:is(:visited) {
+    color: var(--wcag-ui-link-color);
+  }
+
   .wcag-ui-link--full-width {
     width: 100%;
     display: flex; /* Ensure full width button layouts work */

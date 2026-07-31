@@ -88,9 +88,8 @@
 {/if}
 
 <style>
-	/* ── Block ── */
-	.wcag-ui-banner {
-	  --wcag-ui-banner-bg: #fafafa;
+  :root {
+    --wcag-ui-banner-bg: #fafafa;
 	  --wcag-ui-banner-color: #38393b;
 	  --wcag-ui-banner-font-size: 0.875rem;
 	  --wcag-ui-banner-font-weight: 400;
@@ -99,7 +98,10 @@
 	  --wcag-ui-banner-padding-inline: .75rem;
 	  --wcag-ui-banner-gap: 0.5rem;
 	  --wcag-ui-banner-float-spacing: 1rem;
+  }
 
+	/* ── Block ── */
+	.wcag-ui-banner {
 	  box-sizing: border-box;
 	  position: relative;
 	  width: 100%;
