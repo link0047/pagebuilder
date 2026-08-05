@@ -284,7 +284,8 @@
     color: var(--spn-ui-editoralcard-color);
   }
 
-  .spn-ui-editorial-card__link:is(:hover, :focus-visible) {
+  .spn-ui-editorial-card__link:hover,
+  .spn-ui-editorial-card__link:focus-visible {
     text-decoration: underline;
     cursor: pointer;
   }

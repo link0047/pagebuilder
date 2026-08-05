@@ -18,6 +18,7 @@ class WCAGUICarouselItem extends HTMLElement {
           transition: border-color .2s ease-in-out;
           height: var(--wcag-ui-carousel-item-height);
           aspect-ratio: var(--wcag-ui-carousel-item-aspect-ratio);
+          box-sizing: border-box;
 
           @media (prefers-reduced-motion: reduce) {
             transition: none;

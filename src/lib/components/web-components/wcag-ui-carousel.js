@@ -10,6 +10,13 @@ export {};
  *   space-between     {string}  - CSS gap between slides, any CSS length       (default: "1rem")
  *   starting-index    {number}  - 1-based slide to start on                    (default: 1)
  *   breakpoints       {string}  - JSON string: { "768": { slidesPerView: 3 } } (default: none)
+ *   equal-height          {string} - "" | "auto" | "common" | any CSS length (e.g. "300px")
+ *                                    "auto": each slide keeps its natural height
+ *                                    "common": force-load the first N slides, use their
+ *                                              most common height for all slides
+ *                                    <length>: apply a fixed height to all slides
+ *   equal-height-samples  {number} - for "common": how many leading slides to force-load
+ *                                    and measure                       (default: slides-per-view)
  *
  * CSS custom properties (set on the host or any ancestor):
  *   --wcag-ui-carousel-button-width       (default: 2rem)
@@ -195,6 +202,7 @@ class WCAGUICarousel extends HTMLElement {
       "starting-index",
       "breakpoints",
       "equal-height",
+      "equal-height-samples",
     ];
   }
 
@@ -206,6 +214,12 @@ class WCAGUICarousel extends HTMLElement {
   #abortController = null;
   /** @type {IntersectionObserver|null} */
   #intersectionObserver = null;
+  /** @type {number} */
+  #equalHeightRaf = 0;
+  /** Images from the sampled leading slides we're waiting on. @type {Set<HTMLImageElement>} */
+  #equalHeightImages = new Set();
+  /** Author-supplied sample count; NaN means "default to slides-per-view". @type {number} */
+  #equalHeightSamples = NaN;
   /** @type {Array<{ mql: MediaQueryList, config: object }>} */
   #mediaQueries = [];
 
@@ -220,8 +234,16 @@ class WCAGUICarousel extends HTMLElement {
   #prevButton = null;
   /** @type {HTMLButtonElement | null} */
   #nextButton = null;
-  /** @type {boolean} */
-  #equalHeight = false;
+  /**
+   * Resolved equal-height mode:
+   *   ""        - attribute absent, do nothing
+   *   "auto"    - set height:auto on all slides (natural height each)
+   *   "common"  - measure all slides, use the most common height (exact px);
+   *               ties or all-unique fall back to the smallest height
+   *   <length>  - any CSS length (e.g. "300px", "40vh") applied to all slides
+   * @type {string}
+   */
+  #equalHeight = "";
 
   // Resolved options (may change with breakpoints)
   #slidesPerView = 2;
@@ -285,10 +307,15 @@ class WCAGUICarousel extends HTMLElement {
 
     // Wait for custom element upgrades before indexing slides
     customElements.whenDefined("wcag-ui-carousel-item").then(() => {
+      this.#equalHeight = this.#resolveEqualHeightMode(this.getAttribute("equal-height"));
+      this.#equalHeightSamples = this.#resolveEqualHeightSamples(
+        this.getAttribute("equal-height-samples")
+      );
       this.#indexSlides();
       this.#setupIntersectionObserver();
       this.#setupBreakpoints();
       this.#applyTrackCSSVars();
+      this.#applyEqualHeight();
 
       const startingIndex = parseInt(this.getAttribute("starting-index") ?? "1", 10);
       if (!isNaN(startingIndex) && startingIndex > 1) {
@@ -309,6 +336,11 @@ class WCAGUICarousel extends HTMLElement {
     this.#abortController = null;
     this.#intersectionObserver?.disconnect();
     this.#intersectionObserver = null;
+    this.#clearEqualHeightImages();
+    if (this.#equalHeightRaf) {
+      cancelAnimationFrame(this.#equalHeightRaf);
+      this.#equalHeightRaf = 0;
+    }
     this.#teardownBreakpoints();
   }
 
@@ -366,7 +398,12 @@ class WCAGUICarousel extends HTMLElement {
         break;
 
       case "equal-height":
-        this.#equalHeight = newValue !== null;
+        this.#equalHeight = this.#resolveEqualHeightMode(newValue);
+        this.#applyEqualHeight();
+        break;
+
+      case "equal-height-samples":
+        this.#equalHeightSamples = this.#resolveEqualHeightSamples(newValue);
         this.#applyEqualHeight();
         break;
     }
@@ -601,34 +638,217 @@ class WCAGUICarousel extends HTMLElement {
     this.#applyEqualHeight();
   };
 
-  #applyEqualHeight = async () => {
-    if (!this.#equalHeight) return;
+  /**
+   * Normalise the raw `equal-height` attribute value into a mode string.
+   * @param {string | null} raw
+   * @returns {string} "" | "auto" | "common" | <CSS length>
+   */
+  #resolveEqualHeightMode(raw) {
+    if (raw === null) return "";              // attribute absent
+    const v = raw.trim().toLowerCase();
+    if (v === "" || v === "auto") return "auto";
+    if (v === "common") return "common";
+    return raw.trim();                        // treat anything else as a CSS length
+  }
 
-    const items = this.#slideItems();
-    const firstItem = /** @type {HTMLElement | undefined} */ (items[0]);
-    if (!firstItem) return;
+  /**
+   * Parse the equal-height-samples attribute. Returns NaN when unset/invalid,
+   * which the effective getter interprets as "default to slides-per-view".
+   * @param {string | null} raw
+   * @returns {number}
+   */
+  #resolveEqualHeightSamples(raw) {
+    if (raw === null) return NaN;
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n > 0 ? n : NaN;
+  }
 
-    const content = /** @type {HTMLElement | null} */ (firstItem.firstElementChild);
-    if (!content) return;
+  /**
+   * How many leading slides to force-load and measure for "common" height.
+   * Defaults to the current slides-per-view, clamped to the slide count.
+   * @returns {number}
+   */
+  #effectiveEqualHeightSamples() {
+    const base = Number.isFinite(this.#equalHeightSamples)
+      ? this.#equalHeightSamples
+      : Math.ceil(this.#slidesPerView);
+    return Math.max(1, Math.min(base, this.#totalSlides));
+  }
 
-    const img = content.querySelector("img");
-    if (img && !img.complete) {
-      await new Promise(resolve => {
-        img.addEventListener("load", resolve, { once: true });
-        img.addEventListener("error", resolve, { once: true });
-      });
+  /**
+   * Apply the resolved equal-height mode.
+   *   ""       -> remove any forced heights
+   *   "auto"   -> set height:auto on every slide (natural height, no measuring)
+   *   <length> -> set that fixed length on every slide (no measuring)
+   *   "common" -> force-load the first N slides (N = equal-height-samples,
+   *               default slides-per-view), measure their most common height,
+   *               and apply it to ALL slides. Slides past N stay lazy and just
+   *               inherit the height, so lazy-loading is preserved.
+   */
+  #applyEqualHeight = () => {
+    const mode = this.#equalHeight;
+
+    if (mode !== "common") {
+      this.#clearEqualHeightImages();
     }
 
-    const height = content.offsetHeight;
-    if (height <= 0) return;
+    const track = /** @type {HTMLElement | null} */ (this.#track);
+    const items = this.#slideItems();
+
+    if (mode === "") {
+      if (track) track.style.removeProperty("height");
+      for (const item of items) {
+        /** @type {HTMLElement} */ (item).style.removeProperty("height");
+      }
+      return;
+    }
+
+    if (mode === "common") {
+      this.#sampleLeadingImages();
+      this.#measureCommonHeight();
+      return;
+    }
+
+    // "auto" or an explicit CSS length: no measuring required.
+    if (track) track.style.height = mode === "auto" ? "auto" : mode;
+    for (const item of items) {
+      /** @type {HTMLElement} */ (item).style.height = mode === "auto" ? "auto" : mode;
+    }
+  };
+
+  /** Batches measurement into a single rAF so bursts of load events coalesce. */
+  #scheduleEqualHeight() {
+    if (this.#equalHeight !== "common") return;
+    if (this.#equalHeightRaf) cancelAnimationFrame(this.#equalHeightRaf);
+    this.#equalHeightRaf = requestAnimationFrame(() => {
+      this.#equalHeightRaf = 0;
+      this.#measureCommonHeight();
+    });
+  }
+
+  /**
+   * Force-load the images in the first N slides so their heights are known
+   * without the user scrolling. Slides beyond N are left untouched (still lazy).
+   * Each sampled image re-triggers a measure when it settles.
+   */
+  #sampleLeadingImages() {
+    this.#clearEqualHeightImages();
+
+    const items = this.#slideItems();
+    const n = this.#effectiveEqualHeightSamples();
+
+    for (let i = 0; i < n && i < items.length; i++) {
+      const content = /** @type {HTMLElement | null} */ (items[i].firstElementChild);
+      if (!content) continue;
+      for (const img of content.querySelectorAll("img")) {
+        this.#trackEqualHeightImage(/** @type {HTMLImageElement} */ (img));
+      }
+    }
+  }
+
+  /**
+   * Force-load one sampled image and re-measure once it settles.
+   * @param {HTMLImageElement} img
+   */
+  #trackEqualHeightImage(img) {
+    if (this.#equalHeightImages.has(img)) return;
+
+    // Already loaded with real dimensions — nothing to wait for.
+    if (img.complete && img.naturalHeight > 0) return;
+
+    this.#equalHeightImages.add(img);
+    img.addEventListener("load", this.#onEqualHeightImageSettled, { once: true });
+    img.addEventListener("error", this.#onEqualHeightImageSettled, { once: true });
+
+    // Off-screen `loading="lazy"` images inside a scroll container may never
+    // fetch on their own — which is why the layout only corrected itself once
+    // you reached the last slide. Promote just these sampled images to eager so
+    // the browser fetches them now; the load listener then fires a re-measure.
+    if (img.loading === "lazy") {
+      img.loading = "eager";
+    }
+    if (typeof img.decode === "function") {
+      img.decode().then(
+        () => this.#scheduleEqualHeight(),
+        () => {} // decode can reject before fetch completes; load listener covers it
+      );
+    }
+  }
+
+  /** @param {Event} e */
+  #onEqualHeightImageSettled = (e) => {
+    const img = /** @type {HTMLImageElement} */ (e.currentTarget);
+    this.#equalHeightImages.delete(img);
+    this.#scheduleEqualHeight();
+  };
+
+  #clearEqualHeightImages() {
+    for (const img of this.#equalHeightImages) {
+      img.removeEventListener("load", this.#onEqualHeightImageSettled);
+      img.removeEventListener("error", this.#onEqualHeightImageSettled);
+    }
+    this.#equalHeightImages.clear();
+  }
+
+  /**
+   * "common" mode: measure the natural content height of the first N sampled
+   * slides and apply the most frequently occurring height (exact px match) to
+   * ALL slides. Ties, or all-unique, fall back to the smallest sampled height.
+   */
+  #measureCommonHeight() {
+    if (this.#equalHeight !== "common") return;
+
+    const items = this.#slideItems();
+    if (items.length === 0) return;
 
     const track = /** @type {HTMLElement} */ (this.#track);
-    track.style.height = `${height}px`;
+    const n = this.#effectiveEqualHeightSamples();
 
-    items.forEach((item) => {
-      /** @type {HTMLElement} */ (item).style.height = `${height}px`;
-    });
-  };
+    // Release forced heights so the sampled slides report their natural height.
+    track.style.removeProperty("height");
+    for (const item of items) {
+      /** @type {HTMLElement} */ (item).style.removeProperty("height");
+    }
+
+    // Collect natural content heights from the first N slides only.
+    /** @type {number[]} */
+    const heights = [];
+    for (let i = 0; i < n && i < items.length; i++) {
+      const content = /** @type {HTMLElement | null} */ (items[i].firstElementChild);
+      const h = content ? content.getBoundingClientRect().height : 0;
+      if (h > 0) heights.push(h);
+    }
+    if (heights.length === 0) return;
+
+    // Tally exact-match occurrences.
+    /** @type {Map<number, number>} */
+    const counts = new Map();
+    for (const h of heights) counts.set(h, (counts.get(h) ?? 0) + 1);
+
+    let bestHeight = Math.min(...heights); // fallback: smallest
+    let bestCount = 1;
+    let tie = false;
+
+    for (const [h, count] of counts) {
+      if (count > bestCount) {
+        bestCount = count;
+        bestHeight = h;
+        tie = false;
+      } else if (count === bestCount && h !== bestHeight) {
+        tie = true;
+      }
+    }
+
+    // No real winner (all unique -> bestCount 1, or a tie) -> smallest.
+    const chosen = bestCount <= 1 || tie ? Math.min(...heights) : bestHeight;
+
+    // Apply to ALL slides; those past N inherit without being measured/loaded.
+    const px = `${Math.ceil(chosen)}px`;
+    track.style.height = px;
+    for (const item of items) {
+      /** @type {HTMLElement} */ (item).style.height = px;
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Event handlers
@@ -651,6 +871,7 @@ class WCAGUICarousel extends HTMLElement {
     customElements.whenDefined("wcag-ui-carousel-item").then(() => {
       this.#indexSlides();
       this.#setupIntersectionObserver();
+      this.#applyEqualHeight();
     });
   };
 }

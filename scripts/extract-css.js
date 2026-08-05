@@ -1,6 +1,7 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { transform } from "lightningcss";
+import browserslist from "browserslist";
+import { transform, browserslistToTargets } from "lightningcss";
 
 const OUTPUT_DIR = "src/styles/generated";
 const OUTPUT_FILE = "preview-styles.css";
@@ -51,7 +52,14 @@ async function extractCSSFromFiles(files) {
     let match;
     while ((match = stylePattern.exec(content)) !== null) {
       if (match[1]?.trim()) {
-        extractedCSS += match[1].trim();
+        let css = match[1].trim();
+
+        // 1. Strip :global() but keep the content inside
+        // Example: :global(.class) -> .class
+        // Example: :global(*) -> *
+        css = css.replace(/:global\((.*?)\)/g, "$1");
+
+        extractedCSS += `${css}\n`;
       }
     }
   }
@@ -81,17 +89,18 @@ async function main() {
     process.exit(1);
   }
 
+  const targets = browserslistToTargets(browserslist("last 2 years, not dead"));
+  console.log("Target browsers:", targets)
   const [transformError, result] = await attempt(
     Promise.resolve(
       transform({
         code: Buffer.from(extractedCSS),
         minify: true,
-        targets: {
-          // Target modern browsers
-          chrome: 90 << 16,
-          firefox: 88 << 16,
-          safari: 14 << 16,
+        targets,
+        drafts: {
+          nesting: true
         },
+        errorRecovery: true
       })
     )
   );
