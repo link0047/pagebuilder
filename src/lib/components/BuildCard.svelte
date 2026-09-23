@@ -139,6 +139,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.35rem;
+    min-width: 0;
   }
 
   .build-content__name {

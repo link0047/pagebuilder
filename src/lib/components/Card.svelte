@@ -144,7 +144,7 @@
       "content"
       "actions";
     --wcag-ui-card-grid-template-rows: auto auto 1fr auto;
-    --wcag-ui-card-grid-template-columns: 1fr;
+    --wcag-ui-card-grid-template-columns: minmax(0, 1fr);
 
     --wcag-ui-card-header-gap: .25rem;
     --wcag-ui-card-actions-justification: flex-end;
@@ -287,7 +287,7 @@
       "media content"
       "media actions";
     --wcag-ui-card-grid-template-rows: auto 1fr auto;
-    --wcag-ui-card-grid-template-columns: auto 1fr;
+    --wcag-ui-card-grid-template-columns: auto minmax(0, 1fr);
   }
 
   /* --- Interaction States --- */
