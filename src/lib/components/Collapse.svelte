@@ -259,6 +259,7 @@
 		outline: 2px solid transparent;
 		outline-offset: -2px;
 		border-radius: var(--wcag-ui-collapse-radius);
+		min-width: 0;
   }
 
   .wcag-ui-collapse__header::-webkit-details-marker {
@@ -270,6 +271,9 @@
     font-weight: var(--wcag-ui-collapse-font-weight);
     color: var(--wcag-ui-collapse-text-color);
     transition: color 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .wcag-ui-collapse__icon {
