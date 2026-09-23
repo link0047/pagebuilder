@@ -5,7 +5,19 @@ import { Pool } from "@neondatabase/serverless";
 import { DATABASE_URL, BETTER_AUTH_URL, BETTER_AUTH_SECRET } from "$env/static/private";
 import { sendResetEmail } from "$lib/server/email";
 
-const pool = new Pool({ connectionString: DATABASE_URL });
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  idleTimeoutMillis: 60_000,
+});
+
+pool.on("error", (err: Error) => {
+  console.error(JSON.stringify({
+    level: "warn",
+    source: "neon-auth-pool",
+    message: err.message,
+    time: new Date().toISOString(),
+  }));
+});
 
 export const auth = betterAuth({
   secret: BETTER_AUTH_SECRET,
@@ -17,9 +29,20 @@ export const auth = betterAuth({
       const { data, error } = await sendResetEmail(user.email, url, user.name);
 
       if (error) {
-        console.error("Failed to send reset email:", error);
+        console.error(JSON.stringify({
+          level: "error",
+          source: "auth-reset-email",
+          message: error instanceof Error ? error.message : String(error),
+          time: new Date().toISOString(),
+        }));
       } else {
-        console.log(data);
+        console.log(JSON.stringify({
+          level: "info",
+          source: "auth-reset-email",
+          message: "reset email sent",
+          id: data?.id ?? null,
+          time: new Date().toISOString(),
+        }));
       }
     }
   },

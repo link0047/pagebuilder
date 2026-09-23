@@ -11,9 +11,9 @@ import { attempt } from "$lib/utils/attempt";
 import PageDocument from "$lib/components/PageDocument.svelte";
 
 const WEB_COMPONENT_SCRIPTS = [
-  "wcag-ui-carousel.js",
-  "wcag-ui-carousel-item.js"
-].map((script) => `https://spencersonline.com/static/js/${script}`);
+  "wcag-ui-carousel.min.js",
+  "wcag-ui-carousel-item.min.js"
+].map((script) => `/static/js/${script}`);
 
 /**
  * Comprehensive cleanup function for generated HTML
@@ -165,7 +165,7 @@ export const POST: RequestHandler = async ({ request }) => {
   }
 
   const scriptTags = hasCarousel
-    ? WEB_COMPONENT_SCRIPTS.map((src) => `<script src="${src}"><\/script>`).join("")
+    ? WEB_COMPONENT_SCRIPTS.map((src) => `<script type="module" src="${src}"><\/script>`).join("")
     : "";
 
   // Generate final HTML

@@ -134,7 +134,7 @@
   >
     <wcag-ui-carousel
       breakpoints={JSON.stringify(resolvedBreakpoints)}
-      equal-height={equalHeight ? "common" : undefined}
+      equal-height={equalHeight ? "uniform" : undefined}
     >
       {@render children?.()}
     </wcag-ui-carousel>

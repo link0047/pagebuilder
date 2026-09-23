@@ -1,8 +1,10 @@
 import Netstorage from "netstorageapi";
-import { join } from "node:path";
+import { join, parse } from "node:path";
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
 import { loadEnvFile } from "node:process";
+import { minifyHTMLLiterals } from "minify-literals";
+import { minify } from "terser";
 
 loadEnvFile(".env");
 
@@ -45,15 +47,11 @@ async function md5Local(localFile) {
   return crypto.createHash("md5").update(buffer).digest("hex");
 }
 
-// Pulls size + md5 out of the stat response's <file> element.
 function parseStat(body) {
   const file = body?.stat?.file;
   const entry = Array.isArray(file) ? file[0] : file;
   if (!entry) return null;
-  return {
-    size: Number(entry.size),
-    md5: entry.md5
-  };
+  return { size: Number(entry.size), md5: entry.md5 };
 }
 
 async function compareFile(localFile, remoteFile) {
@@ -69,12 +67,10 @@ async function compareFile(localFile, remoteFile) {
     return { status: localMd5 === remote.md5 ? "match" : "differ", localMd5, remoteMd5: remote.md5 };
   }
 
-  // Fallback: size-only comparison when the remote has no md5.
   const localSize = (await fs.stat(localFile)).size;
   return { status: localSize === remote.size ? "match-size" : "differ", localSize, remoteSize: remote.size };
 }
 
-// Compares one file and uploads only if it differs. Returns the tally key.
 async function syncFile(localFile, remoteFile, name) {
   const IDENTICAL = new Set(["match", "match-size"]);
   const comparison = await compareFile(localFile, remoteFile);
@@ -98,11 +94,53 @@ async function syncFile(localFile, remoteFile, name) {
   return "uploaded";
 }
 
-async function deployComponents() {
-  const fileTargets = ["test"];
-  const tally = { uploaded: 0, skipped: 0, failed: 0 };
-  const [readDirError, files] = await attempt(fs.readdir(localPath));
+// Minify one source file, write the result into buildPath, return the built path + name.
+async function buildFile(file) {
+  const srcFile = join(localPath, file);
 
+  const [rawError, rawCode] = await attempt(fs.readFile(srcFile, "utf8"));
+  if (rawError) return { status: "error", error: rawError };
+
+  const [htmlError, htmlResult] = await attempt(minifyHTMLLiterals(rawCode, {
+    fileName: srcFile,
+    minifyOptions: { collapseWhitespace: true, removeComments: true, minifyCSS: true },
+  }));
+  if (htmlError) return { status: "error", error: htmlError };
+
+  const codeToTerser = htmlResult ? htmlResult.code : rawCode;
+
+  const [terserError, terserResult] = await attempt(minify(codeToTerser, {
+    ecma: 2020,
+    module: true,
+    keep_fnames: true,
+    compress: { passes: 2, drop_console: false },
+    mangle: true,
+    format: { comments: false },
+  }));
+  if (terserError) return { status: "error", error: terserError };
+
+  const { name, ext } = parse(file);
+  const outName = `${name}.min${ext}`;
+  const outFile = join(buildPath, outName);
+
+  const [writeError] = await attempt(fs.writeFile(outFile, terserResult.code, "utf8"));
+  if (writeError) return { status: "error", error: writeError };
+
+  return { status: "ok", outFile, outName };
+}
+
+async function deployComponents() {
+  const fileTargets = ["carousel"];
+  const tally = { uploaded: 0, skipped: 0, failed: 0 };
+
+  const [mkdirError] = await attempt(fs.mkdir(buildPath, { recursive: true }));
+  if (mkdirError) {
+    console.error("Failed to create build dir:", mkdirError.message);
+    process.exitCode = 1;
+    return;
+  }
+
+  const [readDirError, files] = await attempt(fs.readdir(localPath));
   if (readDirError) {
     console.error("Failed to read local components:", readDirError.message);
     process.exitCode = 1;
@@ -110,17 +148,21 @@ async function deployComponents() {
   }
 
   for (const file of files) {
-    const localFile = join(localPath, file);
-
-    const [statError, fileStats] = await attempt(fs.stat(localFile));
+    const srcFile = join(localPath, file);
+    const [statError, fileStats] = await attempt(fs.stat(srcFile));
     if (statError || !fileStats.isFile()) continue;
+    if (!fileTargets.some(item => file.includes(item))) continue;
 
-    const isTarget = fileTargets.some(item => file.includes(item));
-    if (!isTarget) continue;
+    const built = await buildFile(file);
+    if (built.status === "error") {
+      console.error(`Failed to build ${file}:`, built.error.message);
+      tally.failed += 1;
+      continue;
+    }
 
     for (const brand of brands) {
-      const storageFile = join(storagePathFor(brand), file);
-      const outcome = await syncFile(localFile, storageFile, `${brand}/${file}`);
+      const storageFile = join(storagePathFor(brand), built.outName);
+      const outcome = await syncFile(built.outFile, storageFile, `${brand}/${built.outName}`);
       tally[outcome] += 1;
     }
   }
@@ -144,6 +186,7 @@ for (const [k, v] of Object.entries(config)) {
 const ns = new Netstorage(config);
 const root = process.cwd();
 const localPath = `${root}/src/lib/components/web-components`;
+const buildPath = `${root}/dist/web-components`;
 const brands = ["spencers", "spirit"];
 const storagePathFor = (brand) => `/${config.cpCode}/${brand}/static/js/`;
 

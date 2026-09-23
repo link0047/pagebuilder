@@ -1,20 +1,16 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
 	import { getCarouselState } from "./carousel-state.svelte";
-
 	type Props = {
 		children?: Snippet;
 	};
-
 	let {
 		children
 	}: Props = $props();
-
 	const carousel = getCarouselState();
 	const slideNumber = carousel.registerSlide();
 	const isActive = $derived(carousel.currentSlide === slideNumber);
 </script>
-
 <div
 	class="wcag-ui-carousel__item"
 	class:wcag-ui-carousel__item--active={isActive}
@@ -25,7 +21,6 @@
 >
 	{@render children?.()}
 </div>
-
 <style>
 	.wcag-ui-carousel__item {
 		position: relative;

@@ -1,68 +1,75 @@
-export { };
+export {};
 
+/**
+ * @param {TemplateStringsArray} strings
+ * @param {any[]} values
+ * @returns {string}
+ */
+const html = (strings, ...values) => String.raw(strings, ...values);
+
+/**
+ * wcag-ui-carousel-item
+ *
+ * A single slide. Registers its position with the parent carousel (which calls
+ * setSlidePosition) and exposes itself for measurement/scroll via the
+ * data-wcag-ui-carousel-slide attribute. The carousel sets an inline height on
+ * this element directly when equal-height is active.
+ */
 class WCAGUICarouselItem extends HTMLElement {
-  static #template = document.createElement("template");
-  static {
-    this.#template.innerHTML = `
-      <style>
-        :host {
-          --wcag-ui-carousel-item-height: auto;
-          --wcag-ui-carousel-item-aspect-ratio: ;
-          --wcag-ui-carousel-item-slot-height: auto;
+	static #template = document.createElement("template");
+	static {
+		this.#template.innerHTML = html`
+			<style>
+				:host {
+					position: relative;
+					display: block;
+					contain: content;
+					scroll-snap-align: start;
+					scroll-snap-stop: always;
+					box-sizing: border-box;
+				}
+			</style>
+			<slot></slot>
+		`;
+	}
 
-          display: block;
-          position: relative;
+	/** @type {number} */
+	#position = 1;
+	/** @type {number} */
+	#total = 0;
 
-          scroll-snap-align: start;
-          scroll-snap-stop: always;
-          transition: border-color .2s ease-in-out;
-          height: var(--wcag-ui-carousel-item-height);
-          aspect-ratio: var(--wcag-ui-carousel-item-aspect-ratio);
-          box-sizing: border-box;
+	constructor() {
+		super();
+		const root = this.attachShadow({ mode: "open" });
+		root.appendChild(WCAGUICarouselItem.#template.content.cloneNode(true));
+	}
 
-          @media (prefers-reduced-motion: reduce) {
-            transition: none;
-          }
-        }
+	connectedCallback() {
+		this.setAttribute("role", "group");
+		this.setAttribute("aria-roledescription", "slide");
+		this.setAttribute("data-wcag-ui-carousel-slide", "");
+		this.#updateLabel();
+	}
 
-        ::slotted(*) {
-          height: var(--wcag-ui-carousel-item-slot-height);
-        }
-      </style>
-      <slot></slot>
-    `;
-  }
+	/**
+	 * Called by the parent carousel during indexing.
+	 * @param {number} position
+	 * @param {number} total
+	 */
+	setSlidePosition(position, total) {
+		this.#position = position;
+		this.#total = total;
+		this.#updateLabel();
+	}
 
-  /** @type {number} */
-  #slideIndex = 0;
-
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
-    this.shadowRoot?.appendChild(WCAGUICarouselItem.#template.content.cloneNode(true));
-  }
-
-  connectedCallback() {
-    this.setAttribute("role", "group");
-    this.setAttribute("aria-roledescription", "slide");
-    this.dataset.wcagUiCarouselSlide = "";
-  }
-
-  /**
-   * Called by the parent carousel to assign this item its 1-based position.
-   * @param {number} index - 1-based slide index
-   * @param {number} total - total number of slides
-   */
-  setSlidePosition(index, total) {
-    this.#slideIndex = index;
-    this.setAttribute("aria-label", `${index} of ${total}`);
-  }
-
-  get slideIndex() {
-    return this.#slideIndex;
-  }
+	#updateLabel() {
+		this.setAttribute("aria-label", `${this.#position} of ${this.#total}`);
+	}
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("wcag-ui-carousel-item")) {
-  customElements.define("wcag-ui-carousel-item", WCAGUICarouselItem);
+if (
+	typeof customElements !== "undefined" &&
+	!customElements.get("wcag-ui-carousel-item")
+) {
+	customElements.define("wcag-ui-carousel-item", WCAGUICarouselItem);
 }

@@ -63,8 +63,8 @@ const buildListSelect = sql`
     b.id,
     b.name,
     b.build_type,
-    b.created_at,
-    b.updated_at,
+    b.created_at::text,
+    b.updated_at::text,
     b.thumbnail_url,
     b.locked_by,
     b.locked_at,
@@ -119,7 +119,7 @@ export const getBuild = query(getBuildSchema, async ({ id }) => {
   requireAuth();
   const result = await sql`
     SELECT
-      b.id, b.name, b.build_type, b.created_at, b.updated_at,
+      b.id, b.name, b.build_type, b.created_at::text, b.updated_at::text,
       b.content, b.thumbnail_url, b.locked_by, b.locked_at,
       u1.name AS author,
       u2.name AS updated_by_name,

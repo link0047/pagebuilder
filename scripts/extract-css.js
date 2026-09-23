@@ -90,7 +90,6 @@ async function main() {
   }
 
   const targets = browserslistToTargets(browserslist("last 2 years, not dead"));
-  console.log("Target browsers:", targets)
   const [transformError, result] = await attempt(
     Promise.resolve(
       transform({
